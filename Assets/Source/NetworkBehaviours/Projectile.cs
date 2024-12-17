@@ -13,6 +13,12 @@ public class Projectile : NetworkBehaviour
         rigidBody = GetComponent<Rigidbody>();
     }
 
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        Debug.Log("Spawn Projectile");
+    }
+
     public void SetOwner(Transform owner)
     {
         this.owner = owner;

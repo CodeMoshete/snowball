@@ -25,11 +25,12 @@ public class ClientControls : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        gameManager.RegisterPlayer(OwnerClientId, transform);
         if (IsOwner)
         {
             Debug.Log("Player OnNetworkSpawn - Setting up new player!");
             Service.EventManager.AddListener(EventId.LevelLoadCompleted, OnLevelLoadComplete);
-            gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
             gameManager.SetUpNewPlayer(transform);
         }
     }

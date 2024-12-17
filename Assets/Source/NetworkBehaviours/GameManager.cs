@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using NUnit.Framework;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Netcode;
@@ -53,32 +54,15 @@ public class GameManager : NetworkBehaviour
                 spawnPoints.Add(teamName, spawnPointsTransforms);
                 teamRosters.Add(teamName, new List<ulong>());
             }
-            // Debug.Log("Server spawning projectiles!");
-            // SpawnProjectilesServer();
         }
-
-        // if (IsHost)
-        // {
-        //     Debug.Log("Host");
-        //     LoadLevel();
-        //     SpawnInfo spawnInfo = SelectTeamAndSpawnPos();
-        //     startData.PlayerStartPos = spawnInfo.SpawnPoint.position;
-        //     startData.PlayerStartEuler = spawnInfo.SpawnPoint.eulerAngles;
-        //     SpawnPlayer(NetworkManager.LocalClientId, spawnInfo);
-        //     Service.EventManager.SendEvent(EventId.LevelLoadCompleted, null);
-        // }
-        // else
-        // {
-            // Debug.Log("Client");
-            GetGameMetadataServerRpc(NetworkManager.LocalClientId);
-        // }
+        GetGameMetadataServerRpc(NetworkManager.LocalClientId);
     }
 
     private void SpawnPlayer(ulong clientId, SpawnInfo spawnInfo)
     {
         GameObject instantiatedPlayer = Instantiate(Resources.Load<GameObject>(PLAYER_RESOURCE));
         NetworkObject netObj = instantiatedPlayer.GetComponent<NetworkObject>();
-        playerTransforms.Add(clientId, instantiatedPlayer.transform);
+        // playerTransforms.Add(clientId, instantiatedPlayer.transform);
         netObj.SpawnWithOwnership(clientId, true);
         teamRosters[spawnInfo.TeamName].Add(clientId);
     }
@@ -187,17 +171,49 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void FireProjectileServerRpc(Vector3 position, Vector3 euler, Vector3 fwd, ulong ownerId)
     {
-        NetworkObject projectile = NetworkObjectPool.Singleton.GetNetworkObject(
-            Constants.SNOWBALL_PREFAB_NAME, position, Quaternion.Euler(euler));
+        // Previous server-object spawned approach
+        // NetworkObject projectile = NetworkObjectPool.Singleton.GetNetworkObject(
+        //     Constants.SNOWBALL_PREFAB_NAME, position, Quaternion.Euler(euler));
 
-        Rigidbody rb = projectile.GetComponent<Rigidbody>();
+        // Rigidbody rb = projectile.GetComponent<Rigidbody>();
+        // rb.position = position;
+        // rb.rotation = Quaternion.identity;
+        // Projectile projComp = projectile.GetComponent<Projectile>();
+        // projComp.SetOwner(playerTransforms[ownerId]);
+        // projectile.Spawn();
+
+        // float forceMultiplier = 600f;
+        // rb.AddForce(new Vector3(fwd.x * forceMultiplier, 300f, fwd.z * forceMultiplier));
+        FireProjectileClientRpc(position, euler, fwd, ownerId);
+    }
+
+    [ClientRpc]
+    public void FireProjectileClientRpc(Vector3 position, Vector3 euler, Vector3 fwd, ulong ownerId)
+    {
+        FireProjectileLocally(position, euler, fwd, ownerId);
+    }
+
+    private void FireProjectileLocally(Vector3 position, Vector3 euler, Vector3 fwd, ulong ownerId)
+    {
+        Debug.Log("Locally firing projectile!");
+        GameObject projectileObj = Instantiate(Resources.Load<GameObject>("LocalSnowball"));
+        projectileObj.transform.position = position;
+        projectileObj.transform.eulerAngles = euler;
+        
+        Rigidbody rb = projectileObj.GetComponent<Rigidbody>();
         rb.position = position;
         rb.rotation = Quaternion.identity;
-        Projectile projComp = projectile.GetComponent<Projectile>();
-        projComp.SetOwner(playerTransforms[ownerId]);
-        projectile.Spawn();
+        LocalProjectlie projComp = projectileObj.GetComponent<LocalProjectlie>();
+        Transform owner = playerTransforms[ownerId];
+        projComp.SetOwner(owner, IsServer);
 
         float forceMultiplier = 600f;
         rb.AddForce(new Vector3(fwd.x * forceMultiplier, 300f, fwd.z * forceMultiplier));
+    }
+
+    public void RegisterPlayer(ulong playerId, Transform player)
+    {
+        Debug.Log("Registering player " + playerId);
+        playerTransforms.Add(playerId, player);
     }
 }
