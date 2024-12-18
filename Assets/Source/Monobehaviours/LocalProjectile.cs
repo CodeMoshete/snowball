@@ -7,11 +7,13 @@ public class LocalProjectlie : MonoBehaviour
     private Rigidbody rigidBody;
     private Transform owner;
     private ClientControls ownerPlayer;
+    private GameManager gameManager;
     private bool isServer;
 
     private void Start()
     {
         rigidBody = GetComponent<Rigidbody>();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     public void SetOwner(Transform owner, bool isServer)
@@ -30,12 +32,12 @@ public class LocalProjectlie : MonoBehaviour
 
         if (isServer)
         {
-            // Trigger hit
             Debug.Log("Server collision with " + collision.transform.name);
             ClientControls otherPlayer = collision.gameObject.GetComponent<ClientControls>();
-            if (otherPlayer != null && (otherPlayer.TeamName.Value != ownerPlayer.TeamName.Value || Constants.IS_FRIENDLY_FIRE_ON))
+            if (otherPlayer != null && !otherPlayer.IsFrozen && (otherPlayer.TeamName.Value != ownerPlayer.TeamName.Value || Constants.IS_FRIENDLY_FIRE_ON))
             {
                 Debug.Log("Collide with player " + otherPlayer.name + "(" + otherPlayer.TeamName.Value + ")");
+                gameManager.TransmitProjectileHitClientRpc(otherPlayer.OwnerClientId);
             }
         }
         Transform impactEffect = Instantiate(Resources.Load<GameObject>(IMPACT_EFFECT_RESOURCE)).transform;

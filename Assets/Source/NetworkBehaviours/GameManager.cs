@@ -211,6 +211,13 @@ public class GameManager : NetworkBehaviour
         rb.AddForce(new Vector3(fwd.x * forceMultiplier, 300f, fwd.z * forceMultiplier));
     }
 
+    [ClientRpc]
+    public void TransmitProjectileHitClientRpc(ulong hitPlayerId)
+    {
+        ClientControls hitPlayer = playerTransforms[hitPlayerId].GetComponent<ClientControls>();
+        hitPlayer.OnPlayerFrozen();
+    }
+
     public void RegisterPlayer(ulong playerId, Transform player)
     {
         Debug.Log("Registering player " + playerId);

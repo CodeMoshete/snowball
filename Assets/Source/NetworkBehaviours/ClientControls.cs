@@ -14,13 +14,12 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class ClientControls : NetworkBehaviour
 {
-    /// <summary>
-    /// Movement Speed
-    /// </summary>
+    public const string ICE_CUBE_RESOURCE = "IceCube";
     public float Speed = 5;
     public float RotationSpeed = 40f;
     public Transform ProjectileOriginReference;
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>("Unassigned");
+    public bool IsFrozen { get; private set; }
 
     private GameManager gameManager;
 
@@ -60,7 +59,7 @@ public class ClientControls : NetworkBehaviour
     {
         // IsOwner will also work in a distributed-authoritative scenario as the owner 
         // has the Authority to update the object.
-        if (!IsOwner || !IsSpawned) return;
+        if (!IsOwner || !IsSpawned || IsFrozen) return;
 
         float multiplier = Speed * Time.deltaTime;
         float rotationMultiplier = RotationSpeed * Time.deltaTime;
@@ -121,6 +120,15 @@ public class ClientControls : NetworkBehaviour
     {
         Debug.Log($"Team name changed from {oldValue} to {newValue}");
         // Update UI or visuals to reflect the new team name
+    }
+
+    public void OnPlayerFrozen()
+    {
+        Transform iceCube = Instantiate(Resources.Load<GameObject>(ICE_CUBE_RESOURCE)).transform;
+        iceCube.position = transform.position;
+        iceCube.rotation = transform.rotation;
+        iceCube.SetParent(transform);
+        IsFrozen = true;
     }
 
     public override void OnDestroy()
