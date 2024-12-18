@@ -1,6 +1,8 @@
 using NUnit.Framework;
+using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Netcode;
+using Unity.Services.Matchmaker.Models;
 using UnityEngine;
 #if NEW_INPUT_SYSTEM_INSTALLED
 using UnityEngine.InputSystem;
@@ -18,6 +20,7 @@ public class ClientControls : NetworkBehaviour
     public float Speed = 5;
     public float RotationSpeed = 40f;
     public Transform ProjectileOriginReference;
+    public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>("Unassigned");
 
     private GameManager gameManager;
 
@@ -25,6 +28,7 @@ public class ClientControls : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+        TeamName.OnValueChanged += OnTeamNameChanged;
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         gameManager.RegisterPlayer(OwnerClientId, transform);
         if (IsOwner)
@@ -42,7 +46,10 @@ public class ClientControls : NetworkBehaviour
 
     private bool OnLevelLoadComplete(object cookie)
     {
-        Debug.Log("Level Load Complete for " + OwnerClientId + ", " + IsOwner);
+        GameStartData startData = (GameStartData)cookie;
+        Debug.Log("Level Load Complete for " + OwnerClientId + " (" + startData.PlayerTeamName + "), " + IsOwner);
+        // TeamName = startData.PlayerTeamName;
+        AssignTeamNameServerRpc(startData.PlayerTeamName);
         gameManager.PlacePlayerAtSpawn(this);
         Debug.Log("POS " + transform.position.ToString());
         Service.EventManager.RemoveListener(EventId.LevelLoadCompleted, OnLevelLoadComplete);
@@ -100,5 +107,25 @@ public class ClientControls : NetworkBehaviour
         {
             transform.position = new Vector3(-10f, 0.5f, 0f);
         }
+    }
+
+    [ServerRpc]
+    public void AssignTeamNameServerRpc(FixedString64Bytes teamName)
+    {
+        // Set the team name on the server
+        TeamName.Value = teamName;
+    }
+
+    // Callback for when the TeamName changes
+    private void OnTeamNameChanged(FixedString64Bytes oldValue, FixedString64Bytes newValue)
+    {
+        Debug.Log($"Team name changed from {oldValue} to {newValue}");
+        // Update UI or visuals to reflect the new team name
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        TeamName.OnValueChanged -= OnTeamNameChanged;
     }
 }

@@ -105,7 +105,7 @@ public class GameManager : NetworkBehaviour
                 teamRosters.Add(teamName, new List<ulong>());
             }
         }
-        Service.EventManager.SendEvent(EventId.LevelLoadCompleted, null);
+        Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
     }
 
     private SpawnInfo SelectTeamAndSpawnPos()
@@ -154,7 +154,7 @@ public class GameManager : NetworkBehaviour
         startData.LevelName = serverStartData.LevelName;
         startData.PlayerStartPos = serverStartData.PlayerStartPos;
         startData.PlayerStartEuler = serverStartData.PlayerStartEuler;
-
+        startData.PlayerTeamName = serverStartData.PlayerTeamName;
         LoadLevel();
     }
 
