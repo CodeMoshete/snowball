@@ -2,6 +2,7 @@ using Unity.Collections;
 using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
+using UnityEngine.Video;
 #if NEW_INPUT_SYSTEM_INSTALLED
 using UnityEngine.InputSystem;
 #endif
@@ -17,15 +18,22 @@ public class PlayerEntity : NetworkBehaviour
     public const string ICE_CUBE_RESOURCE = "IceCube";
     private readonly Color FROZEN_COLOR = new Color(0.33f , 0.33f, 0.33f, 0f);
     private readonly Color UNFROZEN_COLOR = new Color(1f , 0.61f, 0f, 0f);
+    public const string WALL_GHOST_RESOURCE = "WallSegmentGhost";
+    private readonly Vector3 WALL_GHOST_PLAYER_OFFSET = new Vector3(0f, 0.75f, 2.5f);
+    private readonly Vector3 WALL_GHOST_PLAYER_EULER = new Vector3(0f, 90f, 0f);
     public float Speed = 5;
     public float RotationSpeed = 40f;
     public Transform ProjectileOriginReference;
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>("Unassigned");
     public NetworkVariable<PlayerClass> CurrentPlayerClass = new NetworkVariable<PlayerClass>(global::PlayerClass.Soldier);
+    
     public bool IsFrozen { get; private set; }
     private Transform iceCube;
     private Renderer iceCubeRenderer;
     private float frozenTimer;
+    
+    private bool isPlacingWall;
+    private Transform ghostWall;
 
     private GameManager gameManager;
 
@@ -108,15 +116,19 @@ public class PlayerEntity : NetworkBehaviour
         if (IsFrozen)
         {
             Transform teamQueen = gameManager.GetQueenForTeam(TeamName.Value.ToString());
-            if (teamQueen != null && Vector3.SqrMagnitude(transform.position - teamQueen.position) < UNFREEZE_DIST_THRESHOLD)
+            PlayerEntity queenEntity = teamQueen.GetComponent<PlayerEntity>();
+            if (teamQueen != null)
             {
-                frozenTimer -= dt;
-                float pct = 1f - (frozenTimer / UNFREEZE_SECONDS);
-                Color unfreezeColor = Color.Lerp(FROZEN_COLOR, UNFROZEN_COLOR, pct);
-                iceCubeRenderer.material.SetColor("_BaseColor", unfreezeColor);
-                if (IsServer && frozenTimer <= 0f)
+                if (!queenEntity.IsFrozen && Vector3.SqrMagnitude(transform.position - teamQueen.position) < UNFREEZE_DIST_THRESHOLD)
                 {
-                    OnPlayerUnfrozenClientRpc();
+                    frozenTimer -= dt;
+                    float pct = 1f - (frozenTimer / UNFREEZE_SECONDS);
+                    Color unfreezeColor = Color.Lerp(FROZEN_COLOR, UNFROZEN_COLOR, pct);
+                    iceCubeRenderer.material.SetColor("_BaseColor", unfreezeColor);
+                    if (IsServer && frozenTimer <= 0f)
+                    {
+                        OnPlayerUnfrozenClientRpc();
+                    }
                 }
             }
         }
@@ -156,7 +168,7 @@ public class PlayerEntity : NetworkBehaviour
             transform.Rotate(new Vector3(0f, rotationMultiplier));
         }
 
-        if (IsClient && Input.GetKeyDown(KeyCode.Space))
+        if (IsClient && !isPlacingWall && Input.GetKeyDown(KeyCode.Space))
         {
             gameManager.FireProjectileServerRpc(
                 ProjectileOriginReference.position,
@@ -166,10 +178,39 @@ public class PlayerEntity : NetworkBehaviour
             );
         }
 
+        if (IsClient && Input.GetKeyDown(KeyCode.F))
+        {
+            if (!isPlacingWall)
+            {
+                StartPlacingWall();
+            }
+            else
+            {
+                isPlacingWall = false;
+                Destroy(ghostWall.gameObject);
+                gameManager.SpawnWallServerRpc(ghostWall.position, ghostWall.eulerAngles);
+            }
+        }
+
+        if (IsClient && isPlacingWall && Input.GetKeyDown(KeyCode.Escape))
+        {
+            isPlacingWall = false;
+            Destroy(ghostWall.gameObject);
+        }
+
         if (Input.GetKey(KeyCode.P))
         {
             transform.position = new Vector3(-10f, 0.5f, 0f);
         }
+    }
+
+    private void StartPlacingWall()
+    {
+        isPlacingWall = true;
+        ghostWall = Instantiate(Resources.Load<GameObject>(WALL_GHOST_RESOURCE)).transform;
+        ghostWall.SetParent(transform);
+        ghostWall.localPosition = WALL_GHOST_PLAYER_OFFSET;
+        ghostWall.localEulerAngles = WALL_GHOST_PLAYER_EULER;
     }
 
     public void OnPlayerFrozen()

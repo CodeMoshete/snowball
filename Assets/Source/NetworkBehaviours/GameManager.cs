@@ -17,6 +17,7 @@ public class GameManager : NetworkBehaviour
     public const string PROJECTILE_RESOURCE = "Snowball";
     public const string PLAYER_RESOURCE = "PlayerPrefab";
     private const string CAMERA_NAME = "Main Camera";
+    private const string WALL_RESOURCE = "WallSegment";
 
     private GameStartData startData;
     private GameObject levelPrefab;
@@ -65,7 +66,7 @@ public class GameManager : NetworkBehaviour
         if (cameraObj != null)
         {
             cameraObj.transform.SetParent(newPlayer.transform);
-            cameraObj.transform.localPosition = new Vector3(0f, 0.5f, -5f);
+            cameraObj.transform.localPosition = new Vector3(0f, 1f, -5f);
         }
     }
 
@@ -239,5 +240,18 @@ public class GameManager : NetworkBehaviour
     public Transform GetQueenForTeam(string teamName)
     {
         return teamQueens[teamName];
+    }
+
+    [ServerRpc]
+    public void SpawnWallServerRpc(Vector3 position, Vector3 euler)
+    {
+        GameObject instantiatedWall = Instantiate(Resources.Load<GameObject>(WALL_RESOURCE));
+        NetworkObject netObj = instantiatedWall.GetComponent<NetworkObject>();
+        netObj.Spawn(true);
+        instantiatedWall.transform.position = position;
+        instantiatedWall.transform.eulerAngles = euler;
+        Rigidbody rigidBody = instantiatedWall.GetComponent<Rigidbody>();
+        rigidBody.position = position;
+        rigidBody.rotation = Quaternion.Euler(euler);
     }
 }
