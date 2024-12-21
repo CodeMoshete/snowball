@@ -6,7 +6,7 @@ public class LocalProjectlie : MonoBehaviour
     private const string IMPACT_EFFECT_RESOURCE = "SnowballImpactEffect";
     private Rigidbody rigidBody;
     private Transform owner;
-    private ClientControls ownerPlayer;
+    private PlayerEntity ownerPlayer;
     private GameManager gameManager;
     private bool isServer;
 
@@ -19,7 +19,7 @@ public class LocalProjectlie : MonoBehaviour
     public void SetOwner(Transform owner, bool isServer)
     {
         this.owner = owner;
-        ownerPlayer = owner.GetComponent<ClientControls>();
+        ownerPlayer = owner.GetComponent<PlayerEntity>();
         this.isServer = isServer;
     }
 
@@ -33,7 +33,7 @@ public class LocalProjectlie : MonoBehaviour
         if (isServer)
         {
             Debug.Log("Server collision with " + collision.transform.name);
-            ClientControls otherPlayer = collision.gameObject.GetComponent<ClientControls>();
+            PlayerEntity otherPlayer = collision.gameObject.GetComponent<PlayerEntity>();
             if (otherPlayer != null && !otherPlayer.IsFrozen && (otherPlayer.TeamName.Value != ownerPlayer.TeamName.Value || Constants.IS_FRIENDLY_FIRE_ON))
             {
                 Debug.Log("Collide with player " + otherPlayer.name + "(" + otherPlayer.TeamName.Value + ")");

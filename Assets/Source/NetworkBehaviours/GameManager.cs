@@ -1,17 +1,9 @@
-using System;
 using System.Collections.Generic;
-using NUnit.Framework;
-using Unity.Collections;
-using Unity.Mathematics;
+using Unity.Android.Gradle;
 using Unity.Netcode;
+using UnityEditor.MPE;
 using UnityEngine;
 using Utils;
-
-public enum PlayerClass
-{
-    Soldier,
-    Queen
-}
 
 struct SpawnInfo
 {
@@ -31,11 +23,7 @@ public class GameManager : NetworkBehaviour
     private Dictionary<string, List<Transform>> spawnPoints = new Dictionary<string, List<Transform>>();
     private Dictionary<string, List<ulong>> teamRosters = new Dictionary<string, List<ulong>>();
     private Dictionary<ulong, Transform> playerTransforms = new Dictionary<ulong, Transform>();
-
-    void Start()
-    {
-        Debug.Log("Hello World!");
-    }
+    private Dictionary<string, Transform> teamQueens = new Dictionary<string, Transform>();
 
     public override void OnNetworkSpawn()
     {
@@ -58,25 +46,7 @@ public class GameManager : NetworkBehaviour
         GetGameMetadataServerRpc(NetworkManager.LocalClientId);
     }
 
-    private void SpawnPlayer(ulong clientId, SpawnInfo spawnInfo)
-    {
-        GameObject instantiatedPlayer = Instantiate(Resources.Load<GameObject>(PLAYER_RESOURCE));
-        NetworkObject netObj = instantiatedPlayer.GetComponent<NetworkObject>();
-        // playerTransforms.Add(clientId, instantiatedPlayer.transform);
-        netObj.SpawnWithOwnership(clientId, true);
-        teamRosters[spawnInfo.TeamName].Add(clientId);
-    }
-
-    public void SetUpNewPlayer(Transform newPlayer)
-    {
-        GameObject cameraObj = GameObject.Find(CAMERA_NAME);
-        if (cameraObj != null)
-        {
-            cameraObj.transform.SetParent(newPlayer.transform);
-            cameraObj.transform.localPosition = new Vector3(0f, 0.5f, -5f);
-        }
-    }
-
+    // Entry point from Menu scene - triggers the network connection to be made.
     public void StartClient(GameStartData startData)
     {
         this.startData = startData;
@@ -87,6 +57,16 @@ public class GameManager : NetworkBehaviour
     {
         this.startData = startData;
         NetworkManager.Singleton.StartHost();
+    }
+
+    public void SetUpNewPlayer(Transform newPlayer)
+    {
+        GameObject cameraObj = GameObject.Find(CAMERA_NAME);
+        if (cameraObj != null)
+        {
+            cameraObj.transform.SetParent(newPlayer.transform);
+            cameraObj.transform.localPosition = new Vector3(0f, 0.5f, -5f);
+        }
     }
 
     private void LoadLevel()
@@ -103,6 +83,10 @@ public class GameManager : NetworkBehaviour
                 List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
                 spawnPoints.Add(teamName, spawnPointsTransforms);
                 teamRosters.Add(teamName, new List<ulong>());
+                if (!teamQueens.ContainsKey(teamName))
+                {
+                    teamQueens.Add(teamName, null);
+                }
             }
         }
         Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
@@ -131,6 +115,7 @@ public class GameManager : NetworkBehaviour
         return result;
     }
 
+    // Sets up a new player and returns relevant game state information to the caller
     [ServerRpc(RequireOwnership = false)]
     private void GetGameMetadataServerRpc(ulong clientId)
     {
@@ -139,67 +124,87 @@ public class GameManager : NetworkBehaviour
         startData.PlayerTeamName = spawnInfo.TeamName;
         startData.PlayerStartPos = spawnInfo.SpawnPoint.position;
         startData.PlayerStartEuler = spawnInfo.SpawnPoint.eulerAngles;
+        startData.PlayerId = clientId;
         SpawnPlayer(clientId, spawnInfo);
+        AssignPlayerClass(startData.PlayerTeamName, clientId);
 
         ClientRpcParams sendParams = new ClientRpcParams();
         sendParams.Send = new ClientRpcSendParams();
         sendParams.Send.TargetClientIds = new ulong[] { clientId };
         ReceiveGameMetadataClientRpc(startData, sendParams);
+        // ReceiveGameMetadataClientRpc(startData);
+    }
+    
+    // Called on server only
+    private void AssignPlayerClass(string teamName, ulong clientId)
+    {
+        bool isQueenAssigned = false;
+        List<ulong> teamPlayerIds = teamRosters[teamName];
+        for (int i = 0, count = teamPlayerIds.Count; i < count; ++i)
+        {
+            ulong playerId = teamPlayerIds[i];
+            Transform playerTransform = playerTransforms[playerId];
+            PlayerEntity player = playerTransform.GetComponent<PlayerEntity>();
+            Debug.Log($"Player {playerId} class: {player.CurrentPlayerClass.Value}");
+            if (player.CurrentPlayerClass.Value == PlayerClass.Queen)
+            {
+                isQueenAssigned = true;
+                break;
+            }
+        }
+
+        startData.PlayerClass = PlayerClass.Soldier;
+        if (!isQueenAssigned)
+        {
+            startData.PlayerClass = PlayerClass.Queen;
+            if (!teamQueens.ContainsKey(teamName))
+            {
+                teamQueens.Add(teamName, playerTransforms[clientId]);
+            }
+            else
+            {
+                teamQueens[teamName] = playerTransforms[clientId];
+            }
+            Debug.Log($"Promoting player {startData.PlayerName} to Queen role!");
+        }
     }
 
+    // Called on server only
+    private void SpawnPlayer(ulong clientId, SpawnInfo spawnInfo)
+    {
+        GameObject instantiatedPlayer = Instantiate(Resources.Load<GameObject>(PLAYER_RESOURCE));
+        NetworkObject netObj = instantiatedPlayer.GetComponent<NetworkObject>();
+        netObj.SpawnWithOwnership(clientId, true);
+        teamRosters[spawnInfo.TeamName].Add(clientId);
+    }
+
+    // Server message sent to all players when a new player joins the game
     [ClientRpc]
     private void ReceiveGameMetadataClientRpc(GameStartData serverStartData, ClientRpcParams clientRpcParams = default)
     {
-        Debug.Log("Received start data, level: " + serverStartData.LevelName);
+        // Debug.Log("Received start data, level: " + serverStartData.LevelName);
         startData.LevelName = serverStartData.LevelName;
         startData.PlayerStartPos = serverStartData.PlayerStartPos;
         startData.PlayerStartEuler = serverStartData.PlayerStartEuler;
         startData.PlayerTeamName = serverStartData.PlayerTeamName;
+        startData.PlayerClass = serverStartData.PlayerClass;
         LoadLevel();
-    }
-
-    public void PlacePlayerAtSpawn(ClientControls instantiatedPlayer)
-    {
-        instantiatedPlayer.transform.position = startData.PlayerStartPos;
-        instantiatedPlayer.transform.eulerAngles = startData.PlayerStartEuler;
-        Rigidbody rigidBody = instantiatedPlayer.GetComponent<Rigidbody>();
-        rigidBody.position = startData.PlayerStartPos;
-        rigidBody.rotation = Quaternion.Euler(startData.PlayerStartEuler);
-        Debug.Log("Placed player " + instantiatedPlayer.OwnerClientId + " at " + startData.PlayerStartPos.ToString() + " <> " + instantiatedPlayer.transform.position.ToString());
     }
 
     [ServerRpc(RequireOwnership = false)]
     public void FireProjectileServerRpc(Vector3 position, Vector3 euler, Vector3 fwd, ulong ownerId)
     {
-        // Previous server-object spawned approach
-        // NetworkObject projectile = NetworkObjectPool.Singleton.GetNetworkObject(
-        //     Constants.SNOWBALL_PREFAB_NAME, position, Quaternion.Euler(euler));
-
-        // Rigidbody rb = projectile.GetComponent<Rigidbody>();
-        // rb.position = position;
-        // rb.rotation = Quaternion.identity;
-        // Projectile projComp = projectile.GetComponent<Projectile>();
-        // projComp.SetOwner(playerTransforms[ownerId]);
-        // projectile.Spawn();
-
-        // float forceMultiplier = 600f;
-        // rb.AddForce(new Vector3(fwd.x * forceMultiplier, 300f, fwd.z * forceMultiplier));
         FireProjectileClientRpc(position, euler, fwd, ownerId);
     }
 
     [ClientRpc]
     public void FireProjectileClientRpc(Vector3 position, Vector3 euler, Vector3 fwd, ulong ownerId)
     {
-        FireProjectileLocally(position, euler, fwd, ownerId);
-    }
-
-    private void FireProjectileLocally(Vector3 position, Vector3 euler, Vector3 fwd, ulong ownerId)
-    {
         Debug.Log("Locally firing projectile!");
         GameObject projectileObj = Instantiate(Resources.Load<GameObject>("LocalSnowball"));
         projectileObj.transform.position = position;
         projectileObj.transform.eulerAngles = euler;
-        
+
         Rigidbody rb = projectileObj.GetComponent<Rigidbody>();
         rb.position = position;
         rb.rotation = Quaternion.identity;
@@ -214,13 +219,25 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     public void TransmitProjectileHitClientRpc(ulong hitPlayerId)
     {
-        ClientControls hitPlayer = playerTransforms[hitPlayerId].GetComponent<ClientControls>();
+        PlayerEntity hitPlayer = playerTransforms[hitPlayerId].GetComponent<PlayerEntity>();
         hitPlayer.OnPlayerFrozen();
     }
 
-    public void RegisterPlayer(ulong playerId, Transform player)
+    // This gets called on each client for each player entity in the game.
+    public void RegisterPlayer(ulong playerId, PlayerEntity player)
     {
         Debug.Log("Registering player " + playerId);
-        playerTransforms.Add(playerId, player);
+        playerTransforms.Add(playerId, player.transform);
+        
+        if (!IsHost && player.CurrentPlayerClass.Value == PlayerClass.Queen)
+        {
+            Debug.Log($"Setting {player.TeamName.Value.ToString()} queen to {player.name}");
+            teamQueens[player.TeamName.Value.ToString()] = player.transform;
+        }
+    }
+
+    public Transform GetQueenForTeam(string teamName)
+    {
+        return teamQueens[teamName];
     }
 }
