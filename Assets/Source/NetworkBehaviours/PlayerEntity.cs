@@ -2,7 +2,9 @@ using Unity.Collections;
 using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.Video;
+using Utils;
 #if NEW_INPUT_SYSTEM_INSTALLED
 using UnityEngine.InputSystem;
 #endif
@@ -19,6 +21,9 @@ public class PlayerEntity : NetworkBehaviour
     private readonly Color FROZEN_COLOR = new Color(0.33f , 0.33f, 0.33f, 0f);
     private readonly Color UNFROZEN_COLOR = new Color(1f , 0.61f, 0f, 0f);
     public const string WALL_GHOST_RESOURCE = "WallSegmentGhost";
+    public const string CROWN_ICON_RESOURCE = "CrownIcon";
+    public const string CROWN_REFERENCE_POS_NAME = "CrownOrigin";
+    private const string CAMERA_NAME = "Main Camera";
     private readonly Vector3 WALL_GHOST_PLAYER_OFFSET = new Vector3(0f, 0.75f, 2.5f);
     private readonly Vector3 WALL_GHOST_PLAYER_EULER = new Vector3(0f, 90f, 0f);
     public float Speed = 5;
@@ -51,7 +56,17 @@ public class PlayerEntity : NetworkBehaviour
         {
             Debug.Log("Player OnNetworkSpawn - Setting up new player!");
             Service.EventManager.AddListener(EventId.LevelLoadCompleted, OnLevelLoadComplete);
-            gameManager.SetUpNewPlayer(transform);
+            SetUpNewPlayer();
+        }
+    }
+
+    public void SetUpNewPlayer()
+    {
+        GameObject cameraObj = GameObject.Find(CAMERA_NAME);
+        if (cameraObj != null)
+        {
+            cameraObj.transform.SetParent(transform);
+            cameraObj.transform.localPosition = new Vector3(0f, 1f, -5f);
         }
     }
 
@@ -66,8 +81,13 @@ public class PlayerEntity : NetworkBehaviour
         Debug.Log("Level Load Complete for " + OwnerClientId + " (" + startData.PlayerTeamName + "), " + IsOwner);
         AssignTeamNameServerRpc(startData.PlayerTeamName);
         AssignPlayerClassServerRpc(startData.PlayerClass);
-        // gameManager.PlacePlayerAtSpawn(this);
         PlacePlayerAtSpawn(startData);
+        
+        Transform teamQueen = gameManager.GetQueenForTeam(startData.PlayerTeamName);
+        PlayerEntity player = teamQueen.GetComponent<PlayerEntity>();
+        Debug.Log($"Enable crown for player {player.OwnerClientId}");
+        player.ShowCrown();
+
         Debug.Log("POS " + transform.position.ToString());
         Service.EventManager.RemoveListener(EventId.LevelLoadCompleted, OnLevelLoadComplete);
         return false;
@@ -83,8 +103,8 @@ public class PlayerEntity : NetworkBehaviour
     // Callback for when the TeamName changes
     private void OnTeamNameChanged(FixedString64Bytes oldValue, FixedString64Bytes newValue)
     {
-        Debug.Log($"Team name changed from {oldValue} to {newValue}");
         // Update UI or visuals to reflect the new team name
+        Debug.Log($"Team name changed from {oldValue} to {newValue}");
     }
 
     [Rpc(SendTo.Server)]
@@ -206,11 +226,13 @@ public class PlayerEntity : NetworkBehaviour
                 isPlacingWall = false;
                 Destroy(ghostWall.gameObject);
                 gameManager.SpawnWallServerRpc(ghostWall.position, ghostWall.eulerAngles, OwnerClientId);
+                Service.EventManager.SendEvent(EventId.WallPlacementEnd, null);
             }
         }
 
         if (IsClient && isPlacingWall && Input.GetKeyDown(KeyCode.Escape))
         {
+            Service.EventManager.SendEvent(EventId.WallPlacementEnd, null);
             isPlacingWall = false;
             Destroy(ghostWall.gameObject);
         }
@@ -228,6 +250,7 @@ public class PlayerEntity : NetworkBehaviour
             return;
         }
 
+        Service.EventManager.SendEvent(EventId.WallPlacementBegin, null);
         isPlacingWall = true;
         ghostWall = Instantiate(Resources.Load<GameObject>(WALL_GHOST_RESOURCE)).transform;
         ghostWall.SetParent(transform);
@@ -244,6 +267,14 @@ public class PlayerEntity : NetworkBehaviour
         iceCube.SetParent(transform);
         IsFrozen = true;
         frozenTimer = UNFREEZE_SECONDS;
+    }
+
+    public void ShowCrown()
+    {
+        Transform queenIcon = Instantiate(Resources.Load<GameObject>(CROWN_ICON_RESOURCE)).transform;
+        queenIcon.SetParent(transform);
+        Transform referencePos = UnityUtils.FindGameObject(gameObject, CROWN_REFERENCE_POS_NAME).transform;
+        queenIcon.position = referencePos.position;
     }
 
     [Rpc(SendTo.Everyone)]

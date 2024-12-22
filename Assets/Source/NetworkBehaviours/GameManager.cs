@@ -14,7 +14,6 @@ struct SpawnInfo
 public class GameManager : NetworkBehaviour
 {
     public const string PLAYER_RESOURCE = "PlayerPrefab";
-    private const string CAMERA_NAME = "Main Camera";
     private const string WALL_RESOURCE = "WallSegment";
     private const string SNOW_PILE_RESOURCE = "SnowPile";
 
@@ -69,39 +68,6 @@ public class GameManager : NetworkBehaviour
         NetworkManager.Singleton.StartHost();
     }
 
-    public void SetUpNewPlayer(Transform newPlayer)
-    {
-        GameObject cameraObj = GameObject.Find(CAMERA_NAME);
-        if (cameraObj != null)
-        {
-            cameraObj.transform.SetParent(newPlayer.transform);
-            cameraObj.transform.localPosition = new Vector3(0f, 1f, -5f);
-        }
-    }
-
-    private void LoadLevel()
-    {
-        Debug.Log("Load Level");
-        if (!IsServer)
-        {
-            levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
-            GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
-            List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
-            for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
-            {
-                string teamName = teamSpawnPoints[i].name;
-                List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
-                spawnPoints.Add(teamName, spawnPointsTransforms);
-                teamRosters.Add(teamName, new List<ulong>());
-                if (!teamQueens.ContainsKey(teamName))
-                {
-                    teamQueens.Add(teamName, null);
-                }
-            }
-        }
-        Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
-    }
-
     private SpawnInfo SelectTeamAndSpawnPos()
     {
         string selectedTeam = string.Empty;
@@ -137,6 +103,11 @@ public class GameManager : NetworkBehaviour
         startData.PlayerId = clientId;
         SpawnPlayer(clientId, spawnInfo);
         AssignPlayerClass(startData.PlayerTeamName, clientId);
+
+        Transform queenTransform = GetQueenForTeam(startData.PlayerTeamName);
+        PlayerEntity player = queenTransform.GetComponent<PlayerEntity>();
+        startData.TeamQueenPlayerId = player.OwnerClientId;
+
         ReceiveGameMetadataClientRpc(startData, RpcTarget.Single(clientId, RpcTargetUse.Temp));
     }
     
@@ -174,7 +145,7 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    // Called on server only
+    // SERVER CALLED ONLY
     private void SpawnPlayer(ulong clientId, SpawnInfo spawnInfo)
     {
         GameObject instantiatedPlayer = Instantiate(Resources.Load<GameObject>(PLAYER_RESOURCE));
@@ -193,7 +164,33 @@ public class GameManager : NetworkBehaviour
         startData.PlayerStartEuler = serverStartData.PlayerStartEuler;
         startData.PlayerTeamName = serverStartData.PlayerTeamName;
         startData.PlayerClass = serverStartData.PlayerClass;
+        startData.TeamQueenPlayerId = serverStartData.TeamQueenPlayerId;
+        teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
         LoadLevel();
+    }
+
+    // CLIENT CALLED ONLY
+    private void LoadLevel()
+    {
+        Debug.Log("Load Level");
+        if (!IsServer)
+        {
+            levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
+            GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
+            List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
+            for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
+            {
+                string teamName = teamSpawnPoints[i].name;
+                List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
+                spawnPoints.Add(teamName, spawnPointsTransforms);
+                teamRosters.Add(teamName, new List<ulong>());
+                if (!teamQueens.ContainsKey(teamName))
+                {
+                    teamQueens.Add(teamName, null);
+                }
+            }
+        }
+        Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
     }
 
     [Rpc(SendTo.Server)]
@@ -242,12 +239,14 @@ public class GameManager : NetworkBehaviour
     {
         GameObject instantiatedPile = Instantiate(Resources.Load<GameObject>(SNOW_PILE_RESOURCE));
         NetworkObject netObj = instantiatedPile.GetComponent<NetworkObject>();
-        netObj.Spawn(true);
         instantiatedPile.transform.position = position;
+        instantiatedPile.transform.eulerAngles = new Vector3(-90f, Random.Range(0f, 360f), 0f);
+        netObj.Spawn(true);
         pickupSystem.RegisterPickup(netObj.transform);
     }
 
     // This gets called on each client for each player entity in the game.
+    // CLIENT CALLED ONLY
     public void RegisterPlayer(ulong playerId, PlayerEntity player)
     {
         Debug.Log("Registering player " + playerId);
@@ -257,6 +256,16 @@ public class GameManager : NetworkBehaviour
         {
             Debug.Log($"Setting {player.TeamName.Value.ToString()} queen to {player.name}");
             teamQueens[player.TeamName.Value.ToString()] = player.transform;
+        }
+    }
+
+    int numPlayersSetUp;
+    public void OnPlayerFullySetUp()
+    {
+        ++numPlayersSetUp;
+        if (numPlayersSetUp == NetworkManager.ConnectedClientsIds.Count)
+        {
+            Debug.Log("All players fully set up!");
         }
     }
 
