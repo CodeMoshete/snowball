@@ -3,7 +3,10 @@
 public enum EventId
 {
     LevelLoadCompleted,
-    PlayerHit
+    PlayerHit,
+    AmmoUpdated,
+    WallPlacementBegin,
+    WallPlacementEnd
 }
 
 public delegate bool EventCallback(object cookie);

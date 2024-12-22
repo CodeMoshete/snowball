@@ -26,7 +26,7 @@ public class PlayerEntity : NetworkBehaviour
     public Transform ProjectileOriginReference;
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>("Unassigned");
     public NetworkVariable<PlayerClass> CurrentPlayerClass = new NetworkVariable<PlayerClass>(global::PlayerClass.Soldier);
-    public NetworkVariable<int> SnowCount = new NetworkVariable<int>(0);
+    public NetworkVariable<int> SnowCount = new NetworkVariable<int>(3);
 
     public bool IsFrozen { get; private set; }
     private Transform iceCube;
@@ -110,7 +110,11 @@ public class PlayerEntity : NetworkBehaviour
 
     private void OnSnowResourceChanged(int oldValue, int newValue)
     {
-        Debug.Log($"Snow count for player {OwnerClientId} changed to {newValue}");
+        Debug.Log($"Snow count for player {OwnerClientId} changed to {newValue} : {IsOwner}");
+        if (IsOwner)
+        {
+            Service.EventManager.SendEvent(EventId.AmmoUpdated, newValue);
+        }
     }
 
     private void PlacePlayerAtSpawn(GameStartData startData)
@@ -129,9 +133,9 @@ public class PlayerEntity : NetworkBehaviour
         if (IsFrozen)
         {
             Transform teamQueen = gameManager.GetQueenForTeam(TeamName.Value.ToString());
-            PlayerEntity queenEntity = teamQueen.GetComponent<PlayerEntity>();
             if (teamQueen != null)
             {
+                PlayerEntity queenEntity = teamQueen.GetComponent<PlayerEntity>();
                 if (!queenEntity.IsFrozen && Vector3.SqrMagnitude(transform.position - teamQueen.position) < UNFREEZE_DIST_THRESHOLD)
                 {
                     frozenTimer -= dt;
@@ -201,7 +205,7 @@ public class PlayerEntity : NetworkBehaviour
             {
                 isPlacingWall = false;
                 Destroy(ghostWall.gameObject);
-                gameManager.SpawnWallServerRpc(ghostWall.position, ghostWall.eulerAngles);
+                gameManager.SpawnWallServerRpc(ghostWall.position, ghostWall.eulerAngles, OwnerClientId);
             }
         }
 
@@ -219,6 +223,11 @@ public class PlayerEntity : NetworkBehaviour
 
     private void StartPlacingWall()
     {
+        if (SnowCount.Value < Constants.WALL_COST)
+        {
+            return;
+        }
+
         isPlacingWall = true;
         ghostWall = Instantiate(Resources.Load<GameObject>(WALL_GHOST_RESOURCE)).transform;
         ghostWall.SetParent(transform);
@@ -237,7 +246,7 @@ public class PlayerEntity : NetworkBehaviour
         frozenTimer = UNFREEZE_SECONDS;
     }
 
-    [ClientRpc]
+    [Rpc(SendTo.Everyone)]
     public void OnPlayerUnfrozenClientRpc()
     {
         iceCubeRenderer = null;

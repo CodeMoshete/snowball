@@ -11,7 +11,7 @@ public class LocalProjectlie : MonoBehaviour
     private const string CHASM_TAG = "Chasm";
     private Rigidbody rigidBody;
     private Transform owner;
-    private PlayerEntity ownerPlayer;
+    private string ownerTeamName;
     private GameManager gameManager;
     private List<string> collisionTags;
     private bool isServer;
@@ -32,7 +32,12 @@ public class LocalProjectlie : MonoBehaviour
     public void SetOwner(Transform owner, bool isServer)
     {
         this.owner = owner;
-        ownerPlayer = owner.GetComponent<PlayerEntity>();
+        if (owner != null)
+        {
+            PlayerEntity ownerPlayer = owner.GetComponent<PlayerEntity>();
+            ownerTeamName = ownerPlayer.TeamName.Value.ToString();
+        }
+        ownerTeamName = "None";
         this.isServer = isServer;
     }
 
@@ -50,7 +55,7 @@ public class LocalProjectlie : MonoBehaviour
             {
                 Debug.Log("Server collision with " + collision.transform.name);
                 PlayerEntity otherPlayer = collision.gameObject.GetComponent<PlayerEntity>();
-                if (otherPlayer != null && !otherPlayer.IsFrozen && (otherPlayer.TeamName.Value != ownerPlayer.TeamName.Value || Constants.IS_FRIENDLY_FIRE_ON))
+                if (otherPlayer != null && !otherPlayer.IsFrozen && (otherPlayer.TeamName.Value != ownerTeamName || Constants.IS_FRIENDLY_FIRE_ON))
                 {
                     Debug.Log("Collide with player " + otherPlayer.name + "(" + otherPlayer.TeamName.Value + ")");
                     gameManager.TransmitProjectileHitClientRpc(otherPlayer.OwnerClientId);

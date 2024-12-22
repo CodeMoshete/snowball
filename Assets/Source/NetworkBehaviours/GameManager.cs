@@ -25,6 +25,7 @@ public class GameManager : NetworkBehaviour
     private Dictionary<ulong, Transform> playerTransforms = new Dictionary<ulong, Transform>();
     private Dictionary<string, Transform> teamQueens = new Dictionary<string, Transform>();
     private PickupSystem pickupSystem;
+    private List<BoxCollider> spawnVolumes;
 
     public override void OnNetworkSpawn()
     {
@@ -35,6 +36,8 @@ public class GameManager : NetworkBehaviour
             Debug.Log("Server");
             pickupSystem = new PickupSystem(playerTransforms, OnSnowPickedUp);
             levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
+
+            // Populate team spawn points
             GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
             List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
             for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
@@ -44,7 +47,12 @@ public class GameManager : NetworkBehaviour
                 spawnPoints.Add(teamName, spawnPointsTransforms);
                 teamRosters.Add(teamName, new List<ulong>());
             }
+
+            // Populate snowball spawn volumes
+            spawnVolumes = UnityUtils.FindAllComponentsInChildren<BoxCollider>(levelPrefab);
+            SpawnSnowballs(5);
         }
+
         GetGameMetadataServerRpc(NetworkManager.LocalClientId);
     }
 
@@ -197,6 +205,15 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     public void FireProjectileClientRpc(Vector3 position, Vector3 euler, Vector3 fwd, ulong ownerId)
     {
+        Transform owner = playerTransforms[ownerId];
+        PlayerEntity player = owner.GetComponent<PlayerEntity>();
+        if (player.SnowCount.Value <= 0)
+        {
+            Debug.Log("Not enough ammo!");
+            return;
+        }
+        player.SetPlayerSnowCountServerRpc(player.SnowCount.Value - 1);
+
         Debug.Log("Locally firing projectile!");
         GameObject projectileObj = Instantiate(Resources.Load<GameObject>("LocalSnowball"));
         projectileObj.transform.position = position;
@@ -206,7 +223,6 @@ public class GameManager : NetworkBehaviour
         rb.position = position;
         rb.rotation = Quaternion.identity;
         LocalProjectlie projComp = projectileObj.GetComponent<LocalProjectlie>();
-        Transform owner = playerTransforms[ownerId];
         projComp.SetOwner(owner, IsServer);
 
         float forceMultiplier = 600f;
@@ -250,8 +266,17 @@ public class GameManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    public void SpawnWallServerRpc(Vector3 position, Vector3 euler)
+    public void SpawnWallServerRpc(Vector3 position, Vector3 euler, ulong ownerId)
     {
+        Transform playerTransform = playerTransforms[ownerId];
+        PlayerEntity player = playerTransform.GetComponent<PlayerEntity>();
+        if (player.SnowCount.Value < Constants.WALL_COST)
+        {
+            Debug.Log($"Player {ownerId}: Not enough Snowballs to make a wall!");
+            return;
+        }
+        player.SetPlayerSnowCountServerRpc(player.SnowCount.Value - Constants.WALL_COST);
+
         GameObject instantiatedWall = Instantiate(Resources.Load<GameObject>(WALL_RESOURCE));
         NetworkObject netObj = instantiatedWall.GetComponent<NetworkObject>();
         netObj.Spawn(true);
@@ -268,5 +293,40 @@ public class GameManager : NetworkBehaviour
         player.SetPlayerSnowCountServerRpc(player.SnowCount.Value + 1);
         pickupSystem.UnregisterPickup(pickup);
         Destroy(pickup.gameObject);
+    }
+
+    private void SpawnSnowballs(int numToSpawnPerSide)
+    {
+        List<Vector3> spawnPositions = new List<Vector3>();
+        for (int i = 0, count = spawnVolumes.Count; i < count; ++i)
+        {
+            BoxCollider volume = spawnVolumes[i];
+            for (int j = 0; j < numToSpawnPerSide; ++j)
+            {
+                float xVal = Random.Range(volume.bounds.min.x, volume.bounds.max.x);
+                float yVal = Random.Range(volume.bounds.min.y, volume.bounds.max.y);
+                float zVal = Random.Range(volume.bounds.min.z, volume.bounds.max.z);
+                spawnPositions.Add(new Vector3(xVal, yVal, zVal));
+            }
+        }
+        SpawnSnowballsClientRpc(spawnPositions.ToArray());
+    }
+
+    [Rpc(SendTo.Everyone)]
+    public void SpawnSnowballsClientRpc(Vector3[] spawnPositions)
+    {
+        for (int i = 0, count = spawnPositions.Length; i < count; ++i)
+        {
+            Vector3 position = spawnPositions[i];
+            Debug.Log("Locally firing projectile!");
+            GameObject projectileObj = Instantiate(Resources.Load<GameObject>("LocalSnowball"));
+            projectileObj.transform.position = position;
+
+            Rigidbody rb = projectileObj.GetComponent<Rigidbody>();
+            rb.position = position;
+            rb.rotation = Quaternion.identity;
+            LocalProjectlie projComp = projectileObj.GetComponent<LocalProjectlie>();
+            projComp.SetOwner(null, IsServer);
+        }
     }
 }
