@@ -13,11 +13,10 @@ struct SpawnInfo
 
 public class GameManager : NetworkBehaviour
 {
-    public const int BULLETS_TO_SPAWN = 30;
-    public const string PROJECTILE_RESOURCE = "Snowball";
     public const string PLAYER_RESOURCE = "PlayerPrefab";
     private const string CAMERA_NAME = "Main Camera";
     private const string WALL_RESOURCE = "WallSegment";
+    private const string SNOW_PILE_RESOURCE = "SnowPile";
 
     private GameStartData startData;
     private GameObject levelPrefab;
@@ -25,6 +24,7 @@ public class GameManager : NetworkBehaviour
     private Dictionary<string, List<ulong>> teamRosters = new Dictionary<string, List<ulong>>();
     private Dictionary<ulong, Transform> playerTransforms = new Dictionary<ulong, Transform>();
     private Dictionary<string, Transform> teamQueens = new Dictionary<string, Transform>();
+    private PickupSystem pickupSystem;
 
     public override void OnNetworkSpawn()
     {
@@ -33,6 +33,7 @@ public class GameManager : NetworkBehaviour
         if (IsServer)
         {
             Debug.Log("Server");
+            pickupSystem = new PickupSystem(playerTransforms, OnSnowPickedUp);
             levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
             GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
             List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
@@ -117,7 +118,7 @@ public class GameManager : NetworkBehaviour
     }
 
     // Sets up a new player and returns relevant game state information to the caller
-    [ServerRpc(RequireOwnership = false)]
+    [Rpc(SendTo.Server)]
     private void GetGameMetadataServerRpc(ulong clientId)
     {
         Debug.Log("Requesting game data from server");
@@ -128,12 +129,7 @@ public class GameManager : NetworkBehaviour
         startData.PlayerId = clientId;
         SpawnPlayer(clientId, spawnInfo);
         AssignPlayerClass(startData.PlayerTeamName, clientId);
-
-        ClientRpcParams sendParams = new ClientRpcParams();
-        sendParams.Send = new ClientRpcSendParams();
-        sendParams.Send.TargetClientIds = new ulong[] { clientId };
-        ReceiveGameMetadataClientRpc(startData, sendParams);
-        // ReceiveGameMetadataClientRpc(startData);
+        ReceiveGameMetadataClientRpc(startData, RpcTarget.Single(clientId, RpcTargetUse.Temp));
     }
     
     // Called on server only
@@ -179,9 +175,9 @@ public class GameManager : NetworkBehaviour
         teamRosters[spawnInfo.TeamName].Add(clientId);
     }
 
-    // Server message sent to all players when a new player joins the game
-    [ClientRpc]
-    private void ReceiveGameMetadataClientRpc(GameStartData serverStartData, ClientRpcParams clientRpcParams = default)
+    // Server message sent back to a specific player when they join the game
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void ReceiveGameMetadataClientRpc(GameStartData serverStartData, RpcParams clientRpcParams = default)
     {
         // Debug.Log("Received start data, level: " + serverStartData.LevelName);
         startData.LevelName = serverStartData.LevelName;
@@ -192,13 +188,13 @@ public class GameManager : NetworkBehaviour
         LoadLevel();
     }
 
-    [ServerRpc(RequireOwnership = false)]
+    [Rpc(SendTo.Server)]
     public void FireProjectileServerRpc(Vector3 position, Vector3 euler, Vector3 fwd, ulong ownerId)
     {
         FireProjectileClientRpc(position, euler, fwd, ownerId);
     }
 
-    [ClientRpc]
+    [Rpc(SendTo.Everyone)]
     public void FireProjectileClientRpc(Vector3 position, Vector3 euler, Vector3 fwd, ulong ownerId)
     {
         Debug.Log("Locally firing projectile!");
@@ -217,11 +213,22 @@ public class GameManager : NetworkBehaviour
         rb.AddForce(new Vector3(fwd.x * forceMultiplier, 300f, fwd.z * forceMultiplier));
     }
 
-    [ClientRpc]
+    [Rpc(SendTo.Everyone)]
     public void TransmitProjectileHitClientRpc(ulong hitPlayerId)
     {
         PlayerEntity hitPlayer = playerTransforms[hitPlayerId].GetComponent<PlayerEntity>();
         hitPlayer.OnPlayerFrozen();
+    }
+
+    // SERVER CALLED ONLY
+    [Rpc(SendTo.Server)]
+    public void ProjectileHitFloorServerRpc(Vector3 position)
+    {
+        GameObject instantiatedPile = Instantiate(Resources.Load<GameObject>(SNOW_PILE_RESOURCE));
+        NetworkObject netObj = instantiatedPile.GetComponent<NetworkObject>();
+        netObj.Spawn(true);
+        instantiatedPile.transform.position = position;
+        pickupSystem.RegisterPickup(netObj.transform);
     }
 
     // This gets called on each client for each player entity in the game.
@@ -242,7 +249,7 @@ public class GameManager : NetworkBehaviour
         return teamQueens[teamName];
     }
 
-    [ServerRpc]
+    [Rpc(SendTo.Server)]
     public void SpawnWallServerRpc(Vector3 position, Vector3 euler)
     {
         GameObject instantiatedWall = Instantiate(Resources.Load<GameObject>(WALL_RESOURCE));
@@ -253,5 +260,13 @@ public class GameManager : NetworkBehaviour
         Rigidbody rigidBody = instantiatedWall.GetComponent<Rigidbody>();
         rigidBody.position = position;
         rigidBody.rotation = Quaternion.Euler(euler);
+    }
+
+    // SERVER CALLED ONLY
+    private void OnSnowPickedUp(Transform pickup, PlayerEntity player)
+    {
+        player.SetPlayerSnowCountServerRpc(player.SnowCount.Value + 1);
+        pickupSystem.UnregisterPickup(pickup);
+        Destroy(pickup.gameObject);
     }
 }

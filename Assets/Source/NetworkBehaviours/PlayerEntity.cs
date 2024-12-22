@@ -26,7 +26,8 @@ public class PlayerEntity : NetworkBehaviour
     public Transform ProjectileOriginReference;
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>("Unassigned");
     public NetworkVariable<PlayerClass> CurrentPlayerClass = new NetworkVariable<PlayerClass>(global::PlayerClass.Soldier);
-    
+    public NetworkVariable<int> SnowCount = new NetworkVariable<int>(0);
+
     public bool IsFrozen { get; private set; }
     private Transform iceCube;
     private Renderer iceCubeRenderer;
@@ -43,6 +44,7 @@ public class PlayerEntity : NetworkBehaviour
 
         TeamName.OnValueChanged += OnTeamNameChanged;
         CurrentPlayerClass.OnValueChanged += OnPlayerClassChanged;
+        SnowCount.OnValueChanged += OnSnowResourceChanged;
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         gameManager.RegisterPlayer(OwnerClientId, this);
         if (IsOwner)
@@ -71,7 +73,7 @@ public class PlayerEntity : NetworkBehaviour
         return false;
     }
 
-    [ServerRpc]
+    [Rpc(SendTo.Server)]
     public void AssignTeamNameServerRpc(FixedString64Bytes teamName)
     {
         // Set the team name on the server
@@ -85,7 +87,7 @@ public class PlayerEntity : NetworkBehaviour
         // Update UI or visuals to reflect the new team name
     }
 
-    [ServerRpc]
+    [Rpc(SendTo.Server)]
     public void AssignPlayerClassServerRpc(PlayerClass playerClass)
     {
         CurrentPlayerClass.Value = playerClass;
@@ -98,6 +100,17 @@ public class PlayerEntity : NetworkBehaviour
     private void OnPlayerClassChanged(PlayerClass oldValue, PlayerClass newValue)
     {
         Debug.Log($"Player class for player {OwnerClientId} changed to {newValue}");
+    }
+
+    [Rpc(SendTo.Server)]
+    public void SetPlayerSnowCountServerRpc(int newValue)
+    {
+        SnowCount.Value = newValue;
+    }
+
+    private void OnSnowResourceChanged(int oldValue, int newValue)
+    {
+        Debug.Log($"Snow count for player {OwnerClientId} changed to {newValue}");
     }
 
     private void PlacePlayerAtSpawn(GameStartData startData)
