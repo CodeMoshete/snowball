@@ -9,8 +9,8 @@ public class GameHud : MonoBehaviour
     private void Start()
     {
         Service.EventManager.AddListener(EventId.AmmoUpdated, OnAmmoUpdated);
-        Service.EventManager.AddListener(EventId.WallPlacementBegin, OnAmmoUpdated);
-        Service.EventManager.AddListener(EventId.WallPlacementEnd, OnAmmoUpdated);
+        Service.EventManager.AddListener(EventId.WallPlacementBegin, OnWallPlacementBegin);
+        Service.EventManager.AddListener(EventId.WallPlacementEnd, OnWallPlacementEnd);
     }
 
     private bool OnAmmoUpdated(object cookie)

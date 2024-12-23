@@ -1151,7 +1151,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AmmoCountField: {fileID: 1828693316}
-  WallTooltip: {fileID: 0}
+  WallTooltip: {fileID: 556083652}
 --- !u!1 &1321938072
 GameObject:
   m_ObjectHideFlags: 0
