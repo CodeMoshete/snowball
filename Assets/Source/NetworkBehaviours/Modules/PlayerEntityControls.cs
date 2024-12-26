@@ -1,0 +1,59 @@
+using UnityEditor.ShaderGraph.Internal;
+using UnityEngine;
+using Utils;
+
+public class PlayerEntityControls
+{
+    private const float MAX_PITCH = 45f;
+    private const float JUMP_FORCE = 150f;
+    private PlayerEntity player;
+    private Transform cameraArmature;
+    private IControlScheme currentControlScheme;
+
+    public PlayerEntityControls(PlayerEntity player)
+    {
+        this.player = player;
+        cameraArmature = UnityUtils.FindGameObject(player.gameObject, "CameraOrigin").transform;
+    }
+
+    public void Initialize(IControlScheme controlScheme)
+    {
+        currentControlScheme = controlScheme;
+        currentControlScheme.Initialize(UpdateLook, UpdateMovement, OnThrow, OnJump, OnSpawnWall);
+    }
+
+    private void UpdateLook(Vector2 value)
+    {
+        player.transform.Rotate(new Vector3(0f, value.x, 0f));
+        Vector3 armatureRotation = cameraArmature.localEulerAngles;
+        float minPitch = 360f - MAX_PITCH;
+        armatureRotation.x -= value.y;
+        armatureRotation.x = (armatureRotation.x > MAX_PITCH && armatureRotation.x < 180f) ? MAX_PITCH : armatureRotation.x;
+        armatureRotation.x = (armatureRotation.x < minPitch && armatureRotation.x > 180f) ? minPitch : armatureRotation.x;
+        cameraArmature.localEulerAngles = armatureRotation;
+    }
+
+    private void UpdateMovement(Vector2 value)
+    {
+        Vector3 newPos = player.transform.position;
+        newPos += value.x * player.transform.right;
+        newPos += value.y * player.transform.forward;
+        player.transform.position = newPos;
+    }
+
+    private void OnThrow()
+    {
+        player.OnThrowPressed();
+    }
+
+    private void OnJump()
+    {
+        Rigidbody rb = player.GetComponent<Rigidbody>();
+        rb.AddForce(new Vector3(0f, JUMP_FORCE, 0f));
+    }
+
+    private void OnSpawnWall()
+    {
+        player.OnPlaceWallPressed();
+    }
+}

@@ -1,9 +1,6 @@
 using Unity.Collections;
 using Unity.Netcode;
-using Unity.Services.Lobbies.Models;
 using UnityEngine;
-using UnityEngine.Animations;
-using UnityEngine.Video;
 using Utils;
 #if NEW_INPUT_SYSTEM_INSTALLED
 using UnityEngine.InputSystem;
@@ -41,6 +38,8 @@ public class PlayerEntity : NetworkBehaviour
     private bool isPlacingWall;
     private Transform ghostWall;
 
+    private PlayerEntityControls controls;
+
     private GameManager gameManager;
 
     public override void OnNetworkSpawn()
@@ -65,8 +64,9 @@ public class PlayerEntity : NetworkBehaviour
         GameObject cameraObj = GameObject.Find(CAMERA_NAME);
         if (cameraObj != null)
         {
-            cameraObj.transform.SetParent(transform);
-            cameraObj.transform.localPosition = new Vector3(0f, 1f, -5f);
+            GameObject camOrigin = UnityUtils.FindGameObject(gameObject, "CameraOrigin");
+            cameraObj.transform.SetParent(camOrigin.transform);
+            cameraObj.transform.localPosition = Vector3.zero;
         }
     }
 
@@ -90,6 +90,11 @@ public class PlayerEntity : NetworkBehaviour
 
         Debug.Log("POS " + transform.position.ToString());
         Service.EventManager.RemoveListener(EventId.LevelLoadCompleted, OnLevelLoadComplete);
+
+        // Initialize player controls
+        controls = new PlayerEntityControls(this);
+        IControlScheme controlScheme = new KeyboardMouseControlScheme();
+        controls.Initialize(controlScheme);
         return false;
     }
 
@@ -174,38 +179,17 @@ public class PlayerEntity : NetworkBehaviour
         // has the Authority to update the object.
         if (!IsOwner || !IsSpawned || IsFrozen) return;
 
-        float multiplier = Speed * dt;
-        float rotationMultiplier = RotationSpeed * dt;
+        if (IsClient && isPlacingWall && Input.GetKeyDown(KeyCode.Escape))
+        {
+            Service.EventManager.SendEvent(EventId.WallPlacementEnd, null);
+            isPlacingWall = false;
+            Destroy(ghostWall.gameObject);
+        }
+    }
 
-        // Old input backends are enabled.
-        if (Input.GetKey(KeyCode.A))
-        {
-            transform.position -= transform.right * multiplier;
-        }
-        else if (Input.GetKey(KeyCode.D))
-        {
-            transform.position += transform.right * multiplier;
-        }
-
-        if (Input.GetKey(KeyCode.W))
-        {
-            transform.position += transform.forward * multiplier;
-        }
-        else if (Input.GetKey(KeyCode.S))
-        {
-            transform.position -= transform.forward * multiplier;
-        }
-
-        if (Input.GetKey(KeyCode.Q))
-        {
-            transform.Rotate(new Vector3(0f, -rotationMultiplier));
-        }
-        else if (Input.GetKey(KeyCode.E))
-        {
-            transform.Rotate(new Vector3(0f, rotationMultiplier));
-        }
-
-        if (IsClient && !isPlacingWall && Input.GetKeyDown(KeyCode.Space))
+    public void OnThrowPressed()
+    {
+        if (IsClient && !isPlacingWall)
         {
             gameManager.FireProjectileServerRpc(
                 ProjectileOriginReference.position,
@@ -214,32 +198,20 @@ public class PlayerEntity : NetworkBehaviour
                 OwnerClientId
             );
         }
+    }
 
-        if (IsClient && Input.GetKeyDown(KeyCode.F))
+    public void OnPlaceWallPressed()
+    {
+        if (!isPlacingWall)
         {
-            if (!isPlacingWall)
-            {
-                StartPlacingWall();
-            }
-            else
-            {
-                isPlacingWall = false;
-                Destroy(ghostWall.gameObject);
-                gameManager.SpawnWallServerRpc(ghostWall.position, ghostWall.eulerAngles, OwnerClientId);
-                Service.EventManager.SendEvent(EventId.WallPlacementEnd, null);
-            }
+            StartPlacingWall();
         }
-
-        if (IsClient && isPlacingWall && Input.GetKeyDown(KeyCode.Escape))
+        else
         {
-            Service.EventManager.SendEvent(EventId.WallPlacementEnd, null);
             isPlacingWall = false;
             Destroy(ghostWall.gameObject);
-        }
-
-        if (Input.GetKey(KeyCode.P))
-        {
-            transform.position = new Vector3(-10f, 0.5f, 0f);
+            gameManager.SpawnWallServerRpc(ghostWall.position, ghostWall.eulerAngles, OwnerClientId);
+            Service.EventManager.SendEvent(EventId.WallPlacementEnd, null);
         }
     }
 
