@@ -1,4 +1,3 @@
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using Utils;
 
@@ -6,6 +5,25 @@ public class PlayerEntityControls
 {
     private const float MAX_PITCH = 45f;
     private const float JUMP_FORCE = 150f;
+    private float fullPitchRange = 2f * MAX_PITCH;
+
+    public float CameraPitchPct
+    {
+        get
+        {
+            float pitch = cameraArmature.eulerAngles.x;
+            if (pitch <= MAX_PITCH)
+            {
+                pitch = (MAX_PITCH - pitch) / fullPitchRange;
+            }
+            else
+            {
+                pitch = 1f - ((pitch - (360f - MAX_PITCH)) / fullPitchRange);
+            }
+            return pitch;
+        }
+    }
+
     private PlayerEntity player;
     private Transform cameraArmature;
     private IControlScheme currentControlScheme;
@@ -31,6 +49,8 @@ public class PlayerEntityControls
         armatureRotation.x = (armatureRotation.x > MAX_PITCH && armatureRotation.x < 180f) ? MAX_PITCH : armatureRotation.x;
         armatureRotation.x = (armatureRotation.x < minPitch && armatureRotation.x > 180f) ? minPitch : armatureRotation.x;
         cameraArmature.localEulerAngles = armatureRotation;
+        float loftPct = Mathf.Max(CameraPitchPct - 0.4f, 0f) / 0.6f;
+        Debug.Log($"PITCH: {loftPct}");
     }
 
     private void UpdateMovement(Vector2 value)

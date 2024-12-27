@@ -194,13 +194,13 @@ public class GameManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    public void FireProjectileServerRpc(Vector3 position, Vector3 euler, Vector3 fwd, ulong ownerId)
+    public void FireProjectileServerRpc(Vector3 position, Vector3 euler, Vector3 fwd, float verticalVel, ulong ownerId)
     {
-        FireProjectileClientRpc(position, euler, fwd, ownerId);
+        FireProjectileClientRpc(position, euler, fwd, verticalVel, ownerId);
     }
 
     [Rpc(SendTo.Everyone)]
-    public void FireProjectileClientRpc(Vector3 position, Vector3 euler, Vector3 fwd, ulong ownerId)
+    public void FireProjectileClientRpc(Vector3 position, Vector3 euler, Vector3 fwd, float verticalVel, ulong ownerId)
     {
         Transform owner = playerTransforms[ownerId];
         PlayerEntity player = owner.GetComponent<PlayerEntity>();
@@ -222,8 +222,10 @@ public class GameManager : NetworkBehaviour
         LocalProjectlie projComp = projectileObj.GetComponent<LocalProjectlie>();
         projComp.SetOwner(owner, IsServer);
 
+        // TODO: Normalize this so it works right
+        float verticalSpeed = verticalVel * 1500f; // 300 base value
         float forceMultiplier = 600f;
-        rb.AddForce(new Vector3(fwd.x * forceMultiplier, 300f, fwd.z * forceMultiplier));
+        rb.AddForce(new Vector3(fwd.x * forceMultiplier, verticalSpeed, fwd.z * forceMultiplier));
     }
 
     [Rpc(SendTo.Everyone)]

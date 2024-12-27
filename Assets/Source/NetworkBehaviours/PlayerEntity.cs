@@ -191,10 +191,13 @@ public class PlayerEntity : NetworkBehaviour
     {
         if (IsClient && !isPlacingWall)
         {
+            float loftPct = Mathf.Max(controls.CameraPitchPct - 0.4f, 0f) / 0.6f;
+
             gameManager.FireProjectileServerRpc(
                 ProjectileOriginReference.position,
                 ProjectileOriginReference.eulerAngles,
                 ProjectileOriginReference.forward,
+                loftPct,
                 OwnerClientId
             );
         }
