@@ -16,6 +16,9 @@ public class GameManager : NetworkBehaviour
     public const string PLAYER_RESOURCE = "PlayerPrefab";
     private const string WALL_RESOURCE = "WallSegment";
     private const string SNOW_PILE_RESOURCE = "SnowPile";
+    private const float SNOWBALL_THROW_SPEED = 670.82f;
+    private const float MIN_THROW_ANGLE = 20f;
+    private const float MAX_THROW_ANGLE = 70f;
 
     private GameStartData startData;
     private GameObject levelPrefab;
@@ -222,10 +225,10 @@ public class GameManager : NetworkBehaviour
         LocalProjectlie projComp = projectileObj.GetComponent<LocalProjectlie>();
         projComp.SetOwner(owner, IsServer);
 
-        // TODO: Normalize this so it works right
-        float verticalSpeed = verticalVel * 1500f; // 300 base value
-        float forceMultiplier = 600f;
-        rb.AddForce(new Vector3(fwd.x * forceMultiplier, verticalSpeed, fwd.z * forceMultiplier));
+        float throwAngle = Mathf.Lerp(MIN_THROW_ANGLE, MAX_THROW_ANGLE, verticalVel) * Mathf.Deg2Rad;
+        float verticalSpeed = SNOWBALL_THROW_SPEED * Mathf.Sin(throwAngle);
+        float horizontalSpeed = SNOWBALL_THROW_SPEED * Mathf.Cos(throwAngle);
+        rb.AddForce(new Vector3(fwd.x * horizontalSpeed, verticalSpeed, fwd.z * horizontalSpeed));
     }
 
     [Rpc(SendTo.Everyone)]

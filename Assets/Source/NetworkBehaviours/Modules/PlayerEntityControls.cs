@@ -49,8 +49,6 @@ public class PlayerEntityControls
         armatureRotation.x = (armatureRotation.x > MAX_PITCH && armatureRotation.x < 180f) ? MAX_PITCH : armatureRotation.x;
         armatureRotation.x = (armatureRotation.x < minPitch && armatureRotation.x > 180f) ? minPitch : armatureRotation.x;
         cameraArmature.localEulerAngles = armatureRotation;
-        float loftPct = Mathf.Max(CameraPitchPct - 0.4f, 0f) / 0.6f;
-        Debug.Log($"PITCH: {loftPct}");
     }
 
     private void UpdateMovement(Vector2 value)
