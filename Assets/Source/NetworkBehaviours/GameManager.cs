@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using Unity.Android.Gradle;
 using Unity.Netcode;
-using UnityEditor.MPE;
 using UnityEngine;
 using Utils;
 
@@ -52,13 +50,10 @@ public class GameManager : NetworkBehaviour
                 teamRosters.Add(teamName, new List<ulong>());
             }
 
-            // // Populate snowball spawn volumes
-            // spawnVolumes = UnityUtils.FindAllComponentsInChildren<BoxCollider>(levelPrefab);
-            // SpawnSnowballs(5);
-
             Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
         }
 
+        Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
         GetGameMetadataServerRpc(NetworkManager.LocalClientId);
     }
 
@@ -68,7 +63,6 @@ public class GameManager : NetworkBehaviour
         // Populate snowball spawn volumes
         spawnVolumes = UnityUtils.FindAllComponentsInChildren<BoxCollider>(levelPrefab);
         SpawnSnowballs(5);
-
         BroadcastGameStartRpc();
         return true;
     }
@@ -218,11 +212,12 @@ public class GameManager : NetworkBehaviour
                 string teamName = teamSpawnPoints[i].name;
                 List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
                 spawnPoints.Add(teamName, spawnPointsTransforms);
-                teamRosters.Add(teamName, new List<ulong>());
+                
+                if (!teamRosters.ContainsKey(teamName))
+                    teamRosters.Add(teamName, new List<ulong>());
+
                 if (!teamQueens.ContainsKey(teamName))
-                {
                     teamQueens.Add(teamName, null);
-                }
             }
         }
         Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
@@ -305,21 +300,17 @@ public class GameManager : NetworkBehaviour
     public void BroadcastRosterUpdate()
     {
         Dictionary<string, List<string>> roster = new Dictionary<string, List<string>>();
-        foreach (KeyValuePair<string, List<ulong>> team in teamRosters)
-        {
-            string teamName = team.Key;
-            if (teamName == Constants.TEAM_UNASSIGNED)
-                continue;
 
-            List<string> playerNames = new List<string>();
-            for (int i = 0, count = team.Value.Count; i < count; ++i)
-            {
-                ulong playerId = team.Value[i];
-                Transform playerTransform = playerTransforms[playerId];
-                string playerName = playerTransform.name;
-                playerNames.Add(playerName);
-            }
-            roster.Add(teamName, playerNames);
+        foreach (KeyValuePair<ulong, Transform> pair in playerTransforms)
+        {
+            Transform playerTransform = pair.Value;
+            PlayerEntity player = playerTransform.GetComponent<PlayerEntity>();
+            string playerTeam = player.TeamName.Value.ToString();
+            
+            if (!roster.ContainsKey(playerTeam))
+                roster.Add(playerTeam, new List<string>());
+
+            roster[playerTeam].Add(player.name);
         }
 
         Service.EventManager.SendEvent(EventId.PlayerRosterUpdated, roster);

@@ -7,6 +7,7 @@ public enum EventId
     AmmoUpdated,
     WallPlacementBegin,
     WallPlacementEnd,
+    GameManagerInitialized,
     PlayerRosterUpdated,
     GameStateChanged,
     StartGameplayPressed

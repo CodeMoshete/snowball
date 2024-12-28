@@ -17,7 +17,6 @@ public class PreGameScreen : MonoBehaviour
     public TMP_Text ClientActionLabel;
     public TMP_Text HostActionLabel;
     public Button HostStartButton;
-    public GameManager GameManager;
 
     private List<GameObject> teamRosterObjects;
 
@@ -27,6 +26,16 @@ public class PreGameScreen : MonoBehaviour
         HostStartButton.onClick.AddListener(TriggerStartGameplay);
         Service.EventManager.AddListener(EventId.GameStateChanged, OnGameStateChanged);
         Service.EventManager.AddListener(EventId.PlayerRosterUpdated, OnPlayerRosterUpdated);
+        Service.EventManager.AddListener(EventId.GameManagerInitialized, OnGameManagerInitialized);
+    }
+
+    public bool OnGameManagerInitialized(object cookie)
+    {
+        bool isHost = (bool)cookie;
+        HostActionLabel.gameObject.SetActive(isHost);
+        HostStartButton.gameObject.SetActive(isHost);
+        ClientActionLabel.gameObject.SetActive(!isHost);
+        return false;
     }
 
     private void TriggerStartGameplay()
@@ -73,6 +82,8 @@ public class PreGameScreen : MonoBehaviour
             TMP_Text playerNameField = UnityUtils.FindGameObject(playerNameCard, PLAYER_NAME_OBJ).GetComponent<TMP_Text>();
             playerNameField.text = playerNames[i];
         }
+
+        teamRosterObjects.Add(teamCard);
     }
 
     private void OnDestroy()

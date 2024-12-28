@@ -12,6 +12,7 @@ public class GameHud : MonoBehaviour
         Service.EventManager.AddListener(EventId.WallPlacementBegin, OnWallPlacementBegin);
         Service.EventManager.AddListener(EventId.WallPlacementEnd, OnWallPlacementEnd);
         Service.EventManager.AddListener(EventId.GameStateChanged, OnGameStateChanged);
+        gameObject.SetActive(false);
     }
 
     private bool OnAmmoUpdated(object cookie)
