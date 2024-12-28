@@ -25,8 +25,15 @@ public class KeyboardMouseControlScheme : IControlScheme
         this.onJump = onJump;
         this.onSpawnWall = onSpawnWall;
 
-        Cursor.lockState = CursorLockMode.Locked;
         Service.UpdateManager.AddObserver(OnUpdate);
+        Service.EventManager.AddListener(EventId.GameStateChanged, OnGameStateChanged);
+    }
+
+    private bool OnGameStateChanged(object cookie)
+    {
+        GameState gameState = (GameState)cookie;
+        Cursor.lockState = gameState == GameState.Gameplay ? CursorLockMode.Locked : CursorLockMode.None;
+        return false;
     }
 
     private void OnUpdate(float dt)
@@ -68,5 +75,11 @@ public class KeyboardMouseControlScheme : IControlScheme
         {
             onSpawnWall();
         }
+    }
+
+    public void Destroy()
+    {
+        Service.UpdateManager.RemoveObserver(OnUpdate);
+        Service.EventManager.RemoveListener(EventId.GameStateChanged, OnGameStateChanged);
     }
 }

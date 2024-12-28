@@ -42,7 +42,7 @@ public class PlayerEntityControls
 
     private void UpdateLook(Vector2 value)
     {
-        if (player.IsFrozen)
+        if (player.IsControlDisabled)
             return;
 
         player.transform.Rotate(new Vector3(0f, value.x, 0f));
@@ -56,7 +56,7 @@ public class PlayerEntityControls
 
     private void UpdateMovement(Vector2 value)
     {
-        if (player.IsFrozen)
+        if (player.IsControlDisabled)
             return;
 
         Vector3 newPos = player.transform.position;
@@ -67,7 +67,7 @@ public class PlayerEntityControls
 
     private void OnThrow()
     {
-        if (player.IsFrozen)
+        if (player.IsControlDisabled)
             return;
 
         player.OnThrowPressed();
@@ -75,7 +75,7 @@ public class PlayerEntityControls
 
     private void OnJump()
     {
-        if (player.IsFrozen)
+        if (player.IsControlDisabled)
             return;
 
         Rigidbody rb = player.GetComponent<Rigidbody>();
@@ -84,7 +84,7 @@ public class PlayerEntityControls
 
     private void OnSpawnWall()
     {
-        if (player.IsFrozen)
+        if (player.IsControlDisabled)
             return;
 
         player.OnPlaceWallPressed();

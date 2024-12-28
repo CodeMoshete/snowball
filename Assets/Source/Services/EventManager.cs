@@ -6,7 +6,10 @@ public enum EventId
     PlayerHit,
     AmmoUpdated,
     WallPlacementBegin,
-    WallPlacementEnd
+    WallPlacementEnd,
+    PlayerRosterUpdated,
+    GameStateChanged,
+    StartGameplayPressed
 }
 
 public delegate bool EventCallback(object cookie);

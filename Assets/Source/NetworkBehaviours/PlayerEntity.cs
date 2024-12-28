@@ -1,5 +1,6 @@
 using Unity.Collections;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using Utils;
 #if NEW_INPUT_SYSTEM_INSTALLED
@@ -26,11 +27,16 @@ public class PlayerEntity : NetworkBehaviour
     public float Speed = 5;
     public float RotationSpeed = 40f;
     public Transform ProjectileOriginReference;
-    public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>("Unassigned");
+    public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>(Constants.TEAM_UNASSIGNED);
     public NetworkVariable<PlayerClass> CurrentPlayerClass = new NetworkVariable<PlayerClass>(global::PlayerClass.Soldier);
     public NetworkVariable<int> SnowCount = new NetworkVariable<int>(3);
 
     public bool IsFrozen { get; private set; }
+    public bool IsControlDisabled { 
+        get
+        {
+            return IsFrozen || gameManager.CurrentGameState != GameState.Gameplay;
+        }}
     private Transform iceCube;
     private Renderer iceCubeRenderer;
     private float frozenTimer;
@@ -55,11 +61,11 @@ public class PlayerEntity : NetworkBehaviour
         {
             Debug.Log("Player OnNetworkSpawn - Setting up new player!");
             Service.EventManager.AddListener(EventId.LevelLoadCompleted, OnLevelLoadComplete);
-            SetUpNewPlayer();
+            SetUpCamera();
         }
     }
 
-    public void SetUpNewPlayer()
+    public void SetUpCamera()
     {
         GameObject cameraObj = GameObject.Find(CAMERA_NAME);
         if (cameraObj != null)
@@ -88,7 +94,7 @@ public class PlayerEntity : NetworkBehaviour
         Debug.Log($"Enable crown for player {player.OwnerClientId}");
         player.ShowCrown();
 
-        Debug.Log("POS " + transform.position.ToString());
+        // Debug.Log("POS " + transform.position.ToString());
         Service.EventManager.RemoveListener(EventId.LevelLoadCompleted, OnLevelLoadComplete);
 
         // Initialize player controls
@@ -110,6 +116,7 @@ public class PlayerEntity : NetworkBehaviour
     {
         // Update UI or visuals to reflect the new team name
         Debug.Log($"Team name changed from {oldValue} to {newValue}");
+        gameManager.BroadcastRosterUpdate();
     }
 
     [Rpc(SendTo.Server)]

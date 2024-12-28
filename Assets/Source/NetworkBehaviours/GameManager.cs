@@ -20,6 +20,7 @@ public class GameManager : NetworkBehaviour
     private const float MIN_THROW_ANGLE = 20f;
     private const float MAX_THROW_ANGLE = 70f;
 
+    public GameState CurrentGameState { get; private set; }
     private GameStartData startData;
     private GameObject levelPrefab;
     private Dictionary<string, List<Transform>> spawnPoints = new Dictionary<string, List<Transform>>();
@@ -33,6 +34,7 @@ public class GameManager : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         Debug.Log("GameManager: OnNetworkSpawn");
+        CurrentGameState = GameState.PreGameLobby;
         if (IsServer)
         {
             Debug.Log("Server");
@@ -50,12 +52,32 @@ public class GameManager : NetworkBehaviour
                 teamRosters.Add(teamName, new List<ulong>());
             }
 
-            // Populate snowball spawn volumes
-            spawnVolumes = UnityUtils.FindAllComponentsInChildren<BoxCollider>(levelPrefab);
-            SpawnSnowballs(5);
+            // // Populate snowball spawn volumes
+            // spawnVolumes = UnityUtils.FindAllComponentsInChildren<BoxCollider>(levelPrefab);
+            // SpawnSnowballs(5);
+
+            Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
         }
 
         GetGameMetadataServerRpc(NetworkManager.LocalClientId);
+    }
+
+    // Triggered when the host presses the "Start Game" button.
+    private bool OnStartGameplayPressed(object cookie)
+    {
+        // Populate snowball spawn volumes
+        spawnVolumes = UnityUtils.FindAllComponentsInChildren<BoxCollider>(levelPrefab);
+        SpawnSnowballs(5);
+
+        BroadcastGameStartRpc();
+        return true;
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void BroadcastGameStartRpc()
+    {
+        CurrentGameState = GameState.Gameplay;
+        Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
     }
 
     // Entry point from Menu scene - triggers the network connection to be made.
@@ -104,6 +126,8 @@ public class GameManager : NetworkBehaviour
         startData.PlayerStartPos = spawnInfo.SpawnPoint.position;
         startData.PlayerStartEuler = spawnInfo.SpawnPoint.eulerAngles;
         startData.PlayerId = clientId;
+        startData.CurrentGameState = CurrentGameState;
+
         SpawnPlayer(clientId, spawnInfo);
         AssignPlayerClass(startData.PlayerTeamName, clientId);
 
@@ -168,6 +192,14 @@ public class GameManager : NetworkBehaviour
         startData.PlayerTeamName = serverStartData.PlayerTeamName;
         startData.PlayerClass = serverStartData.PlayerClass;
         startData.TeamQueenPlayerId = serverStartData.TeamQueenPlayerId;
+        
+        startData.CurrentGameState = serverStartData.CurrentGameState;
+        CurrentGameState = startData.CurrentGameState;
+        if (CurrentGameState != GameState.PreGameLobby)
+        {
+            Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+        }
+
         teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
         LoadLevel();
     }
@@ -256,12 +288,41 @@ public class GameManager : NetworkBehaviour
     {
         Debug.Log("Registering player " + playerId);
         playerTransforms.Add(playerId, player.transform);
+        string playerTeamName = player.TeamName.Value.ToString();
+        if (!teamRosters.ContainsKey(playerTeamName))
+        {
+            teamRosters.Add(playerTeamName, new List<ulong>());
+        }
+        teamRosters[playerTeamName].Add(player.OwnerClientId);
         
         if (!IsHost && player.CurrentPlayerClass.Value == PlayerClass.Queen)
         {
-            Debug.Log($"Setting {player.TeamName.Value.ToString()} queen to {player.name}");
-            teamQueens[player.TeamName.Value.ToString()] = player.transform;
+            Debug.Log($"Setting {playerTeamName} queen to {player.name}");
+            teamQueens[playerTeamName] = player.transform;
         }
+    }
+
+    public void BroadcastRosterUpdate()
+    {
+        Dictionary<string, List<string>> roster = new Dictionary<string, List<string>>();
+        foreach (KeyValuePair<string, List<ulong>> team in teamRosters)
+        {
+            string teamName = team.Key;
+            if (teamName == Constants.TEAM_UNASSIGNED)
+                continue;
+
+            List<string> playerNames = new List<string>();
+            for (int i = 0, count = team.Value.Count; i < count; ++i)
+            {
+                ulong playerId = team.Value[i];
+                Transform playerTransform = playerTransforms[playerId];
+                string playerName = playerTransform.name;
+                playerNames.Add(playerName);
+            }
+            roster.Add(teamName, playerNames);
+        }
+
+        Service.EventManager.SendEvent(EventId.PlayerRosterUpdated, roster);
     }
 
     int numPlayersSetUp;

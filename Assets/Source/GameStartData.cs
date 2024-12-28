@@ -12,6 +12,7 @@ public struct GameStartData : INetworkSerializable
     public PlayerClass PlayerClass;
     public Vector3 PlayerStartPos;
     public Vector3 PlayerStartEuler;
+    public GameState CurrentGameState;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
@@ -21,5 +22,6 @@ public struct GameStartData : INetworkSerializable
         serializer.SerializeValue(ref PlayerStartPos);
         serializer.SerializeValue(ref PlayerStartEuler);
         serializer.SerializeValue(ref PlayerClass);
+        serializer.SerializeValue(ref CurrentGameState);
     }
 }

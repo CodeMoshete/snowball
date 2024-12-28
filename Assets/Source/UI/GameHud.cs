@@ -11,6 +11,7 @@ public class GameHud : MonoBehaviour
         Service.EventManager.AddListener(EventId.AmmoUpdated, OnAmmoUpdated);
         Service.EventManager.AddListener(EventId.WallPlacementBegin, OnWallPlacementBegin);
         Service.EventManager.AddListener(EventId.WallPlacementEnd, OnWallPlacementEnd);
+        Service.EventManager.AddListener(EventId.GameStateChanged, OnGameStateChanged);
     }
 
     private bool OnAmmoUpdated(object cookie)
@@ -32,8 +33,18 @@ public class GameHud : MonoBehaviour
         return true;
     }
 
+    private bool OnGameStateChanged(object cookie)
+    {
+        GameState gameState = (GameState)cookie;
+        gameObject.SetActive(gameState == GameState.Gameplay);
+        return false;
+    }
+
     private void OnDestroy()
     {
         Service.EventManager.RemoveListener(EventId.AmmoUpdated, OnAmmoUpdated);
+        Service.EventManager.RemoveListener(EventId.WallPlacementBegin, OnWallPlacementBegin);
+        Service.EventManager.RemoveListener(EventId.WallPlacementEnd, OnWallPlacementEnd);
+        Service.EventManager.RemoveListener(EventId.GameStateChanged, OnGameStateChanged);
     }
 }
