@@ -42,6 +42,9 @@ public class PlayerEntityControls
 
     private void UpdateLook(Vector2 value)
     {
+        if (player.IsFrozen)
+            return;
+
         player.transform.Rotate(new Vector3(0f, value.x, 0f));
         Vector3 armatureRotation = cameraArmature.localEulerAngles;
         float minPitch = 360f - MAX_PITCH;
@@ -53,6 +56,9 @@ public class PlayerEntityControls
 
     private void UpdateMovement(Vector2 value)
     {
+        if (player.IsFrozen)
+            return;
+
         Vector3 newPos = player.transform.position;
         newPos += value.x * player.transform.right;
         newPos += value.y * player.transform.forward;
@@ -61,17 +67,26 @@ public class PlayerEntityControls
 
     private void OnThrow()
     {
+        if (player.IsFrozen)
+            return;
+
         player.OnThrowPressed();
     }
 
     private void OnJump()
     {
+        if (player.IsFrozen)
+            return;
+
         Rigidbody rb = player.GetComponent<Rigidbody>();
         rb.AddForce(new Vector3(0f, JUMP_FORCE, 0f));
     }
 
     private void OnSpawnWall()
     {
+        if (player.IsFrozen)
+            return;
+
         player.OnPlaceWallPressed();
     }
 }
