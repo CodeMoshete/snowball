@@ -833,6 +833,10 @@ PrefabInstance:
       value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: -516098083770646512, guid: 4a8c656910d04460791de2154253f3a6, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: -516098083770646512, guid: 4a8c656910d04460791de2154253f3a6, type: 3}
       propertyPath: m_TagString
       value: Floor
       objectReference: {fileID: 0}
