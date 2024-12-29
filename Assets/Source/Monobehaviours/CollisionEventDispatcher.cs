@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CollisionEventDispatcher : MonoBehaviour
 {
+    public const string IMPACT_EFFECT_RESOURCE = "WallToppleEffect";
+
     private List<Action<GameObject>> listeners = new List<Action<GameObject>>();
     public void AddListener(Action<GameObject> listener)
     {
@@ -18,8 +20,15 @@ public class CollisionEventDispatcher : MonoBehaviour
         }
     }
 
+    private void TriggerCollisionEffect(string effectResource, Vector3 contactPt)
+    {
+        Transform impactEffect = Instantiate(Resources.Load<GameObject>(effectResource)).transform;
+        impactEffect.position = contactPt;
+    }
+
     private void OnDestroy()
     {
+        TriggerCollisionEffect(IMPACT_EFFECT_RESOURCE, transform.parent.position);
         listeners = null;
     }
 }

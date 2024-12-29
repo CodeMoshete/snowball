@@ -25,6 +25,7 @@ public class GameManager : NetworkBehaviour
     private Dictionary<string, List<ulong>> teamRosters = new Dictionary<string, List<ulong>>();
     private Dictionary<ulong, Transform> playerTransforms = new Dictionary<ulong, Transform>();
     private Dictionary<string, Transform> teamQueens = new Dictionary<string, Transform>();
+    private Dictionary<GameObject, GameObject> walls = new Dictionary<GameObject, GameObject>();
     private PickupSystem pickupSystem;
     private List<BoxCollider> spawnVolumes;
 
@@ -351,6 +352,19 @@ public class GameManager : NetworkBehaviour
         Rigidbody rigidBody = instantiatedWall.GetComponent<Rigidbody>();
         rigidBody.position = position;
         rigidBody.rotation = Quaternion.Euler(euler);
+
+        GameObject toppleCollider = UnityUtils.FindGameObject(instantiatedWall, "ToppleDetection");
+        CollisionEventDispatcher collisionEvents = toppleCollider.GetComponent<CollisionEventDispatcher>();
+        collisionEvents.AddListener(OnWallToppled);
+        walls.Add(toppleCollider, instantiatedWall);
+    }
+
+    private void OnWallToppled(GameObject toppleDetector)
+    {
+        GameObject wallObject = walls[toppleDetector];
+        NetworkObject netObj = wallObject.GetComponent<NetworkObject>();
+        netObj.Despawn();
+        walls.Remove(toppleDetector);
     }
 
     // SERVER CALLED ONLY

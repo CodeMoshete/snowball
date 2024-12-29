@@ -228,6 +228,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3281899377734774047}
   - component: {fileID: 6542741704190105061}
+  - component: {fileID: 3135093917037749802}
   m_Layer: 6
   m_Name: ToppleDetection
   m_TagString: Untagged
@@ -271,3 +272,15 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.08
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3135093917037749802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7444858547598393296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5979e295d7342b59f99b3f2e4cd96c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
