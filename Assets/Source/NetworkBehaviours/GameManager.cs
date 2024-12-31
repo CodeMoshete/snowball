@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Utils;
 
 struct SpawnInfo
@@ -75,6 +76,8 @@ public class GameManager : NetworkBehaviour
     // Triggered when the host presses the "Start Game" button.
     private bool OnStartGameplayPressed(object cookie)
     {
+        Service.EventManager.RemoveListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
+
         // Populate snowball spawn volumes
         spawnVolumes = UnityUtils.FindAllComponentsInChildren<BoxCollider>(levelPrefab);
         SpawnSnowballs(5);
@@ -96,13 +99,29 @@ public class GameManager : NetworkBehaviour
     public void StartClient(GameStartData startData)
     {
         this.startData = startData;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
         NetworkManager.Singleton.StartClient();
     }
 
     public void StartHost(GameStartData startData)
     {
         this.startData = startData;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
         NetworkManager.Singleton.StartHost();
+    }
+
+    private void OnClientDisconnected(ulong clientId)
+    {
+        if (clientId == NetworkManager.Singleton.LocalClientId)
+        {
+            Debug.Log("Client successfully disconnected from the server.");
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+            Service.EventManager.RemoveListener(EventId.OnGamePause, OnGamePaused);
+            Service.EventManager.RemoveListener(EventId.OnGameResume, OnGameResumed);
+            Service.EventManager.RemoveListener(EventId.OnGameQuit, OnGameQuit);
+            Engine engine = GameObject.Find("Engine").GetComponent<Engine>();
+            engine.EndGame();
+        }
     }
 
     public bool OnGameQuit(object cookie)
@@ -116,6 +135,7 @@ public class GameManager : NetworkBehaviour
         {
             RequestQuitServerRpc(NetworkManager.Singleton.LocalClientId);
         }
+
         return false;
     }
 
@@ -174,7 +194,7 @@ public class GameManager : NetworkBehaviour
         startData.PlayerStartPos = spawnInfo.SpawnPoint.position;
         startData.PlayerStartEuler = spawnInfo.SpawnPoint.eulerAngles;
         startData.PlayerId = clientId;
-        startData.CurrentGameState = CurrentGameState;
+        startData.CurrentGameState = CurrentGameState == GameState.PreGameLobby ? GameState.PreGameLobby : GameState.Gameplay;
 
         SpawnPlayer(clientId, spawnInfo);
         AssignPlayerClass(startData.PlayerTeamName, clientId);
@@ -245,7 +265,9 @@ public class GameManager : NetworkBehaviour
         CurrentGameState = startData.CurrentGameState;
         if (CurrentGameState != GameState.PreGameLobby)
         {
-            Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+            Service.EventManager.AddListener(EventId.OnGamePause, OnGamePaused);
+            Service.EventManager.AddListener(EventId.OnGameResume, OnGameResumed);
+            Service.EventManager.AddListener(EventId.OnGameQuit, OnGameQuit);
         }
 
         teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
@@ -275,6 +297,11 @@ public class GameManager : NetworkBehaviour
             }
         }
         Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
+
+        if (CurrentGameState != GameState.PreGameLobby)
+        {
+            Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+        }
     }
 
     [Rpc(SendTo.Server)]
@@ -369,6 +396,7 @@ public class GameManager : NetworkBehaviour
                 Transform playerTransform = playerTransforms[teamRosters[teamName][0]];
                 PlayerEntity entity = playerTransform.GetComponent<PlayerEntity>();
                 entity.AssignPlayerClassServerRpc(PlayerClass.Queen);
+                teamQueens[teamName] = playerTransform;
             }
         }
     }

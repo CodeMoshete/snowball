@@ -15,10 +15,10 @@ public class Engine : MonoBehaviour
 
     public void StartGame(GameStartData startData)
     {
-        StartCoroutine(LoadYourAsyncScene(startData));
+        StartCoroutine(LoadGameSceneAsync(startData));
     }
 
-    IEnumerator LoadYourAsyncScene(GameStartData startData)
+    IEnumerator LoadGameSceneAsync(GameStartData startData)
     {
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("GameScene");
 
@@ -42,5 +42,25 @@ public class Engine : MonoBehaviour
         }
 
         Debug.Log("Scene Transition Done!");
+    }
+
+    public void EndGame()
+    {
+        gameObject.name = "Engine_Stale";
+        StartCoroutine(LoadMenuSceneAsync());
+    }
+
+    IEnumerator LoadMenuSceneAsync()
+    {
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("MenuScene");
+
+        // Wait until the asynchronous scene fully loads
+        while (!asyncLoad.isDone)
+        {
+            yield return null;
+        }
+
+        Debug.Log("Scene Transition Done!");
+        Destroy(gameObject);
     }
 }

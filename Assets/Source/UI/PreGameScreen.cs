@@ -90,5 +90,6 @@ public class PreGameScreen : MonoBehaviour
     {
         Service.EventManager.RemoveListener(EventId.GameStateChanged, OnGameStateChanged);
         Service.EventManager.RemoveListener(EventId.PlayerRosterUpdated, OnPlayerRosterUpdated);
+        Service.EventManager.RemoveListener(EventId.GameManagerInitialized, OnGameManagerInitialized);
     }
 }
