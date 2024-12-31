@@ -19,6 +19,20 @@ public class GameManager : NetworkBehaviour
     private const float MAX_THROW_ANGLE = 70f;
 
     public GameState CurrentGameState { get; private set; }
+    public PlayerEntity LocalPlayer 
+    {
+        get
+        {
+            if (localPlayer == null)
+            {
+                ulong localPlayerId = NetworkManager.Singleton.LocalClientId;
+                Transform localPlayerTrans = playerTransforms[localPlayerId];
+                localPlayer = localPlayerTrans.GetComponent<PlayerEntity>();
+            }
+            return localPlayer;
+        }
+    }
+    private PlayerEntity localPlayer;
     private GameStartData startData;
     private GameObject levelPrefab;
     private Dictionary<string, List<Transform>> spawnPoints = new Dictionary<string, List<Transform>>();
@@ -122,20 +136,6 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void RequestQuitServerRpc(ulong clientId)
     {
-        // Clean up the player's networked objects
-        // if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
-        // {
-        //     Debug.Log($"Client {clientId} is quitting. Cleaning up their objects...");
-            
-        //     foreach (var networkObject in client.PlayerObject.GetComponentsInChildren<NetworkObject>())
-        //     {
-        //         if (networkObject.IsSpawned)
-        //         {
-        //             networkObject.Despawn();
-        //         }
-        //     }
-        // }
-
         // Disconnect the client
         Debug.Log($"Quit game for {clientId}!");
         NetworkManager.Singleton.DisconnectClient(clientId);
@@ -361,18 +361,15 @@ public class GameManager : NetworkBehaviour
         
         if (IsServer && !player.IsOwner && player.CurrentPlayerClass.Value == PlayerClass.Queen && !player.IsFrozen)
         {
-            ReassignQueenRpc(teamName);
-        }
-    }
-
-    [Rpc(SendTo.Server)]
-    private void ReassignQueenRpc(string teamName)
-    {
-        // Reassign queen role
-        List<ulong> teamIds = teamRosters[teamName];
-        if (teamIds.Count > 0)
-        {
-            AssignPlayerClass(teamName, teamIds[0]);
+            // ReassignQueenRpc(teamName);
+            List<ulong> teamIds = teamRosters[teamName];
+            if (teamIds.Count > 0)
+            {
+                // AssignPlayerClass(teamName, teamIds[0]);
+                Transform playerTransform = playerTransforms[teamRosters[teamName][0]];
+                PlayerEntity entity = playerTransform.GetComponent<PlayerEntity>();
+                entity.AssignPlayerClassServerRpc(PlayerClass.Queen);
+            }
         }
     }
 

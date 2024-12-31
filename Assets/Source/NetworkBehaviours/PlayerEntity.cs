@@ -105,8 +105,8 @@ public class PlayerEntity : NetworkBehaviour
     {
         GameStartData startData = (GameStartData)cookie;
         Debug.Log("Level Load Complete for " + OwnerClientId + " (" + startData.PlayerTeamName + "), " + IsOwner);
-        AssignTeamNameServerRpc(startData.PlayerTeamName);
         AssignPlayerClassServerRpc(startData.PlayerClass);
+        AssignTeamNameServerRpc(startData.PlayerTeamName);
         PlacePlayerAtSpawn(startData);
         
         Transform teamQueen = gameManager.GetQueenForTeam(startData.PlayerTeamName);
@@ -152,6 +152,10 @@ public class PlayerEntity : NetworkBehaviour
     private void OnPlayerClassChanged(PlayerClass oldValue, PlayerClass newValue)
     {
         Debug.Log($"Player class for player {OwnerClientId} changed to {newValue}");
+        if (newValue == PlayerClass.Queen && TeamName.Value.ToString() == gameManager.LocalPlayer.TeamName.Value.ToString())
+        {
+            ShowCrown();
+        }
     }
 
     [Rpc(SendTo.Server)]
