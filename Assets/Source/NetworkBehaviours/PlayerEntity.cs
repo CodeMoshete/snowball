@@ -56,13 +56,33 @@ public class PlayerEntity : NetworkBehaviour
         CurrentPlayerClass.OnValueChanged += OnPlayerClassChanged;
         SnowCount.OnValueChanged += OnSnowResourceChanged;
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        gameManager.RegisterPlayer(OwnerClientId, this);
+        gameManager.RegisterPlayer(this);
         if (IsOwner)
         {
             Debug.Log("Player OnNetworkSpawn - Setting up new player!");
             Service.EventManager.AddListener(EventId.LevelLoadCompleted, OnLevelLoadComplete);
             SetUpCamera();
         }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+        if (IsOwner)
+        {
+            GameObject cameraObj = GameObject.Find(CAMERA_NAME);
+            if (cameraObj != null)
+            {
+                cameraObj.transform.SetParent(null);
+            }
+
+            // Controls will be null if this Entity is now owned by the local player.
+            if (controls != null)
+            {
+                controls.Dispose();
+            }
+        }
+        gameManager.DeregisterPlayer(this);
     }
 
     public void SetUpCamera()
@@ -191,6 +211,24 @@ public class PlayerEntity : NetworkBehaviour
             Service.EventManager.SendEvent(EventId.WallPlacementEnd, null);
             isPlacingWall = false;
             Destroy(ghostWall.gameObject);
+        }
+    }
+
+    public void OnEscapePressed()
+    {
+        if (isPlacingWall)
+        {
+            Service.EventManager.SendEvent(EventId.WallPlacementEnd, null);
+            isPlacingWall = false;
+            Destroy(ghostWall.gameObject);
+        }
+        else if (gameManager.CurrentGameState == GameState.Gameplay)
+        {
+            Service.EventManager.SendEvent(EventId.OnGamePause, null);
+        }
+        else if (gameManager.CurrentGameState == GameState.GameplayPaused)
+        {
+            Service.EventManager.SendEvent(EventId.OnGameResume, null);
         }
     }
 

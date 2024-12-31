@@ -8,5 +8,8 @@ public interface IControlScheme
         Action<Vector2> onUpdateMovement, 
         Action onThrow, 
         Action onJump, 
-        Action onSpawnWall);
+        Action onSpawnWall,
+        Action onEscape);
+    
+    void Dispose();
 }

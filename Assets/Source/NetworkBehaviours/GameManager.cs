@@ -73,6 +73,9 @@ public class GameManager : NetworkBehaviour
     {
         CurrentGameState = GameState.Gameplay;
         Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+        Service.EventManager.AddListener(EventId.OnGamePause, OnGamePaused);
+        Service.EventManager.AddListener(EventId.OnGameResume, OnGameResumed);
+        Service.EventManager.AddListener(EventId.OnGameQuit, OnGameQuit);
     }
 
     // Entry point from Menu scene - triggers the network connection to be made.
@@ -86,6 +89,56 @@ public class GameManager : NetworkBehaviour
     {
         this.startData = startData;
         NetworkManager.Singleton.StartHost();
+    }
+
+    public bool OnGameQuit(object cookie)
+    {
+        Debug.Log($"Quit game for {NetworkManager.Singleton.LocalClientId}!");
+        if (IsServer)
+        {
+            NetworkManager.Singleton.Shutdown();
+        }
+        else
+        {
+            RequestQuitServerRpc(NetworkManager.Singleton.LocalClientId);
+        }
+        return false;
+    }
+
+    private bool OnGamePaused(object cookie)
+    {
+        CurrentGameState = GameState.GameplayPaused;
+        Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+        return false;
+    }
+
+    private bool OnGameResumed(object cookie)
+    {
+        CurrentGameState = GameState.Gameplay;
+        Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+        return false;
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RequestQuitServerRpc(ulong clientId)
+    {
+        // Clean up the player's networked objects
+        // if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
+        // {
+        //     Debug.Log($"Client {clientId} is quitting. Cleaning up their objects...");
+            
+        //     foreach (var networkObject in client.PlayerObject.GetComponentsInChildren<NetworkObject>())
+        //     {
+        //         if (networkObject.IsSpawned)
+        //         {
+        //             networkObject.Despawn();
+        //         }
+        //     }
+        // }
+
+        // Disconnect the client
+        Debug.Log($"Quit game for {clientId}!");
+        NetworkManager.Singleton.DisconnectClient(clientId);
     }
 
     private SpawnInfo SelectTeamAndSpawnPos()
@@ -280,10 +333,10 @@ public class GameManager : NetworkBehaviour
 
     // This gets called on each client for each player entity in the game.
     // CLIENT CALLED ONLY
-    public void RegisterPlayer(ulong playerId, PlayerEntity player)
+    public void RegisterPlayer(PlayerEntity player)
     {
-        Debug.Log("Registering player " + playerId);
-        playerTransforms.Add(playerId, player.transform);
+        Debug.Log("Registering player " + player.OwnerClientId);
+        playerTransforms.Add(player.OwnerClientId, player.transform);
         string playerTeamName = player.TeamName.Value.ToString();
         if (!teamRosters.ContainsKey(playerTeamName))
         {
@@ -295,6 +348,31 @@ public class GameManager : NetworkBehaviour
         {
             Debug.Log($"Setting {playerTeamName} queen to {player.name}");
             teamQueens[playerTeamName] = player.transform;
+        }
+    }
+
+    public void DeregisterPlayer(PlayerEntity player)
+    {
+        ulong playerId = player.OwnerClientId;
+        Debug.Log("Deregistering player " + playerId);
+        playerTransforms.Remove(playerId);
+        string teamName = player.TeamName.Value.ToString();
+        teamRosters[teamName].Remove(playerId);
+        
+        if (IsServer && !player.IsOwner && player.CurrentPlayerClass.Value == PlayerClass.Queen && !player.IsFrozen)
+        {
+            ReassignQueenRpc(teamName);
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ReassignQueenRpc(string teamName)
+    {
+        // Reassign queen role
+        List<ulong> teamIds = teamRosters[teamName];
+        if (teamIds.Count > 0)
+        {
+            AssignPlayerClass(teamName, teamIds[0]);
         }
     }
 

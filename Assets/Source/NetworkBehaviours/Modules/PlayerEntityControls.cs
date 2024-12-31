@@ -37,7 +37,7 @@ public class PlayerEntityControls
     public void Initialize(IControlScheme controlScheme)
     {
         currentControlScheme = controlScheme;
-        currentControlScheme.Initialize(UpdateLook, UpdateMovement, OnThrow, OnJump, OnSpawnWall);
+        currentControlScheme.Initialize(UpdateLook, UpdateMovement, OnThrow, OnJump, OnSpawnWall, OnEscape);
     }
 
     private void UpdateLook(Vector2 value)
@@ -88,5 +88,18 @@ public class PlayerEntityControls
             return;
 
         player.OnPlaceWallPressed();
+    }
+
+    private void OnEscape()
+    {
+        player.OnEscapePressed();
+    }
+
+    public void Dispose()
+    {
+        currentControlScheme.Dispose();
+        player = null;
+        cameraArmature = null;
+        currentControlScheme = null;
     }
 }

@@ -10,7 +10,11 @@ public enum EventId
     GameManagerInitialized,
     PlayerRosterUpdated,
     GameStateChanged,
-    StartGameplayPressed
+    StartGameplayPressed,
+    OnGamePause,
+    OnGameResume,
+    OnGameQuit,
+    OnLookSpeedUpdated
 }
 
 public delegate bool EventCallback(object cookie);

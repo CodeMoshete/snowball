@@ -4,35 +4,49 @@ using UnityEngine;
 public class KeyboardMouseControlScheme : IControlScheme
 {
     private const float MOVE_SPEED = 5f;
-    private const float LOOK_MULT = 250f;
+    // private const float LOOK_MULT_DEFAULT = 250f;
+    private const float LOOK_MULT_MIN = 50f;
+    private const float LOOK_MULT_MAX = 450f;
 
     private Action<Vector2> updateLook;
     private Action<Vector2> updateMovement;
     private Action onThrow;
     private Action onJump;
     private Action onSpawnWall;
+    private Action onEscape;
+    private float lookMultiplier = 250f;
 
     public void Initialize(
         Action<Vector2> onUpdateLook, 
         Action<Vector2> onUpdateMovement, 
         Action onThrow, 
         Action onJump, 
-        Action onSpawnWall)
+        Action onSpawnWall,
+        Action onEscape)
     {
         updateLook = onUpdateLook;
         updateMovement = onUpdateMovement;
         this.onThrow = onThrow;
         this.onJump = onJump;
         this.onSpawnWall = onSpawnWall;
+        this.onEscape = onEscape;
 
         Service.UpdateManager.AddObserver(OnUpdate);
         Service.EventManager.AddListener(EventId.GameStateChanged, OnGameStateChanged);
+        Service.EventManager.AddListener(EventId.OnLookSpeedUpdated, OnLookSpeedUpdated);
     }
 
     private bool OnGameStateChanged(object cookie)
     {
         GameState gameState = (GameState)cookie;
         Cursor.lockState = gameState == GameState.Gameplay ? CursorLockMode.Locked : CursorLockMode.None;
+        return false;
+    }
+
+    private bool OnLookSpeedUpdated(object cookie)
+    {
+        float lookSpeed = (float)cookie;
+        lookMultiplier = Mathf.Lerp(LOOK_MULT_MIN, LOOK_MULT_MAX, lookSpeed);
         return false;
     }
 
@@ -57,7 +71,7 @@ public class KeyboardMouseControlScheme : IControlScheme
         lookDelta.y = lookDelta.y / Screen.height;
         if (lookDelta.x != 0f || lookDelta.y != 0f)
         {
-            lookDelta *= LOOK_MULT;
+            lookDelta *= lookMultiplier;
             updateLook(new Vector2(lookDelta.x, lookDelta.y));
         }
 
@@ -75,11 +89,17 @@ public class KeyboardMouseControlScheme : IControlScheme
         {
             onSpawnWall();
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            onEscape();
+        }
     }
 
-    public void Destroy()
+    public void Dispose()
     {
         Service.UpdateManager.RemoveObserver(OnUpdate);
         Service.EventManager.RemoveListener(EventId.GameStateChanged, OnGameStateChanged);
+        Service.EventManager.RemoveListener(EventId.OnLookSpeedUpdated, OnLookSpeedUpdated);
     }
 }
