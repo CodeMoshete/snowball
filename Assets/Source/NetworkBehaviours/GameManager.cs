@@ -68,6 +68,11 @@ public class GameManager : NetworkBehaviour
 
             Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
         }
+        else
+        {
+            startData = GameObject.Find("Engine").GetComponent<Engine>().StartData;
+            StartClient(startData);
+        }
 
         Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
         GetGameMetadataServerRpc(NetworkManager.LocalClientId);
@@ -100,14 +105,16 @@ public class GameManager : NetworkBehaviour
     {
         this.startData = startData;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-        NetworkManager.Singleton.StartClient();
+        // NetworkObject.Spawn(true);
+        // NetworkManager.Singleton.StartClient();
     }
 
     public void StartHost(GameStartData startData)
     {
         this.startData = startData;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-        NetworkManager.Singleton.StartHost();
+        // NetworkObject.Spawn(true);
+        // NetworkManager.Singleton.StartHost();
     }
 
     private void OnClientDisconnected(ulong clientId)

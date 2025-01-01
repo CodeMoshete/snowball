@@ -25,7 +25,7 @@ public class LocalProjectlie : MonoBehaviour
             CHASM_TAG
         };
         rigidBody = GetComponent<Rigidbody>();
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        gameManager = GameObject.Find("GameManager(Clone)").GetComponent<GameManager>();
     }
 
     public void SetOwner(Transform owner, bool isServer)

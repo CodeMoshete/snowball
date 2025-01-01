@@ -3,6 +3,7 @@ using UnityEngine;
 
 public struct GameStartData : INetworkSerializable
 {
+    public string SessionName;
     public bool IsHost;
     public ulong PlayerId;
     public string LevelName;

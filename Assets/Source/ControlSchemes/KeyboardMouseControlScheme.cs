@@ -3,8 +3,7 @@ using UnityEngine;
 
 public class KeyboardMouseControlScheme : IControlScheme
 {
-    private const float MOVE_SPEED = 5f;
-    // private const float LOOK_MULT_DEFAULT = 250f;
+    // private const float MOVE_SPEED = 5f;
     private const float LOOK_MULT_MIN = 50f;
     private const float LOOK_MULT_MAX = 450f;
 
@@ -54,7 +53,7 @@ public class KeyboardMouseControlScheme : IControlScheme
     {
         Vector2 lookDelta = Vector2.zero;
         Vector2 moveDelta = Vector2.zero;
-        float speedMult = MOVE_SPEED * dt;
+        float speedMult = Constants.MOVE_SPEED * dt;
 
         moveDelta.x -= Input.GetKey(KeyCode.A) ? speedMult : 0f;
         moveDelta.x += Input.GetKey(KeyCode.D) ? speedMult : 0f;

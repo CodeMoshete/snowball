@@ -1,11 +1,20 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using TMPro;
+using Unity.Netcode;
+using Unity.Services.Multiplayer;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
+    public TMP_InputField SessionNameField;
     public Button HostButton;
     public Button JoinButton;
     private Engine engine;
+
+    private bool initialized;
 
     public void Start()
     {
@@ -14,18 +23,54 @@ public class MainMenu : MonoBehaviour
         JoinButton.onClick.AddListener(OnJoinClicked);
     }
 
-    private void OnHostClicked()
+    public void OnHostClicked()
     {
+        if (initialized)
+            return;
+        
+        Debug.Log("Hosting session");
+        initialized = true;
         GameStartData gameData = new GameStartData();
         gameData.IsHost = true;
         gameData.LevelName = "TestArenaPrefab";
+        gameData.SessionName = SessionNameField.text;
         engine.StartGame(gameData);
     }
 
-    private void OnJoinClicked()
+    public void OnJoinClicked()
     {
+        if (initialized)
+            return;
+        
+        Debug.Log("Joining session");
+        initialized = true;
         GameStartData gameData = new GameStartData();
         gameData.IsHost = false;
         engine.StartGame(gameData);
+    }
+
+    public void OnJoinedGame()
+    {
+        if (initialized)
+            return;
+
+        initialized = true;
+
+        if (NetworkManager.Singleton.IsHost)
+        {
+            Debug.Log("Hosting session");
+            GameStartData gameData = new GameStartData();
+            gameData.IsHost = true;
+            gameData.LevelName = "TestArenaPrefab";
+            gameData.SessionName = SessionNameField.text;
+            engine.StartGame(gameData);
+        }
+        else
+        {
+            Debug.Log("Joining session");
+            GameStartData gameData = new GameStartData();
+            gameData.IsHost = false;
+            engine.StartGame(gameData);
+        }
     }
 }

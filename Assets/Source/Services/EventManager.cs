@@ -14,7 +14,11 @@ public enum EventId
     OnGamePause,
     OnGameResume,
     OnGameQuit,
-    OnLookSpeedUpdated
+    OnLookSpeedUpdated,
+    OnThrowUIButtonPressed,
+    OnJumpUIButtonPressed,
+    OnWallUIButtonPressed,
+    OnMenuUIButtonPressed
 }
 
 public delegate bool EventCallback(object cookie);

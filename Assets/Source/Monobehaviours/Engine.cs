@@ -8,6 +8,8 @@ using UnityEngine.SceneManagement;
 
 public class Engine : MonoBehaviour
 {
+    public GameStartData StartData { get; private set; }
+
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
@@ -20,6 +22,7 @@ public class Engine : MonoBehaviour
 
     IEnumerator LoadGameSceneAsync(GameStartData startData)
     {
+        StartData = startData;
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("GameScene");
 
         // Wait until the asynchronous scene fully loads
@@ -28,16 +31,21 @@ public class Engine : MonoBehaviour
             yield return null;
         }
 
-        GameObject gameManagerObj = GameObject.Find("GameManager");
-        GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
         if (startData.IsHost)
         {
+            GameObject gameManagerObj = Instantiate(Resources.Load<GameObject>("GameManager"));
+            NetworkObject gameManagerNw = gameManagerObj.GetComponent<NetworkObject>();
+            GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
             gameManager.StartHost(startData);
+            gameManagerNw.Spawn(true);
+            // GameObject gameManagerObj = GameObject.Find("GameManager");
             // NetworkManager.Singleton.StartHost();
         }
         else 
         {
-            gameManager.StartClient(startData);
+            // GameObject gameManagerObj = GameObject.Find("GameManager(Clone)");
+            // GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
+            // gameManager.StartClient(startData);
             // NetworkManager.Singleton.StartClient();
         }
 

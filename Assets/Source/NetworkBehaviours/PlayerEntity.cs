@@ -55,7 +55,7 @@ public class PlayerEntity : NetworkBehaviour
         TeamName.OnValueChanged += OnTeamNameChanged;
         CurrentPlayerClass.OnValueChanged += OnPlayerClassChanged;
         SnowCount.OnValueChanged += OnSnowResourceChanged;
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        gameManager = GameObject.Find("GameManager(Clone)").GetComponent<GameManager>();
         gameManager.RegisterPlayer(this);
         if (IsOwner)
         {
@@ -119,7 +119,12 @@ public class PlayerEntity : NetworkBehaviour
 
         // Initialize player controls
         controls = new PlayerEntityControls(this);
-        IControlScheme controlScheme = new KeyboardMouseControlScheme();
+        IControlScheme controlScheme;
+#if UNITY_STANDALONE
+        controlScheme = new KeyboardMouseControlScheme();
+#elif UNITY_ANDROID || UNITY_IOS
+        controlScheme = new MobileControlScheme();
+#endif
         controls.Initialize(controlScheme);
         return false;
     }

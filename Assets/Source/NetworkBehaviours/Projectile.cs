@@ -11,10 +11,12 @@ public class Projectile : NetworkBehaviour
 
     private void Start()
     {
-        collisionTags = new List<string>();
-        collisionTags.Add("Player");
-        collisionTags.Add("Floor");
-        collisionTags.Add("Chasm");
+        collisionTags = new List<string>
+        {
+            "Player",
+            "Floor",
+            "Chasm"
+        };
         networkObj = GetComponent<NetworkObject>();
         rigidBody = GetComponent<Rigidbody>();
     }

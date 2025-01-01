@@ -5,6 +5,7 @@ public class GameHud : MonoBehaviour
 {
     public TMP_Text AmmoCountField;
     public GameObject WallTooltip;
+    public MobileHud MobileHud;
 
     private void Start()
     {
@@ -38,6 +39,9 @@ public class GameHud : MonoBehaviour
     {
         GameState gameState = (GameState)cookie;
         gameObject.SetActive(gameState == GameState.Gameplay);
+#if UNITY_ANDROID || UNITY_IOS
+        MobileHud.gameObject.SetActive(gameState == GameState.Gameplay);
+#endif
         return false;
     }
 
