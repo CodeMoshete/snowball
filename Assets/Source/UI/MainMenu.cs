@@ -12,6 +12,7 @@ public class MainMenu : MonoBehaviour
     public TMP_InputField SessionNameField;
     public Button HostButton;
     public Button JoinButton;
+    public Button QuitButton;
     private Engine engine;
 
     private bool initialized;
@@ -21,6 +22,7 @@ public class MainMenu : MonoBehaviour
         engine = GameObject.Find("Engine").GetComponent<Engine>();
         HostButton.onClick.AddListener(OnHostClicked);
         JoinButton.onClick.AddListener(OnJoinClicked);
+        QuitButton.onClick.AddListener(OnQuitClicked);
     }
 
     public void OnHostClicked()
@@ -72,5 +74,11 @@ public class MainMenu : MonoBehaviour
             gameData.IsHost = false;
             engine.StartGame(gameData);
         }
+    }
+
+    private void OnQuitClicked()
+    {
+        Debug.Log("Quit!");
+        Application.Quit();
     }
 }

@@ -33,6 +33,17 @@ public class GamepadControlScheme : IControlScheme
 
         currentGamepad = Gamepad.current;
 
+        // foreach (var device in InputSystem.devices)
+        // {
+        //     Debug.Log($"Device: {device.displayName}, Type: {device.GetType()}");
+        //     if (device.displayName.IndexOf("Steam") >= 0 && device is Gamepad)
+        //     {
+        //         Debug.Log("Found Steam Gamepad!");
+        //         currentGamepad = (Gamepad)device;
+        //         break;
+        //     }
+        // }
+
         Service.UpdateManager.AddObserver(OnUpdate);
         Service.EventManager.AddListener(EventId.GameStateChanged, OnGameStateChanged);
         Service.EventManager.AddListener(EventId.OnLookSpeedUpdated, OnLookSpeedUpdated);
@@ -67,7 +78,7 @@ public class GamepadControlScheme : IControlScheme
         Debug.Log($"Left stick: {leftStickVal}");
 
         Vector2 rightStickVal = currentGamepad.rightStick.value;
-        Debug.Log($"Right stick: {rightStickVal}");
+        // Debug.Log($"Right stick: {rightStickVal}");
         if (rightStickVal.x != 0f || rightStickVal.y != 0f)
         {
             lookDelta = rightStickVal * lookMultiplier;
