@@ -18,6 +18,7 @@ public class GameManager : NetworkBehaviour
     private const float SNOWBALL_THROW_SPEED = 670.82f;
     private const float MIN_THROW_ANGLE = 20f;
     private const float MAX_THROW_ANGLE = 70f;
+    private const float BLIZZARD_TIMEOUT = 90f;
 
     public GameState CurrentGameState { get; private set; }
     public PlayerEntity LocalPlayer 
@@ -43,6 +44,7 @@ public class GameManager : NetworkBehaviour
     private Dictionary<GameObject, GameObject> walls = new Dictionary<GameObject, GameObject>();
     private PickupSystem pickupSystem;
     private List<BoxCollider> spawnVolumes;
+    private float blizzardCountdown;
 
     public override void OnNetworkSpawn()
     {
@@ -67,6 +69,9 @@ public class GameManager : NetworkBehaviour
             }
 
             Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
+
+            blizzardCountdown = BLIZZARD_TIMEOUT;
+            Service.UpdateManager.AddObserver(OnUpdate);
         }
         else
         {
@@ -166,6 +171,16 @@ public class GameManager : NetworkBehaviour
         // Disconnect the client
         Debug.Log($"Quit game for {clientId}!");
         NetworkManager.Singleton.DisconnectClient(clientId);
+    }
+
+    private void OnUpdate(float dt)
+    {
+        blizzardCountdown -= dt;
+        if (blizzardCountdown <= 0f)
+        {
+            SpawnSnowballs(5);
+            blizzardCountdown = BLIZZARD_TIMEOUT;
+        }
     }
 
     private SpawnInfo SelectTeamAndSpawnPos()

@@ -38,15 +38,6 @@ public class Engine : MonoBehaviour
             GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
             gameManager.StartHost(startData);
             gameManagerNw.Spawn(true);
-            // GameObject gameManagerObj = GameObject.Find("GameManager");
-            // NetworkManager.Singleton.StartHost();
-        }
-        else 
-        {
-            // GameObject gameManagerObj = GameObject.Find("GameManager(Clone)");
-            // GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
-            // gameManager.StartClient(startData);
-            // NetworkManager.Singleton.StartClient();
         }
 
         Debug.Log("Scene Transition Done!");
