@@ -4,8 +4,8 @@ using UnityEngine.InputSystem;
 
 public class GamepadControlScheme : IControlScheme
 {
-    private const float LOOK_MULT_MIN = 50f;
-    private const float LOOK_MULT_MAX = 450f;
+    private const float LOOK_MULT_MIN = 0.05f;
+    private const float LOOK_MULT_MAX = 1f;
 
     private Action<Vector2> updateLook;
     private Action<Vector2> updateMovement;
@@ -13,7 +13,7 @@ public class GamepadControlScheme : IControlScheme
     private Action onJump;
     private Action onSpawnWall;
     private Action onEscape;
-    private float lookMultiplier = 250f;
+    private float lookMultiplier = (LOOK_MULT_MIN + LOOK_MULT_MAX) / 2f;
     private Gamepad currentGamepad;
 
     public void Initialize(
@@ -58,30 +58,21 @@ public class GamepadControlScheme : IControlScheme
         Vector2 moveDelta = Vector2.zero;
         float speedMult = Constants.MOVE_SPEED * dt;
 
-        // moveDelta.x -= Input.GetKey(KeyCode.A) ? speedMult : 0f;
-        // moveDelta.x += Input.GetKey(KeyCode.D) ? speedMult : 0f;
-        // moveDelta.y += Input.GetKey(KeyCode.W) ? speedMult : 0f;
-        // moveDelta.y -= Input.GetKey(KeyCode.S) ? speedMult : 0f;
-        // if (moveDelta.x != 0f || moveDelta.y != 0f)
-        // {
-        //     moveDelta = moveDelta.normalized * speedMult;
-        //     updateMovement(moveDelta);
-        // }
-
         Vector2 leftStickVal = currentGamepad.leftStick.value;
+        if (leftStickVal.x != 0f || leftStickVal.y != 0f)
+        {
+            moveDelta = leftStickVal * speedMult;
+            updateMovement(moveDelta);
+        }
         Debug.Log($"Left stick: {leftStickVal}");
-
-        // lookDelta = Input.mousePositionDelta;
-        // lookDelta.x = lookDelta.x / Screen.width;
-        // lookDelta.y = lookDelta.y / Screen.height;
-        // if (lookDelta.x != 0f || lookDelta.y != 0f)
-        // {
-        //     lookDelta *= lookMultiplier;
-        //     updateLook(new Vector2(lookDelta.x, lookDelta.y));
-        // }
 
         Vector2 rightStickVal = currentGamepad.rightStick.value;
         Debug.Log($"Right stick: {rightStickVal}");
+        if (rightStickVal.x != 0f || rightStickVal.y != 0f)
+        {
+            lookDelta = rightStickVal * lookMultiplier;
+            updateLook(new Vector2(lookDelta.x, lookDelta.y));
+        }
 
         if (currentGamepad.rightTrigger.wasPressedThisFrame)
         {
