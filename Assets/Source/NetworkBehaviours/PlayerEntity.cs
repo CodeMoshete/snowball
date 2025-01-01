@@ -121,7 +121,8 @@ public class PlayerEntity : NetworkBehaviour
         controls = new PlayerEntityControls(this);
         IControlScheme controlScheme;
 #if UNITY_STANDALONE
-        controlScheme = new KeyboardMouseControlScheme();
+        // controlScheme = new KeyboardMouseControlScheme();
+        controlScheme = new GamepadControlScheme();
 #elif UNITY_ANDROID || UNITY_IOS
         controlScheme = new MobileControlScheme();
 #endif
