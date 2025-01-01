@@ -44,7 +44,7 @@ public class GameManager : NetworkBehaviour
     private Dictionary<GameObject, GameObject> walls = new Dictionary<GameObject, GameObject>();
     private PickupSystem pickupSystem;
     private List<BoxCollider> spawnVolumes;
-    private float blizzardCountdown;
+    private float blizzardCountdown = BLIZZARD_TIMEOUT;
 
     public override void OnNetworkSpawn()
     {
@@ -69,8 +69,6 @@ public class GameManager : NetworkBehaviour
             }
 
             Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
-
-            blizzardCountdown = BLIZZARD_TIMEOUT;
             Service.UpdateManager.AddObserver(OnUpdate);
         }
         else
@@ -141,6 +139,7 @@ public class GameManager : NetworkBehaviour
         Debug.Log($"Quit game for {NetworkManager.Singleton.LocalClientId}!");
         if (IsServer)
         {
+            Service.UpdateManager.RemoveObserver(OnUpdate);
             NetworkManager.Singleton.Shutdown();
         }
         else

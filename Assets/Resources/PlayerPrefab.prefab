@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 2421989631892871186}
   - component: {fileID: 790956287869785478}
   - component: {fileID: -8704473318394825924}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: PlayerPrefab
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -129,7 +129,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3422404129
+  GlobalObjectIdHash: 1432166684
   InScenePlacedSourceGlobalObjectIdHash: 1432166684
   DeferredDespawnTick: 0
   Ownership: 1
@@ -333,7 +333,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3834345100354265989}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: CameraArmature
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -365,7 +365,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4958613023722403665}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: CameraOrigin
   m_TagString: Untagged
   m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
@@ -396,7 +396,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 383231530722205033}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: ProjectileOrigin
   m_TagString: Untagged
   m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
@@ -427,7 +427,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7905925981604148735}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: CrownOrigin
   m_TagString: Untagged
   m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
