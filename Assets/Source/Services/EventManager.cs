@@ -18,7 +18,8 @@ public enum EventId
     OnThrowUIButtonPressed,
     OnJumpUIButtonPressed,
     OnWallUIButtonPressed,
-    OnMenuUIButtonPressed
+    OnMenuUIButtonPressed,
+    OnGameOver
 }
 
 public delegate bool EventCallback(object cookie);

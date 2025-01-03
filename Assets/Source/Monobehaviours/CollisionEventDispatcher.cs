@@ -6,17 +6,32 @@ public class CollisionEventDispatcher : MonoBehaviour
 {
     public const string IMPACT_EFFECT_RESOURCE = "WallToppleEffect";
 
-    private List<Action<GameObject>> listeners = new List<Action<GameObject>>();
-    public void AddListener(Action<GameObject> listener)
+    private List<Action<GameObject>> collisionStartListeners = new List<Action<GameObject>>();
+    private List<Action<GameObject>> collisionEndListeners = new List<Action<GameObject>>();
+    
+    public void AddListenerCollisionStart(Action<GameObject> listener)
     {
-        listeners.Add(listener);
+        collisionStartListeners.Add(listener);
+    }
+
+    public void AddListenerCollisionEnd(Action<GameObject> listener)
+    {
+        collisionEndListeners.Add(listener);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        for (int i = 0, count = listeners.Count; i < count; ++i)
+        for (int i = 0, count = collisionStartListeners.Count; i < count; ++i)
         {
-            listeners[i](gameObject);
+            collisionStartListeners[i](gameObject);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        for (int i = 0, count = collisionEndListeners.Count; i < count; ++i)
+        {
+            collisionEndListeners[i](gameObject);
         }
     }
 
@@ -29,6 +44,6 @@ public class CollisionEventDispatcher : MonoBehaviour
     private void OnDestroy()
     {
         TriggerCollisionEffect(IMPACT_EFFECT_RESOURCE, transform.parent.position);
-        listeners = null;
+        collisionStartListeners = null;
     }
 }

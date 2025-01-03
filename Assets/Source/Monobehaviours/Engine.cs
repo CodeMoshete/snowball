@@ -31,11 +31,24 @@ public class Engine : MonoBehaviour
             yield return null;
         }
 
-        if (startData.IsHost)
+        if (Constants.IS_OFFLINE_DEBUG)
         {
             GameObject gameManagerObj = Instantiate(Resources.Load<GameObject>("GameManager"));
-            NetworkObject gameManagerNw = gameManagerObj.GetComponent<NetworkObject>();
             GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
+            if (startData.IsHost)
+            {
+                gameManager.StartHost(startData);
+            }
+            else
+            {
+                gameManager.StartClient(startData);
+            }
+        }
+        else if (startData.IsHost)
+        {
+            GameObject gameManagerObj = Instantiate(Resources.Load<GameObject>("GameManager"));
+            GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
+            NetworkObject gameManagerNw = gameManagerObj.GetComponent<NetworkObject>();
             gameManager.StartHost(startData);
             gameManagerNw.Spawn(true);
         }

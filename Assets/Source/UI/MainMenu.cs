@@ -13,6 +13,8 @@ public class MainMenu : MonoBehaviour
     public Button HostButton;
     public Button JoinButton;
     public Button QuitButton;
+    public GameObject CreateSessionContainer;
+    public GameObject JoinSessionContainer;
     private Engine engine;
 
     private bool initialized;
@@ -23,6 +25,11 @@ public class MainMenu : MonoBehaviour
         HostButton.onClick.AddListener(OnHostClicked);
         JoinButton.onClick.AddListener(OnJoinClicked);
         QuitButton.onClick.AddListener(OnQuitClicked);
+        
+        CreateSessionContainer.SetActive(!Constants.IS_OFFLINE_DEBUG);
+        JoinSessionContainer.SetActive(!Constants.IS_OFFLINE_DEBUG);
+        HostButton.gameObject.SetActive(Constants.IS_OFFLINE_DEBUG);
+        JoinButton.gameObject.SetActive(Constants.IS_OFFLINE_DEBUG);
     }
 
     public void OnHostClicked()

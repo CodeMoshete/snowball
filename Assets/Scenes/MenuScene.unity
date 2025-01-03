@@ -930,6 +930,8 @@ MonoBehaviour:
   HostButton: {fileID: 755635311}
   JoinButton: {fileID: 844296966}
   QuitButton: {fileID: 519068687}
+  CreateSessionContainer: {fileID: 94971540}
+  JoinSessionContainer: {fileID: 1968855737}
 --- !u!1 &375492653
 GameObject:
   m_ObjectHideFlags: 0
@@ -1515,8 +1517,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 446889956}
   m_HandleRect: {fileID: 446889955}
   m_Direction: 0
-  m_Value: 0
-  m_Size: 0.99999994
+  m_Value: 1
+  m_Size: 0.9999999
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3573,8 +3575,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1964758071}
   m_HandleRect: {fileID: 1964758070}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.9999999
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

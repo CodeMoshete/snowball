@@ -87,7 +87,8 @@ public class GameManager : NetworkBehaviour
         Service.EventManager.RemoveListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
 
         // Populate snowball spawn volumes
-        spawnVolumes = UnityUtils.FindAllComponentsInChildren<BoxCollider>(levelPrefab);
+        GameObject spawnVolumesContaier = UnityUtils.FindGameObject(levelPrefab, "SnowballSpawnVolumes");
+        spawnVolumes = UnityUtils.FindAllComponentsInChildren<BoxCollider>(spawnVolumesContaier);
         SpawnSnowballs(5);
         BroadcastGameStartRpc();
         return true;
@@ -108,16 +109,20 @@ public class GameManager : NetworkBehaviour
     {
         this.startData = startData;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-        // NetworkObject.Spawn(true);
-        // NetworkManager.Singleton.StartClient();
+        if (Constants.IS_OFFLINE_DEBUG)
+        {
+            NetworkManager.Singleton.StartClient();
+        }
     }
 
     public void StartHost(GameStartData startData)
     {
         this.startData = startData;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-        // NetworkObject.Spawn(true);
-        // NetworkManager.Singleton.StartHost();
+        if (Constants.IS_OFFLINE_DEBUG)
+        {
+            NetworkManager.Singleton.StartHost();
+        }
     }
 
     private void OnClientDisconnected(ulong clientId)
@@ -129,8 +134,12 @@ public class GameManager : NetworkBehaviour
             Service.EventManager.RemoveListener(EventId.OnGamePause, OnGamePaused);
             Service.EventManager.RemoveListener(EventId.OnGameResume, OnGameResumed);
             Service.EventManager.RemoveListener(EventId.OnGameQuit, OnGameQuit);
-            Engine engine = GameObject.Find("Engine").GetComponent<Engine>();
-            engine.EndGame();
+            GameObject engineObj = GameObject.Find("Engine");
+            if (engineObj != null)
+            {
+                Engine engine = engineObj.GetComponent<Engine>();
+                engine.EndGame();
+            }
         }
     }
 
@@ -291,7 +300,6 @@ public class GameManager : NetworkBehaviour
             Service.EventManager.AddListener(EventId.OnGameQuit, OnGameQuit);
         }
 
-        teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
         LoadLevel();
     }
 
@@ -317,6 +325,8 @@ public class GameManager : NetworkBehaviour
                     teamQueens.Add(teamName, null);
             }
         }
+
+        teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
         Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
 
         if (CurrentGameState != GameState.PreGameLobby)
@@ -365,6 +375,19 @@ public class GameManager : NetworkBehaviour
     {
         PlayerEntity hitPlayer = playerTransforms[hitPlayerId].GetComponent<PlayerEntity>();
         hitPlayer.OnPlayerFrozen();
+
+        if (IsServer)
+        {
+            Service.EventManager.SendEvent(EventId.PlayerHit, hitPlayer);
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    public void TransmitGameOverRpc(string winningTeam)
+    {
+        CurrentGameState = GameState.PostGame;
+        Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+        Service.EventManager.SendEvent(EventId.OnGameOver, winningTeam);
     }
 
     // SERVER CALLED ONLY
@@ -456,6 +479,23 @@ public class GameManager : NetworkBehaviour
         return teamQueens[teamName];
     }
 
+    public Dictionary<string, List<PlayerEntity>> GetTeamRosters()
+    {
+        Dictionary<string, List<PlayerEntity>> returnRoster = new Dictionary<string, List<PlayerEntity>>();
+        foreach (KeyValuePair<string, List<ulong>> roster in teamRosters)
+        {
+            List<PlayerEntity> teamEntities = new List<PlayerEntity>();
+            int teamCount = roster.Value.Count;
+            for (int i = 0; i < teamCount; ++i)
+            {
+                PlayerEntity entity = playerTransforms[roster.Value[i]].GetComponent<PlayerEntity>();
+                teamEntities.Add(entity);
+            }
+            returnRoster.Add(roster.Key, teamEntities);
+        }
+        return returnRoster;
+    }
+
     [Rpc(SendTo.Server)]
     public void SpawnWallServerRpc(Vector3 position, Vector3 euler, ulong ownerId)
     {
@@ -479,7 +519,7 @@ public class GameManager : NetworkBehaviour
 
         GameObject toppleCollider = UnityUtils.FindGameObject(instantiatedWall, "ToppleDetection");
         CollisionEventDispatcher collisionEvents = toppleCollider.GetComponent<CollisionEventDispatcher>();
-        collisionEvents.AddListener(OnWallToppled);
+        collisionEvents.AddListenerCollisionStart(OnWallToppled);
         walls.Add(toppleCollider, instantiatedWall);
     }
 

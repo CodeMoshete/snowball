@@ -3,6 +3,8 @@ using Utils;
 
 public class PlayerEntityControls
 {
+    private string FEET_OBJECT_NAME = "FeetCollision";
+    private string CAMERA_ORIGIN = "CameraOrigin";
     private const float MAX_PITCH = 45f;
     private const float JUMP_FORCE = 150f;
     private float fullPitchRange = 2f * MAX_PITCH;
@@ -27,17 +29,32 @@ public class PlayerEntityControls
     private PlayerEntity player;
     private Transform cameraArmature;
     private IControlScheme currentControlScheme;
+    private bool isGrounded;
 
     public PlayerEntityControls(PlayerEntity player)
     {
         this.player = player;
-        cameraArmature = UnityUtils.FindGameObject(player.gameObject, "CameraOrigin").transform;
+        cameraArmature = UnityUtils.FindGameObject(player.gameObject, CAMERA_ORIGIN).transform;
     }
 
     public void Initialize(IControlScheme controlScheme)
     {
         currentControlScheme = controlScheme;
         currentControlScheme.Initialize(UpdateLook, UpdateMovement, OnThrow, OnJump, OnSpawnWall, OnEscape);
+        CollisionEventDispatcher feet = UnityUtils.FindGameObject(player.gameObject, FEET_OBJECT_NAME).GetComponent<CollisionEventDispatcher>();
+        feet.gameObject.SetActive(true);
+        feet.AddListenerCollisionStart(OnFeetCollisionStart);
+        feet.AddListenerCollisionEnd(OnFeetCollisionEnd);
+    }
+
+    private void OnFeetCollisionStart(GameObject collidedObject)
+    {
+        isGrounded = true;
+    }
+
+    private void OnFeetCollisionEnd(GameObject collidedObject)
+    {
+        isGrounded = false;
     }
 
     private void UpdateLook(Vector2 value)
@@ -75,7 +92,7 @@ public class PlayerEntityControls
 
     private void OnJump()
     {
-        if (player.IsControlDisabled)
+        if (!isGrounded || player.IsControlDisabled)
             return;
 
         Rigidbody rb = player.GetComponent<Rigidbody>();
