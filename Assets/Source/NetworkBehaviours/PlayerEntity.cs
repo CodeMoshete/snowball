@@ -120,9 +120,11 @@ public class PlayerEntity : NetworkBehaviour
         // Initialize player controls
         controls = new PlayerEntityControls(this);
         IControlScheme controlScheme;
-#if UNITY_STANDALONE
+#if UNITY_STANDALONE_LINUX
+        // Steam Deck
+        controlScheme = new GamepadControlScheme();
+#elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
         controlScheme = new KeyboardMouseControlScheme();
-        // controlScheme = new GamepadControlScheme();
 #elif UNITY_ANDROID || UNITY_IOS
         controlScheme = new MobileControlScheme();
 #endif
