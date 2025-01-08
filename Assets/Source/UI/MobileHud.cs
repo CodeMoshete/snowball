@@ -19,6 +19,9 @@ public class MobileHud : MonoBehaviour
         MenuButton.onClick.AddListener(OnMenuPressed);
         NextWallButton.onClick.AddListener(OnNextWallPressed);
         PrevWallButton.onClick.AddListener(OnPrevWallPressed);
+        Service.EventManager.AddListener(EventId.OnWallPlacementStarted, ShowWallTypeContainer);
+        Service.EventManager.AddListener(EventId.OnWallPlacementStarted, HideWallTypeContainer);
+        WallTypeContainer.SetActive(false);
         gameObject.SetActive(false);
     }
 
@@ -45,6 +48,18 @@ public class MobileHud : MonoBehaviour
     private void OnPrevWallPressed()
     {
         Service.EventManager.SendEvent(EventId.OnPrevWallUIButtonPressed, null);
+    }
+
+    private bool HideWallTypeContainer(object cookie)
+    {
+        WallTypeContainer.SetActive(false);
+        return false;
+    }
+    
+    private bool ShowWallTypeContainer(object cookie)
+    {
+        WallTypeContainer.SetActive(true);
+        return false;
     }
 
     private void OnMenuPressed()

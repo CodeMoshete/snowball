@@ -82,7 +82,7 @@ GameObject:
   - component: {fileID: 1613610042333602648}
   - component: {fileID: 5570794285193827450}
   - component: {fileID: 2780988141663464595}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Ramp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,14 +97,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8284527207921147147}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.61237246, y: -0.35355338, z: -0.35355338, w: 0.61237246}
-  m_LocalPosition: {x: -11.91, y: -7.69, z: -11.37}
+  m_LocalRotation: {x: 0.6408564, y: -0.29883626, z: -0.29883626, w: 0.6408564}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.15, y: 0.7, z: 4.16814}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5297478587026069794}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 30, y: -90, z: -90}
+  m_LocalEulerAnglesHint: {x: 40, y: -90, z: -90}
 --- !u!33 &3126947521278602454
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -191,7 +191,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 175184841
+  GlobalObjectIdHash: 3724410418
   InScenePlacedSourceGlobalObjectIdHash: 3464471525
   DeferredDespawnTick: 0
   Ownership: 1
@@ -266,7 +266,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!114 &2780988141663464595
 MonoBehaviour:
   m_ObjectHideFlags: 0

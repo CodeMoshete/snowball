@@ -15,11 +15,14 @@ public class GameManager : NetworkBehaviour
     public const string PLAYER_RESOURCE = "PlayerPrefab";
     private const string WALL_RESOURCE = "WallSegment";
     private const string SNOW_PILE_RESOURCE = "SnowPile";
-    private const float SNOWBALL_THROW_SPEED = 670.82f;
-    private const float MIN_THROW_ANGLE = 20f;
-    private const float MAX_THROW_ANGLE = 70f;
+    private const float SNOWBALL_THROW_SPEED = 1800f;
+    private const float MIN_THROW_ANGLE = 5f;
+    private const float MAX_THROW_ANGLE = 25f;
     private const float BLIZZARD_TIMEOUT = 90f;
 
+    public float SnowballThrowSpeed = SNOWBALL_THROW_SPEED;
+    public float MinThrowAngle = MIN_THROW_ANGLE;
+    public float MaxThrowAngle = MAX_THROW_ANGLE;
     public GameState CurrentGameState { get; private set; }
     public PlayerEntity LocalPlayer 
     {
@@ -364,9 +367,9 @@ public class GameManager : NetworkBehaviour
         LocalProjectlie projComp = projectileObj.GetComponent<LocalProjectlie>();
         projComp.SetOwner(owner, IsServer);
 
-        float throwAngle = Mathf.Lerp(MIN_THROW_ANGLE, MAX_THROW_ANGLE, verticalVel) * Mathf.Deg2Rad;
-        float verticalSpeed = SNOWBALL_THROW_SPEED * Mathf.Sin(throwAngle);
-        float horizontalSpeed = SNOWBALL_THROW_SPEED * Mathf.Cos(throwAngle);
+        float throwAngle = Mathf.Lerp(MinThrowAngle, MaxThrowAngle, verticalVel) * Mathf.Deg2Rad;
+        float verticalSpeed = SnowballThrowSpeed * Mathf.Sin(throwAngle);
+        float horizontalSpeed = SnowballThrowSpeed * Mathf.Cos(throwAngle);
         rb.AddForce(new Vector3(fwd.x * horizontalSpeed, verticalSpeed, fwd.z * horizontalSpeed));
     }
 
@@ -497,7 +500,7 @@ public class GameManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    public void SpawnWallServerRpc(Vector3 position, Vector3 euler, ulong ownerId)
+    public void SpawnWallServerRpc(string resourceName, Vector3 position, Vector3 euler, ulong ownerId)
     {
         Transform playerTransform = playerTransforms[ownerId];
         PlayerEntity player = playerTransform.GetComponent<PlayerEntity>();
@@ -508,7 +511,7 @@ public class GameManager : NetworkBehaviour
         }
         player.SetPlayerSnowCountServerRpc(player.SnowCount.Value - Constants.WALL_COST);
 
-        GameObject instantiatedWall = Instantiate(Resources.Load<GameObject>(WALL_RESOURCE));
+        GameObject instantiatedWall = Instantiate(Resources.Load<GameObject>(resourceName));
         NetworkObject netObj = instantiatedWall.GetComponent<NetworkObject>();
         netObj.Spawn(true);
         instantiatedWall.transform.position = position;

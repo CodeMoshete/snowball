@@ -109,12 +109,12 @@ public class PlayerEntityControls
 
     private void OnNextWall()
     {
-
+        player.OnNextWallPressed();
     }
 
     private void OnPrevWall()
     {
-        
+        player.OnPrevWallPressed();
     }
 
     private void OnEscape()

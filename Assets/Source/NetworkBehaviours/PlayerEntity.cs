@@ -1,5 +1,6 @@
 using Unity.Collections;
 using Unity.Netcode;
+using Unity.Services.Multiplay.Authoring.Core.MultiplayApi;
 using Unity.VisualScripting;
 using UnityEngine;
 using Utils;
@@ -18,10 +19,12 @@ public class PlayerEntity : NetworkBehaviour
     public const string ICE_CUBE_RESOURCE = "IceCube";
     private readonly Color FROZEN_COLOR = new Color(0.33f , 0.33f, 0.33f, 0f);
     private readonly Color UNFROZEN_COLOR = new Color(1f , 0.61f, 0f, 0f);
+    private const string BUILDABLE_RESOURCE_PATH = "BuildingPieces/";
     public const string WALL_GHOST_RESOURCE = "WallSegmentGhost";
     public const string CROWN_ICON_RESOURCE = "CrownIcon";
     public const string CROWN_REFERENCE_POS_NAME = "CrownOrigin";
     private const string CAMERA_NAME = "Main Camera";
+    private const string BUILDABLES_RESOURCE = "BuildingPieces/WallBuildData";
     private readonly Vector3 WALL_GHOST_PLAYER_OFFSET = new Vector3(0f, 0.75f, 2.5f);
     private readonly Vector3 WALL_GHOST_PLAYER_EULER = new Vector3(0f, 90f, 0f);
     public float Speed = 5;
@@ -43,6 +46,8 @@ public class PlayerEntity : NetworkBehaviour
     
     private bool isPlacingWall;
     private Transform ghostWall;
+    private Buildables wallOptions;
+    private int currentWallOptionIndex;
 
     private PlayerEntityControls controls;
 
@@ -55,6 +60,7 @@ public class PlayerEntity : NetworkBehaviour
         TeamName.OnValueChanged += OnTeamNameChanged;
         CurrentPlayerClass.OnValueChanged += OnPlayerClassChanged;
         SnowCount.OnValueChanged += OnSnowResourceChanged;
+        wallOptions = Resources.Load<Buildables>(BUILDABLES_RESOURCE);
         gameManager = GameObject.Find(Constants.GAME_MANAGER_NAME).GetComponent<GameManager>();
         gameManager.RegisterPlayer(this);
         if (IsOwner)
@@ -220,9 +226,11 @@ public class PlayerEntity : NetworkBehaviour
 
         if (IsClient && isPlacingWall && Input.GetKeyDown(KeyCode.Escape))
         {
+            Service.EventManager.SendEvent(EventId.OnWallPlacementEnded, null);
             Service.EventManager.SendEvent(EventId.HideMessage, null);
             isPlacingWall = false;
             Destroy(ghostWall.gameObject);
+            ghostWall = null;
         }
     }
 
@@ -270,9 +278,51 @@ public class PlayerEntity : NetworkBehaviour
         {
             isPlacingWall = false;
             Destroy(ghostWall.gameObject);
-            gameManager.SpawnWallServerRpc(ghostWall.position, ghostWall.eulerAngles, OwnerClientId);
+            Service.EventManager.SendEvent(EventId.OnWallPlacementEnded, null);
+            BuildableItem currentItem = wallOptions.BuildableItems[currentWallOptionIndex];
+            string resourceName = $"{BUILDABLE_RESOURCE_PATH}{currentItem.PrefabName}";
+            gameManager.SpawnWallServerRpc(resourceName, ghostWall.position, ghostWall.eulerAngles, OwnerClientId);
+            ghostWall = null;
             Service.EventManager.SendEvent(EventId.HideMessage, null);
         }
+    }
+
+    private void DisplayBuildableOptionAtIndex(int index)
+    {
+        if (!isPlacingWall)
+            return;
+
+        if (ghostWall != null)
+        {
+            Destroy(ghostWall.gameObject);
+            ghostWall = null;
+        }
+
+        BuildableItem nextItem = wallOptions.BuildableItems[index];
+        ghostWall = Instantiate(Resources.Load<GameObject>($"{BUILDABLE_RESOURCE_PATH}{nextItem.GhostPrefabName}")).transform;
+        ghostWall.SetParent(transform);
+        ghostWall.localPosition = nextItem.SpawnOffsetPos;
+        ghostWall.localEulerAngles = nextItem.SpawnOffsetEuler;
+    }
+
+    public void OnNextWallPressed()
+    {
+        if (!isPlacingWall)
+            return;
+
+        currentWallOptionIndex = 
+            currentWallOptionIndex >= wallOptions.BuildableItems.Count - 1 ? 0 : currentWallOptionIndex + 1;
+        DisplayBuildableOptionAtIndex(currentWallOptionIndex);
+    }
+
+    public void OnPrevWallPressed()
+    {
+        if (!isPlacingWall)
+            return;
+
+        currentWallOptionIndex = 
+            currentWallOptionIndex <= 0 ? wallOptions.BuildableItems.Count - 1 : currentWallOptionIndex - 1;
+        DisplayBuildableOptionAtIndex(currentWallOptionIndex);
     }
 
     private void StartPlacingWall()
@@ -282,12 +332,14 @@ public class PlayerEntity : NetworkBehaviour
             return;
         }
 
+        Service.EventManager.SendEvent(EventId.OnWallPlacementStarted, null);
         Service.EventManager.SendEvent(EventId.DisplayMessage, Constants.SNOWBALL_SPAWN_TOOLTIP_TEXT);
         isPlacingWall = true;
-        ghostWall = Instantiate(Resources.Load<GameObject>(WALL_GHOST_RESOURCE)).transform;
-        ghostWall.SetParent(transform);
-        ghostWall.localPosition = WALL_GHOST_PLAYER_OFFSET;
-        ghostWall.localEulerAngles = WALL_GHOST_PLAYER_EULER;
+        DisplayBuildableOptionAtIndex(currentWallOptionIndex);
+        // ghostWall = Instantiate(Resources.Load<GameObject>(WALL_GHOST_RESOURCE)).transform;
+        // ghostWall.SetParent(transform);
+        // ghostWall.localPosition = WALL_GHOST_PLAYER_OFFSET;
+        // ghostWall.localEulerAngles = WALL_GHOST_PLAYER_EULER;
     }
 
     public void OnPlayerFrozen()

@@ -18,6 +18,8 @@ public enum EventId
     OnWallUIButtonPressed,
     OnNextWallUIButtonPressed,
     OnPrevWallUIButtonPressed,
+    OnWallPlacementStarted,
+    OnWallPlacementEnded,
     OnMenuUIButtonPressed,
     OnGameOver,
     DisplayMessage,

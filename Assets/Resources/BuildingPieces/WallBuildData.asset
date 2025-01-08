@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4bf9cda4f60a412c8cda2bc60cd4ca0, type: 3}
+  m_Name: WallBuildData
+  m_EditorClassIdentifier: 
+  BuildableItems:
+  - PrefabName: WallSegment
+    GhostPrefabName: WallSegmentGhost
+    SpawnOffsetPos: {x: 0, y: 0.75, z: 2.5}
+    SpawnOffsetEuler: {x: 0, y: 90, z: 0}
+  - PrefabName: Floor
+    GhostPrefabName: FloorGhost
+    SpawnOffsetPos: {x: 0, y: 1.75, z: 2.5}
+    SpawnOffsetEuler: {x: 0, y: 90, z: 90}
+  - PrefabName: Ramp
+    GhostPrefabName: RampGhost
+    SpawnOffsetPos: {x: 0, y: 1, z: 4}
+    SpawnOffsetEuler: {x: 40, y: 180, z: -90}
+  - PrefabName: HalfWall
+    GhostPrefabName: HalfWallGhost
+    SpawnOffsetPos: {x: 0, y: 0.25, z: 2.5}
+    SpawnOffsetEuler: {x: 0, y: 90, z: 0}
