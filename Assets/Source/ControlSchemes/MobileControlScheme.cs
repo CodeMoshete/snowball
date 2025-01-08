@@ -13,6 +13,8 @@ public class MobileControlScheme : IControlScheme
     private Action onThrow;
     private Action onJump;
     private Action onSpawnWall;
+    private Action onNextWall;
+    private Action onPrevWall;
     private Action onEscape;
     private float lookMultiplier = (LOOK_MULT_MAX + LOOK_MULT_MIN) / 2f;
     private Vector2 leftTouchStartPos;  // Initial touch position for movement
@@ -27,6 +29,8 @@ public class MobileControlScheme : IControlScheme
         Action onThrow, 
         Action onJump, 
         Action onSpawnWall, 
+        Action onNextWall,
+        Action onPrevWall,
         Action onEscape)
     {
         updateLook = onUpdateLook;
@@ -34,12 +38,16 @@ public class MobileControlScheme : IControlScheme
         this.onThrow = onThrow;
         this.onJump = onJump;
         this.onSpawnWall = onSpawnWall;
+        this.onNextWall = onNextWall;
+        this.onPrevWall = onPrevWall;
         this.onEscape = onEscape;
 
         Service.UpdateManager.AddObserver(OnUpdate);
         Service.EventManager.AddListener(EventId.OnThrowUIButtonPressed, OnThrowPressed);
         Service.EventManager.AddListener(EventId.OnJumpUIButtonPressed, OnJumpPressed);
         Service.EventManager.AddListener(EventId.OnWallUIButtonPressed, OnWallPressed);
+        Service.EventManager.AddListener(EventId.OnNextWallUIButtonPressed, OnNextWallPressed);
+        Service.EventManager.AddListener(EventId.OnPrevWallUIButtonPressed, OnPrevWallPressed);
         Service.EventManager.AddListener(EventId.OnMenuUIButtonPressed, OnMenuPressed);
         Service.EventManager.AddListener(EventId.OnLookSpeedUpdated, OnLookSpeedUpdated);
     }
@@ -59,6 +67,18 @@ public class MobileControlScheme : IControlScheme
     private bool OnWallPressed(object cookie)
     {
         onSpawnWall();
+        return true;
+    }
+
+    private bool OnNextWallPressed(object cookie)
+    {
+        onNextWall();
+        return true;
+    }
+
+    private bool OnPrevWallPressed(object cookie)
+    {
+        onPrevWall();
         return true;
     }
 

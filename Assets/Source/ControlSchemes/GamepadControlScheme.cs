@@ -12,6 +12,8 @@ public class GamepadControlScheme : IControlScheme
     private Action onThrow;
     private Action onJump;
     private Action onSpawnWall;
+    private Action onNextWall;
+    private Action onPrevWall;
     private Action onEscape;
     private float lookMultiplier = (LOOK_MULT_MIN + LOOK_MULT_MAX) / 2f;
     private Gamepad currentGamepad;
@@ -22,6 +24,8 @@ public class GamepadControlScheme : IControlScheme
         Action onThrow, 
         Action onJump, 
         Action onSpawnWall, 
+        Action onNextWall,
+        Action onPrevWall,
         Action onEscape)
     {
         updateLook = onUpdateLook;
@@ -29,6 +33,8 @@ public class GamepadControlScheme : IControlScheme
         this.onThrow = onThrow;
         this.onJump = onJump;
         this.onSpawnWall = onSpawnWall;
+        this.onNextWall = onNextWall;
+        this.onPrevWall = onPrevWall;
         this.onEscape = onEscape;
 
         currentGamepad = Gamepad.current;
@@ -98,6 +104,16 @@ public class GamepadControlScheme : IControlScheme
         if (currentGamepad.yButton.wasPressedThisFrame)
         {
             onSpawnWall();
+        }
+        
+        if (currentGamepad.rightShoulder.wasPressedThisFrame)
+        {
+            onNextWall();
+        }
+
+        if (currentGamepad.leftShoulder.wasPressedThisFrame)
+        {
+            onPrevWall();
         }
 
         if (currentGamepad.startButton.wasPressedThisFrame)

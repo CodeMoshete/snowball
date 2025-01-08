@@ -7,6 +7,9 @@ public class MobileHud : MonoBehaviour
     public Button JumpButton;
     public Button WallButton;
     public Button MenuButton;
+    public GameObject WallTypeContainer;
+    public Button NextWallButton;
+    public Button PrevWallButton;
 
     private void Start()
     {
@@ -14,6 +17,8 @@ public class MobileHud : MonoBehaviour
         JumpButton.onClick.AddListener(OnJumpPressed);
         WallButton.onClick.AddListener(OnWallPressed);
         MenuButton.onClick.AddListener(OnMenuPressed);
+        NextWallButton.onClick.AddListener(OnNextWallPressed);
+        PrevWallButton.onClick.AddListener(OnPrevWallPressed);
         gameObject.SetActive(false);
     }
 
@@ -30,6 +35,16 @@ public class MobileHud : MonoBehaviour
     private void OnWallPressed()
     {
         Service.EventManager.SendEvent(EventId.OnWallUIButtonPressed, null);
+    }
+
+    private void OnNextWallPressed()
+    {
+        Service.EventManager.SendEvent(EventId.OnNextWallUIButtonPressed, null);
+    }
+
+    private void OnPrevWallPressed()
+    {
+        Service.EventManager.SendEvent(EventId.OnPrevWallUIButtonPressed, null);
     }
 
     private void OnMenuPressed()

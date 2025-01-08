@@ -9,6 +9,8 @@ public interface IControlScheme
         Action onThrow, 
         Action onJump, 
         Action onSpawnWall,
+        Action onCycleNextWall,
+        Action onCyclePrevWall,
         Action onEscape);
     
     void Dispose();

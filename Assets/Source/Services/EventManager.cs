@@ -16,6 +16,8 @@ public enum EventId
     OnThrowUIButtonPressed,
     OnJumpUIButtonPressed,
     OnWallUIButtonPressed,
+    OnNextWallUIButtonPressed,
+    OnPrevWallUIButtonPressed,
     OnMenuUIButtonPressed,
     OnGameOver,
     DisplayMessage,

@@ -12,6 +12,8 @@ public class KeyboardMouseControlScheme : IControlScheme
     private Action onThrow;
     private Action onJump;
     private Action onSpawnWall;
+    private Action onNextWall;
+    private Action onPrevWall;
     private Action onEscape;
     private float lookMultiplier = 250f;
 
@@ -21,6 +23,8 @@ public class KeyboardMouseControlScheme : IControlScheme
         Action onThrow, 
         Action onJump, 
         Action onSpawnWall,
+        Action onNextWall,
+        Action onPrevWall,
         Action onEscape)
     {
         updateLook = onUpdateLook;
@@ -28,6 +32,8 @@ public class KeyboardMouseControlScheme : IControlScheme
         this.onThrow = onThrow;
         this.onJump = onJump;
         this.onSpawnWall = onSpawnWall;
+        this.onNextWall = onNextWall;
+        this.onPrevWall = onPrevWall;
         this.onEscape = onEscape;
 
         Service.UpdateManager.AddObserver(OnUpdate);
@@ -87,6 +93,16 @@ public class KeyboardMouseControlScheme : IControlScheme
         if (Input.GetKeyDown(KeyCode.F))
         {
             onSpawnWall();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            onPrevWall();
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            onNextWall();
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
