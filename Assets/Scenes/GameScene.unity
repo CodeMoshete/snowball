@@ -5538,7 +5538,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AmmoCountField: {fileID: 1828693316}
-  WallTooltip: {fileID: 556083652}
+  TooltipObject: {fileID: 556083652}
+  TooltipText: {fileID: 197234332}
   MobileHud: {fileID: 487661219}
 --- !u!1 &1597705924
 GameObject:

@@ -5,8 +5,6 @@ public enum EventId
     LevelLoadCompleted,
     PlayerHit,
     AmmoUpdated,
-    WallPlacementBegin,
-    WallPlacementEnd,
     GameManagerInitialized,
     PlayerRosterUpdated,
     GameStateChanged,
@@ -19,7 +17,9 @@ public enum EventId
     OnJumpUIButtonPressed,
     OnWallUIButtonPressed,
     OnMenuUIButtonPressed,
-    OnGameOver
+    OnGameOver,
+    DisplayMessage,
+    HideMessage
 }
 
 public delegate bool EventCallback(object cookie);

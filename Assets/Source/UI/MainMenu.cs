@@ -9,6 +9,7 @@ using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
+    private const string TEST_ARENA_RESOURCE = "Levels/TestArena/TestArenaPrefab";
     public TMP_InputField SessionNameField;
     public Button HostButton;
     public Button JoinButton;
@@ -41,7 +42,7 @@ public class MainMenu : MonoBehaviour
         initialized = true;
         GameStartData gameData = new GameStartData();
         gameData.IsHost = true;
-        gameData.LevelName = "TestArenaPrefab";
+        gameData.LevelName = TEST_ARENA_RESOURCE;
         gameData.SessionName = SessionNameField.text;
         engine.StartGame(gameData);
     }
@@ -70,7 +71,7 @@ public class MainMenu : MonoBehaviour
             Debug.Log("Hosting session");
             GameStartData gameData = new GameStartData();
             gameData.IsHost = true;
-            gameData.LevelName = "TestArenaPrefab";
+            gameData.LevelName = TEST_ARENA_RESOURCE;
             gameData.SessionName = SessionNameField.text;
             engine.StartGame(gameData);
         }

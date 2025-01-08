@@ -220,7 +220,7 @@ public class PlayerEntity : NetworkBehaviour
 
         if (IsClient && isPlacingWall && Input.GetKeyDown(KeyCode.Escape))
         {
-            Service.EventManager.SendEvent(EventId.WallPlacementEnd, null);
+            Service.EventManager.SendEvent(EventId.HideMessage, null);
             isPlacingWall = false;
             Destroy(ghostWall.gameObject);
         }
@@ -230,7 +230,7 @@ public class PlayerEntity : NetworkBehaviour
     {
         if (isPlacingWall)
         {
-            Service.EventManager.SendEvent(EventId.WallPlacementEnd, null);
+            Service.EventManager.SendEvent(EventId.HideMessage, null);
             isPlacingWall = false;
             Destroy(ghostWall.gameObject);
         }
@@ -271,7 +271,7 @@ public class PlayerEntity : NetworkBehaviour
             isPlacingWall = false;
             Destroy(ghostWall.gameObject);
             gameManager.SpawnWallServerRpc(ghostWall.position, ghostWall.eulerAngles, OwnerClientId);
-            Service.EventManager.SendEvent(EventId.WallPlacementEnd, null);
+            Service.EventManager.SendEvent(EventId.HideMessage, null);
         }
     }
 
@@ -282,7 +282,7 @@ public class PlayerEntity : NetworkBehaviour
             return;
         }
 
-        Service.EventManager.SendEvent(EventId.WallPlacementBegin, null);
+        Service.EventManager.SendEvent(EventId.DisplayMessage, Constants.SNOWBALL_SPAWN_TOOLTIP_TEXT);
         isPlacingWall = true;
         ghostWall = Instantiate(Resources.Load<GameObject>(WALL_GHOST_RESOURCE)).transform;
         ghostWall.SetParent(transform);

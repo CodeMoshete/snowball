@@ -22,7 +22,7 @@ public class TimerManager
 
     public void CreateTimer(float duration, Action<object> callback, object cookie)
     {
-        TimerInstance timer = new TimerInstance { TimeLeft = duration, Callback = callback, Cookie = cookie };
+        TimerInstance timer = new TimerInstance {TimeLeft = duration, Callback = callback, Cookie = cookie };
         timers.Add(timer);
     }
 
@@ -30,10 +30,11 @@ public class TimerManager
     {
         for (int i = 0, count = timers.Count; i < count; ++i)
         {
-            timers[i].TimeLeft -= dt;
+            TimerInstance currentTimer = timers[i];
+            currentTimer.TimeLeft -= dt;
             if (timers[i].TimeLeft <= 0)
             {
-                timers[i].Callback.Invoke(timers[i].Cookie);
+                timers[i].Callback.Invoke(currentTimer.Cookie);
                 timersToRemove.Push(timers[i]);
             }
         }

@@ -4,15 +4,16 @@ using UnityEngine;
 public class GameHud : MonoBehaviour
 {
     public TMP_Text AmmoCountField;
-    public GameObject WallTooltip;
+    public GameObject TooltipObject;
+    public TMP_Text TooltipText;
     public MobileHud MobileHud;
 
     private void Start()
     {
         Service.EventManager.AddListener(EventId.AmmoUpdated, OnAmmoUpdated);
-        Service.EventManager.AddListener(EventId.WallPlacementBegin, OnWallPlacementBegin);
-        Service.EventManager.AddListener(EventId.WallPlacementEnd, OnWallPlacementEnd);
         Service.EventManager.AddListener(EventId.GameStateChanged, OnGameStateChanged);
+        Service.EventManager.AddListener(EventId.DisplayMessage, OnDisplayMessage);
+        Service.EventManager.AddListener(EventId.HideMessage, OnHideMessage);
         gameObject.SetActive(false);
     }
 
@@ -23,15 +24,18 @@ public class GameHud : MonoBehaviour
         return true;
     }
 
-    private bool OnWallPlacementBegin(object cookie)
+    private bool OnDisplayMessage(object cookie)
     {
-        WallTooltip.SetActive(true);
+        Debug.Log("Show tooltip");
+        TooltipText.text = (string)cookie;
+        TooltipObject.SetActive(true);
         return true;
     }
 
-    private bool OnWallPlacementEnd(object cookie)
+    private bool OnHideMessage(object cookie)
     {
-        WallTooltip.SetActive(false);
+        Debug.Log("Hide tooltip");
+        TooltipObject.SetActive(false);
         return true;
     }
 
@@ -48,8 +52,8 @@ public class GameHud : MonoBehaviour
     private void OnDestroy()
     {
         Service.EventManager.RemoveListener(EventId.AmmoUpdated, OnAmmoUpdated);
-        Service.EventManager.RemoveListener(EventId.WallPlacementBegin, OnWallPlacementBegin);
-        Service.EventManager.RemoveListener(EventId.WallPlacementEnd, OnWallPlacementEnd);
         Service.EventManager.RemoveListener(EventId.GameStateChanged, OnGameStateChanged);
+        Service.EventManager.RemoveListener(EventId.DisplayMessage, OnDisplayMessage);
+        Service.EventManager.RemoveListener(EventId.HideMessage, OnHideMessage);
     }
 }
