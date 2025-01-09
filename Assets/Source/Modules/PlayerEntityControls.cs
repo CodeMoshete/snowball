@@ -30,6 +30,7 @@ public class PlayerEntityControls
     private Transform cameraArmature;
     private IControlScheme currentControlScheme;
     private bool isGrounded;
+    private bool isLookInverted;
 
     public PlayerEntityControls(PlayerEntity player)
     {
@@ -45,6 +46,13 @@ public class PlayerEntityControls
         feet.gameObject.SetActive(true);
         feet.AddListenerCollisionStart(OnFeetCollisionStart);
         feet.AddListenerCollisionEnd(OnFeetCollisionEnd);
+        Service.EventManager.AddListener(EventId.OnLookInvertToggled, OnLookInverted);
+    }
+
+    private bool OnLookInverted(object cookie)
+    {
+        isLookInverted = (bool)cookie;
+        return false;
     }
 
     private void OnFeetCollisionStart(GameObject collidedObject)
@@ -62,6 +70,7 @@ public class PlayerEntityControls
         if (player.IsControlDisabled)
             return;
 
+        value.y = isLookInverted ? -value.y : value.y;
         player.transform.Rotate(new Vector3(0f, value.x, 0f));
         Vector3 armatureRotation = cameraArmature.localEulerAngles;
         float minPitch = 360f - MAX_PITCH;
@@ -124,6 +133,7 @@ public class PlayerEntityControls
 
     public void Dispose()
     {
+        Service.EventManager.RemoveListener(EventId.OnLookInvertToggled, OnLookInverted);
         currentControlScheme.Dispose();
         player = null;
         cameraArmature = null;

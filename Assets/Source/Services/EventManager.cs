@@ -23,7 +23,8 @@ public enum EventId
     OnMenuUIButtonPressed,
     OnGameOver,
     DisplayMessage,
-    HideMessage
+    HideMessage,
+    OnLookInvertToggled
 }
 
 public delegate bool EventCallback(object cookie);
