@@ -1,6 +1,6 @@
 public class Constants
 {
-    public const bool IS_OFFLINE_DEBUG = true;
+    public const bool IS_OFFLINE_DEBUG = false;
     public const string SNOWBALL_PREFAB_NAME = "Snowball";
     public const bool IS_FRIENDLY_FIRE_ON = true;
     public const int WALL_COST = 0;

@@ -58,8 +58,21 @@ public class Engine : MonoBehaviour
 
     public void EndGame()
     {
-        gameObject.name = "Engine_Stale";
         StartCoroutine(LoadMenuSceneAsync());
+    }
+
+    public void StartEndSequence(UnityEngine.UI.Button.ButtonClickedEvent leaveGameEvent)
+    {
+        StartCoroutine(CleanUpClientSession(leaveGameEvent));
+    }
+
+    IEnumerator CleanUpClientSession(UnityEngine.UI.Button.ButtonClickedEvent leaveGameEvent)
+    {
+        // TERRIBLE HACK - Trigger leave game for Multiplayer Session Widgets.
+        Debug.Log("Forcing player disconnect through Multiplayer Widgets!");
+        yield return null; // Wait 1 frame so the stupid button click logic will actually fire.
+        leaveGameEvent.Invoke(); // End the current Session within the Widget systems.
+        EndGame(); // Actually end the game now that the Session is cleaned up.
     }
 
     IEnumerator LoadMenuSceneAsync()
@@ -73,6 +86,5 @@ public class Engine : MonoBehaviour
         }
 
         Debug.Log("Scene Transition Done!");
-        Destroy(gameObject);
     }
 }

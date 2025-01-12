@@ -14,6 +14,8 @@ public class MainMenu : MonoBehaviour
     public Button HostButton;
     public Button JoinButton;
     public Button QuitButton;
+    public Button NetworkJoinButton;
+    public Button NetworkCreateButton;
     public GameObject CreateSessionContainer;
     public GameObject JoinSessionContainer;
     private Engine engine;
@@ -31,6 +33,9 @@ public class MainMenu : MonoBehaviour
         JoinSessionContainer.SetActive(!Constants.IS_OFFLINE_DEBUG);
         HostButton.gameObject.SetActive(Constants.IS_OFFLINE_DEBUG);
         JoinButton.gameObject.SetActive(Constants.IS_OFFLINE_DEBUG);
+
+        NetworkJoinButton.enabled = true;
+        NetworkCreateButton.enabled = true;
     }
 
     public void OnHostClicked()

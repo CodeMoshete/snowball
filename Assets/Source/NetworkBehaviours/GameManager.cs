@@ -1,7 +1,9 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using Utils;
 
 struct SpawnInfo
@@ -48,6 +50,7 @@ public class GameManager : NetworkBehaviour
     private PickupSystem pickupSystem;
     private List<BoxCollider> spawnVolumes;
     private float blizzardCountdown = BLIZZARD_TIMEOUT;
+    private bool didInitQuit;
 
     public override void OnNetworkSpawn()
     {
@@ -137,17 +140,30 @@ public class GameManager : NetworkBehaviour
             Service.EventManager.RemoveListener(EventId.OnGamePause, OnGamePaused);
             Service.EventManager.RemoveListener(EventId.OnGameResume, OnGameResumed);
             Service.EventManager.RemoveListener(EventId.OnGameQuit, OnGameQuit);
+
             GameObject engineObj = GameObject.Find("Engine");
             if (engineObj != null)
             {
                 Engine engine = engineObj.GetComponent<Engine>();
-                engine.EndGame();
+                // TERRIBLE HACK to work around Unity Multiplayer Widget's awful Leave Session technical limitations.
+                if (!didInitQuit)
+                {
+                    Service.EventManager.SendEvent(EventId.OnGamePause, null);
+                    Service.EventManager.SendEvent(EventId.GameStateChanged, GameState.GameplayPaused);
+                    Button leaveButton = GameObject.Find("Leave Session").GetComponent<Button>();
+                    engine.StartEndSequence(leaveButton.onClick);
+                }
+                else
+                {
+                    engine.EndGame();
+                }
             }
         }
     }
 
     public bool OnGameQuit(object cookie)
     {
+        didInitQuit = true;
         Debug.Log($"Quit game for {NetworkManager.Singleton.LocalClientId}!");
         if (IsServer)
         {

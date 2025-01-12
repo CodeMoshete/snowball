@@ -4,14 +4,14 @@ using UnityEngine.UI;
 public class PauseScreen : MonoBehaviour
 {
     public Button ResumeButton;
-    public Button QuitButton;
+    // public Button QuitButton;
     public Slider LookSpeedSlider;
     public Toggle InvertLookToggle;
 
     private void Start()
     {
         ResumeButton.onClick.AddListener(OnResumePressed);
-        QuitButton.onClick.AddListener(OnQuitPressed);
+        // QuitButton.onClick.AddListener(OnQuitPressed);
         LookSpeedSlider.onValueChanged.AddListener(OnLookSpeedChanged);
         InvertLookToggle.onValueChanged.AddListener(OnInvertLookToggled);
         Service.EventManager.AddListener(EventId.OnGameResume, OnGameResumed);
@@ -37,7 +37,8 @@ public class PauseScreen : MonoBehaviour
         Service.EventManager.SendEvent(EventId.OnGameResume, null);
     }
 
-    private void OnQuitPressed()
+    // Invoked by "Leave Button" which is a Unity Multiplayer Widget in the editor / GameScene UI Canvas.
+    public void OnQuitPressed()
     {
         Service.EventManager.SendEvent(EventId.OnGameQuit, null);
     }
