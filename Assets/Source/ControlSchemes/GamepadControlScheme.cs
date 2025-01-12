@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 public class GamepadControlScheme : IControlScheme
 {
     private const float LOOK_MULT_MIN = 0.05f;
-    private const float LOOK_MULT_MAX = 10f;
+    private const float LOOK_MULT_MAX = 4f;
 
     private Action<Vector2> updateLook;
     private Action<Vector2> updateMovement;
