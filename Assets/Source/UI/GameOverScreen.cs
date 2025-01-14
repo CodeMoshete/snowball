@@ -22,7 +22,7 @@ public class GameOverScreen : MonoBehaviour
         return false;
     }
 
-    private void OnQuitPressed()
+    public void OnQuitPressed()
     {
         Service.EventManager.SendEvent(EventId.OnGameQuit, null);
     }

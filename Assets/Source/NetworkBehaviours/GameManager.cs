@@ -167,7 +167,6 @@ public class GameManager : NetworkBehaviour
         Debug.Log($"Quit game for {NetworkManager.Singleton.LocalClientId}!");
         if (IsServer)
         {
-            Service.UpdateManager.RemoveObserver(OnUpdate);
             NetworkManager.Singleton.Shutdown();
         }
         else
@@ -405,6 +404,7 @@ public class GameManager : NetworkBehaviour
     public void TransmitGameOverRpc(string winningTeam)
     {
         CurrentGameState = GameState.PostGame;
+        Service.UpdateManager.RemoveObserver(OnUpdate);
         Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
         Service.EventManager.SendEvent(EventId.OnGameOver, winningTeam);
     }
