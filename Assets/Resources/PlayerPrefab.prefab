@@ -397,15 +397,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 385922924217697458}
-  - component: {fileID: 6310992001708115779}
   - component: {fileID: 8817226898890760829}
+  - component: {fileID: 752493954182412711}
   m_Layer: 10
   m_Name: FeetCollision
   m_TagString: Untagged
   m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &385922924217697458
 Transform:
   m_ObjectHideFlags: 0
@@ -421,8 +421,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 933489954257748402}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &6310992001708115779
-SphereCollider:
+--- !u!114 &8817226898890760829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6919637799221984512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd5979e295d7342b59f99b3f2e4cd96c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!65 &752493954182412711
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -440,20 +452,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.15
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8817226898890760829
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6919637799221984512}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd5979e295d7342b59f99b3f2e4cd96c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Size: {x: 1, y: 0.08, z: 1}
+  m_Center: {x: 0, y: -0.03, z: 0}
 --- !u!1 &7109409945772707717
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 
@@ -30,6 +31,9 @@ public class PlayerEntityControls
     private Transform cameraArmature;
     private IControlScheme currentControlScheme;
     private bool isGrounded;
+    
+    // A persistent list of all objects colliding with the feet collider.
+    private List<GameObject> feetColliders = new List<GameObject>();
     private bool isLookInverted;
 
     public PlayerEntityControls(PlayerEntity player)
@@ -58,11 +62,15 @@ public class PlayerEntityControls
     private void OnFeetCollisionStart(GameObject collidedObject)
     {
         isGrounded = true;
+        feetColliders.Add(collidedObject);
+        Debug.Log($"Collision start: {feetColliders.Count}");
     }
 
     private void OnFeetCollisionEnd(GameObject collidedObject)
     {
-        isGrounded = false;
+        feetColliders.Remove(collidedObject);
+        isGrounded = feetColliders.Count > 0;
+        Debug.Log($"Collision start: {feetColliders.Count}");
     }
 
     private void UpdateLook(Vector2 value)
@@ -138,5 +146,6 @@ public class PlayerEntityControls
         player = null;
         cameraArmature = null;
         currentControlScheme = null;
+        feetColliders = null;
     }
 }
