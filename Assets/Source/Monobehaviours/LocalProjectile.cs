@@ -81,4 +81,10 @@ public class LocalProjectlie : MonoBehaviour
         impactEffect.position = contactPt.point;
         impactEffect.transform.LookAt(impactEffect.position + contactPt.normal);
     }
+
+    public void TriggerTimedDespawnAnimation(Transform despawningTransform)
+    {
+        Transform impactEffect = Instantiate(Resources.Load<GameObject>(MINOR_IMPACT_EFFECT_RESOURCE)).transform;
+        impactEffect.position = despawningTransform.position;
+    }
 }

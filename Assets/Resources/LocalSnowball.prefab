@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: -593189270587481878}
   - component: {fileID: 1187012929295356845}
   - component: {fileID: -1462330973042985932}
+  - component: {fileID: 1763849751745074174}
   m_Layer: 0
   m_Name: LocalSnowball
   m_TagString: Untagged
@@ -95,6 +96,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f8b81b11ce5348989865117ecd66358, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1763849751745074174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8684039603205588185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f865ae5d1c594447b11a37f2cec6e09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Delay: 10
+  OnDestroyed:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: -1462330973042985932}
+        m_TargetAssemblyTypeName: LocalProjectlie, Assembly-CSharp
+        m_MethodName: TriggerTimedDespawnAnimation
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 2819933710535542037}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Transform, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1001 &3366033633221212106
 PrefabInstance:
   m_ObjectHideFlags: 0
