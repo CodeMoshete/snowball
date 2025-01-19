@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameHud : MonoBehaviour
 {
@@ -7,6 +8,12 @@ public class GameHud : MonoBehaviour
     public GameObject TooltipObject;
     public TMP_Text TooltipText;
     public MobileHud MobileHud;
+    public GameObject BuildingTooltipObj;
+    public Image BuildingProgressBar;
+
+    private float totalBuildTime;
+    private float currentBuildTime;
+    private bool isBuilding;
 
     private void Start()
     {
@@ -14,6 +21,7 @@ public class GameHud : MonoBehaviour
         Service.EventManager.AddListener(EventId.GameStateChanged, OnGameStateChanged);
         Service.EventManager.AddListener(EventId.DisplayMessage, OnDisplayMessage);
         Service.EventManager.AddListener(EventId.HideMessage, OnHideMessage);
+        Service.EventManager.AddListener(EventId.OnWallBuildStageStarted, OnWallBuilding);
         gameObject.SetActive(false);
     }
 
@@ -39,6 +47,16 @@ public class GameHud : MonoBehaviour
         return true;
     }
 
+    private bool OnWallBuilding(object cookie)
+    {
+        BuildingTooltipObj.SetActive(true);
+        totalBuildTime = (float)cookie;
+        currentBuildTime = 0f;
+        BuildingProgressBar.fillAmount = 0f;
+        isBuilding = true;
+        return false;
+    }
+
     private bool OnGameStateChanged(object cookie)
     {
         GameState gameState = (GameState)cookie;
@@ -49,11 +67,28 @@ public class GameHud : MonoBehaviour
         return false;
     }
 
+    private void Update()
+    {
+        if (isBuilding)
+        {
+            currentBuildTime += Time.deltaTime;
+            float pct = currentBuildTime / totalBuildTime;
+            BuildingProgressBar.fillAmount = pct;
+            if (pct >= 1f)
+            {
+                isBuilding = false;
+                BuildingTooltipObj.SetActive(false);
+            }
+        }
+    }
+
     private void OnDestroy()
     {
+        isBuilding = false;
         Service.EventManager.RemoveListener(EventId.AmmoUpdated, OnAmmoUpdated);
         Service.EventManager.RemoveListener(EventId.GameStateChanged, OnGameStateChanged);
         Service.EventManager.RemoveListener(EventId.DisplayMessage, OnDisplayMessage);
         Service.EventManager.RemoveListener(EventId.HideMessage, OnHideMessage);
+        Service.EventManager.RemoveListener(EventId.OnWallBuildStageStarted, OnWallBuilding);
     }
 }

@@ -23,11 +23,10 @@ public class PlayerEntity : NetworkBehaviour
     public const string CROWN_REFERENCE_POS_NAME = "CrownOrigin";
     private const string CAMERA_NAME = "Main Camera";
     private const string BUILDABLES_RESOURCE = "BuildingPieces/WallBuildData";
-    private readonly Vector3 WALL_GHOST_PLAYER_OFFSET = new Vector3(0f, 0.75f, 2.5f);
-    private readonly Vector3 WALL_GHOST_PLAYER_EULER = new Vector3(0f, 90f, 0f);
     public float Speed = 5;
     public float RotationSpeed = 40f;
     public Transform ProjectileOriginReference;
+    public GameObject DefrostRangeFX;
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>(Constants.TEAM_UNASSIGNED);
     public NetworkVariable<PlayerClass> CurrentPlayerClass = new NetworkVariable<PlayerClass>(global::PlayerClass.Soldier);
     public NetworkVariable<int> SnowCount = new NetworkVariable<int>(3);
@@ -206,15 +205,27 @@ public class PlayerEntity : NetworkBehaviour
                 PlayerEntity queenEntity = teamQueen.GetComponent<PlayerEntity>();
                 if (!queenEntity.IsFrozen && Vector3.SqrMagnitude(transform.position - teamQueen.position) < UNFREEZE_DIST_THRESHOLD)
                 {
+                    if (!DefrostRangeFX.activeSelf)
+                        DefrostRangeFX.SetActive(true);
+
                     frozenTimer -= dt;
                     float pct = 1f - (frozenTimer / UNFREEZE_SECONDS);
                     Color unfreezeColor = Color.Lerp(FROZEN_COLOR, UNFROZEN_COLOR, pct);
                     iceCubeRenderer.material.SetColor("_BaseColor", unfreezeColor);
                     if (IsServer && frozenTimer <= 0f)
                     {
+                        DefrostRangeFX.SetActive(false);
                         OnPlayerUnfrozenClientRpc();
                     }
                 }
+                else if (DefrostRangeFX.activeSelf)
+                {
+                    DefrostRangeFX.SetActive(false);
+                }
+            }
+            else if (DefrostRangeFX.activeSelf)
+            {
+                DefrostRangeFX.SetActive(false);
             }
         }
 
@@ -275,14 +286,20 @@ public class PlayerEntity : NetworkBehaviour
         else
         {
             isPlacingWall = false;
-            Destroy(ghostWall.gameObject);
-            Service.EventManager.SendEvent(EventId.OnWallPlacementEnded, null);
-            BuildableItem currentItem = wallOptions.BuildableItems[currentWallOptionIndex];
-            string resourceName = $"{BUILDABLE_RESOURCE_PATH}{currentItem.PrefabName}";
-            gameManager.SpawnWallServerRpc(resourceName, ghostWall.position, ghostWall.eulerAngles, OwnerClientId);
-            ghostWall = null;
             Service.EventManager.SendEvent(EventId.HideMessage, null);
+            Service.EventManager.SendEvent(EventId.OnWallBuildStageStarted, Constants.WallBuildTime);
+            Service.TimerManager.CreateTimer(Constants.WallBuildTime, FinishWallPlacement, null);
         }
+    }
+
+    private void FinishWallPlacement(object cookie)
+    {
+        Destroy(ghostWall.gameObject);
+        Service.EventManager.SendEvent(EventId.OnWallPlacementEnded, null);
+        BuildableItem currentItem = wallOptions.BuildableItems[currentWallOptionIndex];
+        string resourceName = $"{BUILDABLE_RESOURCE_PATH}{currentItem.PrefabName}";
+        gameManager.SpawnWallServerRpc(resourceName, ghostWall.position, ghostWall.eulerAngles, OwnerClientId);
+        ghostWall = null;
     }
 
     private void DisplayBuildableOptionAtIndex(int index)
@@ -325,7 +342,7 @@ public class PlayerEntity : NetworkBehaviour
 
     private void StartPlacingWall()
     {
-        if (SnowCount.Value < Constants.WALL_COST)
+        if (SnowCount.Value < Constants.WallCost)
         {
             return;
         }
@@ -334,10 +351,6 @@ public class PlayerEntity : NetworkBehaviour
         Service.EventManager.SendEvent(EventId.DisplayMessage, Constants.SNOWBALL_SPAWN_TOOLTIP_TEXT);
         isPlacingWall = true;
         DisplayBuildableOptionAtIndex(currentWallOptionIndex);
-        // ghostWall = Instantiate(Resources.Load<GameObject>(WALL_GHOST_RESOURCE)).transform;
-        // ghostWall.SetParent(transform);
-        // ghostWall.localPosition = WALL_GHOST_PLAYER_OFFSET;
-        // ghostWall.localEulerAngles = WALL_GHOST_PLAYER_EULER;
     }
 
     public void OnPlayerFrozen()

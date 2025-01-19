@@ -116,7 +116,7 @@ public class MobileControlScheme : IControlScheme
                     leftTouchDelta = touch.position - leftTouchStartPos;
                     float dragPct = Vector2.SqrMagnitude(leftTouchDelta);
                     float pct = Mathf.Min(dragPct, MOVE_THRESHOLD) / MOVE_THRESHOLD;
-                    float speedMult = Constants.MOVE_SPEED * dt;
+                    float speedMult = Constants.MoveSpeed * dt;
                     Vector2 speedVector = leftTouchDelta.normalized * pct * speedMult;
                     updateMovement(speedVector);
                 }

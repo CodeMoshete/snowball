@@ -59,7 +59,7 @@ public class KeyboardMouseControlScheme : IControlScheme
     {
         Vector2 lookDelta = Vector2.zero;
         Vector2 moveDelta = Vector2.zero;
-        float speedMult = Constants.MOVE_SPEED * dt;
+        float speedMult = Constants.MoveSpeed * dt;
 
         moveDelta.x -= Input.GetKey(KeyCode.A) ? speedMult : 0f;
         moveDelta.x += Input.GetKey(KeyCode.D) ? speedMult : 0f;

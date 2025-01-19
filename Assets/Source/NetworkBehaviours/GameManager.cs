@@ -17,14 +17,10 @@ public class GameManager : NetworkBehaviour
     public const string PLAYER_RESOURCE = "PlayerPrefab";
     private const string WALL_RESOURCE = "WallSegment";
     private const string SNOW_PILE_RESOURCE = "SnowPile";
-    private const float SNOWBALL_THROW_SPEED = 1800f;
-    private const float MIN_THROW_ANGLE = 5f;
-    private const float MAX_THROW_ANGLE = 25f;
-    private const float BLIZZARD_TIMEOUT = 90f;
 
-    public float SnowballThrowSpeed = SNOWBALL_THROW_SPEED;
-    public float MinThrowAngle = MIN_THROW_ANGLE;
-    public float MaxThrowAngle = MAX_THROW_ANGLE;
+    public float SnowballThrowSpeed = Constants.SNOWBALL_THROW_SPEED;
+    public float MinThrowAngle = Constants.MIN_THROW_ANGLE;
+    public float MaxThrowAngle = Constants.MAX_THROW_ANGLE;
     public GameState CurrentGameState { get; private set; }
     public PlayerEntity LocalPlayer 
     {
@@ -49,7 +45,7 @@ public class GameManager : NetworkBehaviour
     private Dictionary<GameObject, GameObject> walls = new Dictionary<GameObject, GameObject>();
     private PickupSystem pickupSystem;
     private List<BoxCollider> spawnVolumes;
-    private float blizzardCountdown = BLIZZARD_TIMEOUT;
+    private float blizzardCountdown = Constants.BLIZZARD_TIMEOUT;
     private bool didInitQuit;
 
     public override void OnNetworkSpawn()
@@ -205,7 +201,7 @@ public class GameManager : NetworkBehaviour
         if (blizzardCountdown <= 0f)
         {
             SpawnSnowballs(5);
-            blizzardCountdown = BLIZZARD_TIMEOUT;
+            blizzardCountdown = Constants.BLIZZARD_TIMEOUT;
         }
     }
 
@@ -520,12 +516,12 @@ public class GameManager : NetworkBehaviour
     {
         Transform playerTransform = playerTransforms[ownerId];
         PlayerEntity player = playerTransform.GetComponent<PlayerEntity>();
-        if (player.SnowCount.Value < Constants.WALL_COST)
+        if (player.SnowCount.Value < Constants.WallCost)
         {
             Debug.Log($"Player {ownerId}: Not enough Snowballs to make a wall!");
             return;
         }
-        player.SetPlayerSnowCountServerRpc(player.SnowCount.Value - Constants.WALL_COST);
+        player.SetPlayerSnowCountServerRpc(player.SnowCount.Value - Constants.WallCost);
 
         GameObject instantiatedWall = Instantiate(Resources.Load<GameObject>(resourceName));
         NetworkObject netObj = instantiatedWall.GetComponent<NetworkObject>();

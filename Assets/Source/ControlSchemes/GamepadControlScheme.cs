@@ -73,7 +73,7 @@ public class GamepadControlScheme : IControlScheme
     {
         Vector2 lookDelta = Vector2.zero;
         Vector2 moveDelta = Vector2.zero;
-        float speedMult = Constants.MOVE_SPEED * dt;
+        float speedMult = Constants.MoveSpeed * dt;
 
         Vector2 leftStickVal = currentGamepad.leftStick.value;
         if (leftStickVal.x != 0f || leftStickVal.y != 0f)

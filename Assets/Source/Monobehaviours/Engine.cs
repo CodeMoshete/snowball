@@ -80,7 +80,7 @@ public class Engine : MonoBehaviour
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("MenuScene");
 
         // Wait until the asynchronous scene fully loads
-        while (!asyncLoad.isDone)
+        while (asyncLoad != null && !asyncLoad.isDone)
         {
             yield return null;
         }

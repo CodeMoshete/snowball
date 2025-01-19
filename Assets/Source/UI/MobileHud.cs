@@ -66,4 +66,10 @@ public class MobileHud : MonoBehaviour
     {
         Service.EventManager.SendEvent(EventId.OnMenuUIButtonPressed, null);
     }
+
+    private void OnDestroy()
+    {
+        Service.EventManager.RemoveListener(EventId.OnWallPlacementStarted, ShowWallTypeContainer);
+        Service.EventManager.RemoveListener(EventId.OnWallPlacementStarted, HideWallTypeContainer);
+    }
 }
