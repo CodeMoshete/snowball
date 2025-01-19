@@ -16,10 +16,10 @@ public class Constants
     // Platform specific string values.
 #if UNITY_STANDALONE_LINUX
     // Steam Deck
-    public static string SNOWBALL_SPAWN_TOOLTIP_TEXT = $"Press Y again to spawn wall\n({WALL_COST} Snowballs)";
+    public static string SNOWBALL_SPAWN_TOOLTIP_TEXT = $"Press Y again to spawn wall\n({WallCost} Snowballs)";
 #elif UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
     public static string SNOWBALL_SPAWN_TOOLTIP_TEXT = $"Press F again to spawn wall\n({WallCost} Snowballs)";
 #elif UNITY_ANDROID || UNITY_IOS
-    public static string SNOWBALL_SPAWN_TOOLTIP_TEXT = $"Press Wall Button again to spawn wall\n({WALL_COST} Snowballs)";
+    public static string SNOWBALL_SPAWN_TOOLTIP_TEXT = $"Press Wall Button again to spawn wall\n({WallCost} Snowballs)";
 #endif
 }
