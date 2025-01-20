@@ -11,6 +11,11 @@ public class CheckLastTeamStandingAction : CustomActionStringProvider
 
     public override void Initiate()
     {
+        base.Initiate();
+    }
+
+    public override void InitiateFromNetwork()
+    {
         List<string> survivingTeams = new List<string>();
         GameManager gameManager = GameObject.Find(Constants.GAME_MANAGER_NAME).GetComponent<GameManager>();
         Dictionary<string, List<PlayerEntity>> teams = gameManager.GetTeamRosters();

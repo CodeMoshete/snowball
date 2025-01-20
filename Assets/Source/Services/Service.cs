@@ -28,6 +28,20 @@
         }
     }
 
+    private static NetworkActionManager networkActions;
+    public static NetworkActionManager NetworkActions
+    {
+        get
+        {
+            if (networkActions == null)
+            {
+                networkActions = new NetworkActionManager();
+            }
+
+            return networkActions;
+        }
+    }
+
     public static UpdateManager UpdateManager
     {
         get

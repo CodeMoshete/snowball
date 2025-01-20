@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -14,6 +15,7 @@ public struct GameStartData : INetworkSerializable
     public Vector3 PlayerStartPos;
     public Vector3 PlayerStartEuler;
     public GameState CurrentGameState;
+    public int[] StartActions;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
@@ -24,5 +26,6 @@ public struct GameStartData : INetworkSerializable
         serializer.SerializeValue(ref PlayerStartEuler);
         serializer.SerializeValue(ref PlayerClass);
         serializer.SerializeValue(ref CurrentGameState);
+        serializer.SerializeValue(ref StartActions);
     }
 }

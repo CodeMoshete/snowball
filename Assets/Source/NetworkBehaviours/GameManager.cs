@@ -55,23 +55,7 @@ public class GameManager : NetworkBehaviour
         CurrentGameState = GameState.PreGameLobby;
         if (IsServer)
         {
-            Debug.Log("Server");
-            pickupSystem = new PickupSystem(playerTransforms, OnSnowPickedUp);
-            levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
-
-            // Populate team spawn points
-            GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
-            List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
-            for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
-            {
-                string teamName = teamSpawnPoints[i].name;
-                List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
-                spawnPoints.Add(teamName, spawnPointsTransforms);
-                teamRosters.Add(teamName, new List<ulong>());
-            }
-
-            Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
-            Service.UpdateManager.AddObserver(OnUpdate);
+            OnServerNetworkSpawn();
         }
         else
         {
@@ -81,6 +65,30 @@ public class GameManager : NetworkBehaviour
 
         Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
         GetGameMetadataServerRpc(NetworkManager.LocalClientId);
+    }
+
+    // Server only
+    private void OnServerNetworkSpawn()
+    {
+        Debug.Log("Server");
+        pickupSystem = new PickupSystem(playerTransforms, OnSnowPickedUp);
+        levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
+        Service.NetworkActions.RegisterNetworkActionsForLevel(levelPrefab);
+
+        // Populate team spawn points
+        GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
+        List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
+        for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
+        {
+            string teamName = teamSpawnPoints[i].name;
+            List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
+            spawnPoints.Add(teamName, spawnPointsTransforms);
+            teamRosters.Add(teamName, new List<ulong>());
+        }
+
+        Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
+        Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
+        Service.UpdateManager.AddObserver(OnUpdate);
     }
 
     // Triggered when the host presses the "Start Game" button.
@@ -136,6 +144,8 @@ public class GameManager : NetworkBehaviour
             Service.EventManager.RemoveListener(EventId.OnGamePause, OnGamePaused);
             Service.EventManager.RemoveListener(EventId.OnGameResume, OnGameResumed);
             Service.EventManager.RemoveListener(EventId.OnGameQuit, OnGameQuit);
+            Service.EventManager.RemoveListener(EventId.NetworkActionTriggered, OnNetworkAction);
+            Service.NetworkActions.ClearNetworkActionsForCurrentLevel();
 
             GameObject engineObj = GameObject.Find("Engine");
             if (engineObj != null)
@@ -239,6 +249,7 @@ public class GameManager : NetworkBehaviour
         startData.PlayerStartEuler = spawnInfo.SpawnPoint.eulerAngles;
         startData.PlayerId = clientId;
         startData.CurrentGameState = CurrentGameState == GameState.PreGameLobby ? GameState.PreGameLobby : GameState.Gameplay;
+        startData.StartActions = Service.NetworkActions.CurrentActionsToSync;
 
         SpawnPlayer(clientId, spawnInfo);
         AssignPlayerClass(startData.PlayerTeamName, clientId);
@@ -304,6 +315,7 @@ public class GameManager : NetworkBehaviour
         startData.PlayerTeamName = serverStartData.PlayerTeamName;
         startData.PlayerClass = serverStartData.PlayerClass;
         startData.TeamQueenPlayerId = serverStartData.TeamQueenPlayerId;
+        startData.StartActions = serverStartData.StartActions;
         
         startData.CurrentGameState = serverStartData.CurrentGameState;
         CurrentGameState = startData.CurrentGameState;
@@ -324,6 +336,11 @@ public class GameManager : NetworkBehaviour
         if (!IsServer)
         {
             levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
+            
+            Service.NetworkActions.RegisterNetworkActionsForLevel(levelPrefab);
+            Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
+            Service.NetworkActions.SyncActionsForLateJoiningUser(startData.StartActions);
+
             GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
             List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
             for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
@@ -440,10 +457,10 @@ public class GameManager : NetworkBehaviour
     public void DeregisterPlayer(PlayerEntity player)
     {
         ulong playerId = player.OwnerClientId;
-        Debug.Log("Deregistering player " + playerId);
         playerTransforms.Remove(playerId);
         string teamName = player.TeamName.Value.ToString();
         teamRosters[teamName].Remove(playerId);
+        Debug.Log($"Deregistered player {playerId} - team size {teamRosters[teamName].Count}");
         
         if (IsServer && !player.IsOwner && player.CurrentPlayerClass.Value == PlayerClass.Queen && !player.IsFrozen)
         {
@@ -500,8 +517,8 @@ public class GameManager : NetworkBehaviour
         foreach (KeyValuePair<string, List<ulong>> roster in teamRosters)
         {
             List<PlayerEntity> teamEntities = new List<PlayerEntity>();
-            int teamCount = roster.Value.Count;
-            for (int i = 0; i < teamCount; ++i)
+            int teamSize = roster.Value.Count;
+            for (int i = 0; i < teamSize; ++i)
             {
                 PlayerEntity entity = playerTransforms[roster.Value[i]].GetComponent<PlayerEntity>();
                 teamEntities.Add(entity);
@@ -587,5 +604,18 @@ public class GameManager : NetworkBehaviour
             LocalProjectlie projComp = projectileObj.GetComponent<LocalProjectlie>();
             projComp.SetOwner(null, IsServer);
         }
+    }
+
+    private bool OnNetworkAction(object cookie)
+    {
+        int networkActionId = Service.NetworkActions.GetIndexForAction((CustomNetworkAction)cookie);
+        TriggerNetworkActionForAllPlayersRpc(networkActionId);
+        return false;
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void TriggerNetworkActionForAllPlayersRpc(int actionIndex)
+    {
+        Service.NetworkActions.TriggerNetworkAction(actionIndex);
     }
 }

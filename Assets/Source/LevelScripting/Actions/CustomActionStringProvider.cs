@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CustomActionStringProvider : CustomAction
+public class CustomActionStringProvider : CustomNetworkAction
 {
     public virtual string GetStringValue()
     {

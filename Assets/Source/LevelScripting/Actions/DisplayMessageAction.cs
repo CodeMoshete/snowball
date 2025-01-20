@@ -1,7 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class DisplayMessageAction : CustomAction
+public class DisplayMessageAction : CustomNetworkAction
 {
     public string Message;
     public float DisplayTime;
@@ -9,6 +9,11 @@ public class DisplayMessageAction : CustomAction
     public CustomAction OnMessageDone;
 
     public override void Initiate()
+    {
+        base.Initiate();
+    }
+
+    public override void InitiateFromNetwork()
     {
         Debug.Log($"Display message: {Message}");
         Service.EventManager.SendEvent(EventId.DisplayMessage, Message);

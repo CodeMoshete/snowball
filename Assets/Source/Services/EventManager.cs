@@ -25,7 +25,8 @@ public enum EventId
     OnGameOver,
     DisplayMessage,
     HideMessage,
-    OnLookInvertToggled
+    OnLookInvertToggled,
+    NetworkActionTriggered
 }
 
 public delegate bool EventCallback(object cookie);

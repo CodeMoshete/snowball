@@ -44,6 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37dd45c7668fc49c6943b14ca5d417b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 0
   Message: SNOWBAWWWL!
   DisplayTime: 5
   OnComplete: {fileID: 3131658769254463426}
@@ -120,6 +122,7 @@ Transform:
   - {fileID: 3691397918041194877}
   - {fileID: 4879404217042631243}
   - {fileID: 7152687030868120171}
+  - {fileID: 2034789676214379494}
   - {fileID: 4101713790009200387}
   - {fileID: 5606853482765875956}
   m_Father: {fileID: 2864336366926709805}
@@ -136,7 +139,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba969e1721b764a3ead16e65a8054053, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OnTriggered: {fileID: 7012651215341900940}
+  OnTriggered: {fileID: 8470560687440379079}
 --- !u!1 &1122573516699993185
 GameObject:
   m_ObjectHideFlags: 0
@@ -311,6 +314,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37dd45c7668fc49c6943b14ca5d417b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 0
   Message: Build Phase!
   DisplayTime: 5
   OnComplete: {fileID: 0}
@@ -745,6 +750,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37dd45c7668fc49c6943b14ca5d417b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 0
   Message: Game starts in 60 seconds!
   DisplayTime: 5
   OnComplete: {fileID: 0}
@@ -793,6 +800,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eab26adcebcf400a82d984a125a3232, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 0
   WinningTeam: {fileID: 4989052365428419154}
   OnComplete: {fileID: 0}
 --- !u!1 &4441813087364218842
@@ -935,6 +944,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37dd45c7668fc49c6943b14ca5d417b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 0
   Message: Game starts in 10 seconds!
   DisplayTime: 5
   OnComplete: {fileID: 0}
@@ -1060,6 +1071,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37dd45c7668fc49c6943b14ca5d417b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 0
   Message: Game starts in 30 seconds!
   DisplayTime: 5
   OnComplete: {fileID: 0}
@@ -1443,6 +1456,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40f149b4582fd46a0b829a80eeb945f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 0
   OnLastTeamStanding: {fileID: 1571284032401612045}
   OnMultipleTeamsStanding: {fileID: 0}
   OnNoTeamsStanding: {fileID: 0}
@@ -1761,10 +1776,58 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e31272a9da85a24582b296db8dc0e8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 1
   Targets:
   - {fileID: 7443935738085445915}
   OnDone: {fileID: 0}
   SetActive: 0
+--- !u!1 &8417325679533208180
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2034789676214379494}
+  - component: {fileID: 8470560687440379079}
+  m_Layer: 0
+  m_Name: WaitDebug
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2034789676214379494
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8417325679533208180}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5825228591310349626}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8470560687440379079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8417325679533208180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aff0628f6fe264d4caf4ae40f3a24a5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Duration: 10
+  NextAction: {fileID: 1846562614994983279}
 --- !u!1 &8929783144873202613
 GameObject:
   m_ObjectHideFlags: 0
