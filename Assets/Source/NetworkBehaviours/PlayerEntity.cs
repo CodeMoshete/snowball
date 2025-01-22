@@ -59,7 +59,7 @@ public class PlayerEntity : NetworkBehaviour
         SnowCount.OnValueChanged += OnSnowResourceChanged;
         wallOptions = Resources.Load<Buildables>(BUILDABLES_RESOURCE);
         gameManager = GameObject.Find(Constants.GAME_MANAGER_NAME).GetComponent<GameManager>();
-        gameManager.RegisterPlayer(this);
+        gameManager.RegisterPlayerTransform(this);
         if (IsOwner)
         {
             Debug.Log("Player OnNetworkSpawn - Setting up new player!");

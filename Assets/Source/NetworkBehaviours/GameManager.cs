@@ -48,6 +48,7 @@ public class GameManager : NetworkBehaviour
     private float blizzardCountdown = Constants.BLIZZARD_TIMEOUT;
     private bool didInitQuit;
 
+    // 1. Entry point for newly loaded player.
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
@@ -55,6 +56,7 @@ public class GameManager : NetworkBehaviour
         CurrentGameState = GameState.PreGameLobby;
         if (IsServer)
         {
+            // Set up level data.
             OnServerNetworkSpawn();
         }
         else
@@ -67,7 +69,8 @@ public class GameManager : NetworkBehaviour
         GetGameMetadataServerRpc(NetworkManager.LocalClientId);
     }
 
-    // Server only
+    // 2a. Server only - sets up only level related data.
+    // Does not handle any player data.
     private void OnServerNetworkSpawn()
     {
         Debug.Log("Server");
@@ -91,6 +94,190 @@ public class GameManager : NetworkBehaviour
         Service.UpdateManager.AddObserver(OnUpdate);
     }
 
+    // 2b. Entry point from Menu scene - triggers the network connection to be made.
+    public void StartClient(GameStartData startData)
+    {
+        this.startData = startData;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+        if (Constants.IS_OFFLINE_DEBUG)
+        {
+            NetworkManager.Singleton.StartClient();
+        }
+    }
+
+    public void StartHost(GameStartData startData)
+    {
+        this.startData = startData;
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+        if (Constants.IS_OFFLINE_DEBUG)
+        {
+            NetworkManager.Singleton.StartHost();
+        }
+    }
+
+    // This gets called on each client every time a new player entity is Spawned.
+    // CLIENT CALLED ONLY
+    public void RegisterPlayerTransform(PlayerEntity player)
+    {
+        Debug.Log("Registering player transform " + player.OwnerClientId);
+        playerTransforms.Add(player.OwnerClientId, player.transform);
+    }
+
+    private SpawnInfo SelectTeamAndSpawnPos()
+    {
+        string selectedTeam = string.Empty;
+        int smallestTeamCount = int.MaxValue;
+        foreach (KeyValuePair<string, List<ulong>> roster in teamRosters)
+        {
+            if (roster.Key == Constants.TEAM_UNASSIGNED)
+                continue;
+
+            int teamCount = roster.Value.Count;
+            if (roster.Value.Count < smallestTeamCount)
+            {
+                selectedTeam = roster.Key;
+                smallestTeamCount = teamCount;
+            }
+        }
+
+        List<Transform> availableSpawns = spawnPoints[selectedTeam];
+        Transform spawnPoint = availableSpawns[UnityEngine.Random.Range(0, availableSpawns.Count)];
+
+        SpawnInfo result = new SpawnInfo();
+        result.TeamName = selectedTeam;
+        result.SpawnPoint = spawnPoint;
+        return result;
+    }
+
+    // 3. Sets up a new player and returns relevant game state information to the caller
+    [Rpc(SendTo.Server)]
+    private void GetGameMetadataServerRpc(ulong clientId)
+    {
+        Debug.Log("Requesting game data from server");
+        SpawnInfo spawnInfo = SelectTeamAndSpawnPos();
+        startData.PlayerTeamName = spawnInfo.TeamName;
+        startData.PlayerStartPos = spawnInfo.SpawnPoint.position;
+        startData.PlayerStartEuler = spawnInfo.SpawnPoint.eulerAngles;
+        startData.PlayerId = clientId;
+        startData.CurrentGameState = CurrentGameState == GameState.PreGameLobby ? GameState.PreGameLobby : GameState.Gameplay;
+        startData.StartActions = Service.NetworkActions.CurrentActionsToSync;
+
+        SpawnPlayer(clientId, spawnInfo);
+        AssignPlayerClass(startData.PlayerTeamName, clientId);
+
+        Transform queenTransform = GetQueenForTeam(startData.PlayerTeamName);
+        PlayerEntity player = queenTransform.GetComponent<PlayerEntity>();
+        startData.TeamQueenPlayerId = player.OwnerClientId;
+
+        ReceiveGameMetadataClientRpc(startData, RpcTarget.Single(clientId, RpcTargetUse.Temp));
+    }
+
+    // SERVER CALLED ONLY
+    private void SpawnPlayer(ulong clientId, SpawnInfo spawnInfo)
+    {
+        GameObject instantiatedPlayer = Instantiate(Resources.Load<GameObject>(PLAYER_RESOURCE));
+        NetworkObject netObj = instantiatedPlayer.GetComponent<NetworkObject>();
+        netObj.SpawnWithOwnership(clientId, true);
+        teamRosters[spawnInfo.TeamName].Add(clientId);
+        Debug.Log($"Added player {clientId} to team {spawnInfo.TeamName}");
+    }
+    
+    // Called on server only
+    private void AssignPlayerClass(string teamName, ulong clientId)
+    {
+        bool isQueenAssigned = false;
+        List<ulong> teamPlayerIds = teamRosters[teamName];
+        for (int i = 0, count = teamPlayerIds.Count; i < count; ++i)
+        {
+            ulong playerId = teamPlayerIds[i];
+            Transform playerTransform = playerTransforms[playerId];
+            PlayerEntity player = playerTransform.GetComponent<PlayerEntity>();
+            Debug.Log($"Player {playerId} class: {player.CurrentPlayerClass.Value}");
+            if (player.CurrentPlayerClass.Value == PlayerClass.Queen)
+            {
+                isQueenAssigned = true;
+                break;
+            }
+        }
+
+        startData.PlayerClass = PlayerClass.Soldier;
+        if (!isQueenAssigned)
+        {
+            startData.PlayerClass = PlayerClass.Queen;
+            if (!teamQueens.ContainsKey(teamName))
+            {
+                teamQueens.Add(teamName, playerTransforms[clientId]);
+            }
+            else
+            {
+                teamQueens[teamName] = playerTransforms[clientId];
+            }
+            Debug.Log($"Promoting player {startData.PlayerName} to Queen role!");
+        }
+    }
+
+    // Server message sent back to a specific player when they join the game
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void ReceiveGameMetadataClientRpc(GameStartData serverStartData, RpcParams clientRpcParams = default)
+    {
+        // Debug.Log("Received start data, level: " + serverStartData.LevelName);
+        startData.LevelName = serverStartData.LevelName;
+        startData.PlayerStartPos = serverStartData.PlayerStartPos;
+        startData.PlayerStartEuler = serverStartData.PlayerStartEuler;
+        startData.PlayerTeamName = serverStartData.PlayerTeamName;
+        startData.PlayerClass = serverStartData.PlayerClass;
+        startData.TeamQueenPlayerId = serverStartData.TeamQueenPlayerId;
+        startData.StartActions = serverStartData.StartActions;
+        
+        startData.CurrentGameState = serverStartData.CurrentGameState;
+        CurrentGameState = startData.CurrentGameState;
+        if (CurrentGameState != GameState.PreGameLobby)
+        {
+            Service.EventManager.AddListener(EventId.OnGamePause, OnGamePaused);
+            Service.EventManager.AddListener(EventId.OnGameResume, OnGameResumed);
+            Service.EventManager.AddListener(EventId.OnGameQuit, OnGameQuit);
+        }
+
+        LoadLevel();
+    }
+
+    // CLIENT CALLED ONLY
+    private void LoadLevel()
+    {
+        Debug.Log("Load Level");
+        if (!IsServer)
+        {
+            levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
+            
+            Service.NetworkActions.RegisterNetworkActionsForLevel(levelPrefab);
+            Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
+            Service.NetworkActions.SyncActionsForLateJoiningUser(startData.StartActions);
+
+            GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
+            List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
+            for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
+            {
+                string teamName = teamSpawnPoints[i].name;
+                List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
+                spawnPoints.Add(teamName, spawnPointsTransforms);
+                
+                if (!teamRosters.ContainsKey(teamName))
+                    teamRosters.Add(teamName, new List<ulong>());
+
+                if (!teamQueens.ContainsKey(teamName))
+                    teamQueens.Add(teamName, null);
+            }
+        }
+
+        teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
+        Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
+
+        if (CurrentGameState != GameState.PreGameLobby)
+        {
+            Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+        }
+    }
+
     // Triggered when the host presses the "Start Game" button.
     private bool OnStartGameplayPressed(object cookie)
     {
@@ -112,27 +299,6 @@ public class GameManager : NetworkBehaviour
         Service.EventManager.AddListener(EventId.OnGamePause, OnGamePaused);
         Service.EventManager.AddListener(EventId.OnGameResume, OnGameResumed);
         Service.EventManager.AddListener(EventId.OnGameQuit, OnGameQuit);
-    }
-
-    // Entry point from Menu scene - triggers the network connection to be made.
-    public void StartClient(GameStartData startData)
-    {
-        this.startData = startData;
-        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-        if (Constants.IS_OFFLINE_DEBUG)
-        {
-            NetworkManager.Singleton.StartClient();
-        }
-    }
-
-    public void StartHost(GameStartData startData)
-    {
-        this.startData = startData;
-        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-        if (Constants.IS_OFFLINE_DEBUG)
-        {
-            NetworkManager.Singleton.StartHost();
-        }
     }
 
     private void OnClientDisconnected(ulong clientId)
@@ -215,157 +381,6 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    private SpawnInfo SelectTeamAndSpawnPos()
-    {
-        string selectedTeam = string.Empty;
-        int smallestTeamCount = int.MaxValue;
-        foreach (KeyValuePair<string, List<ulong>> roster in teamRosters)
-        {
-            int teamCount = roster.Value.Count;
-            if (roster.Value.Count < smallestTeamCount)
-            {
-                selectedTeam = roster.Key;
-                smallestTeamCount = teamCount;
-            }
-        }
-
-        List<Transform> availableSpawns = spawnPoints[selectedTeam];
-        Transform spawnPoint = availableSpawns[UnityEngine.Random.Range(0, availableSpawns.Count)];
-
-        SpawnInfo result = new SpawnInfo();
-        result.TeamName = selectedTeam;
-        result.SpawnPoint = spawnPoint;
-        return result;
-    }
-
-    // Sets up a new player and returns relevant game state information to the caller
-    [Rpc(SendTo.Server)]
-    private void GetGameMetadataServerRpc(ulong clientId)
-    {
-        Debug.Log("Requesting game data from server");
-        SpawnInfo spawnInfo = SelectTeamAndSpawnPos();
-        startData.PlayerTeamName = spawnInfo.TeamName;
-        startData.PlayerStartPos = spawnInfo.SpawnPoint.position;
-        startData.PlayerStartEuler = spawnInfo.SpawnPoint.eulerAngles;
-        startData.PlayerId = clientId;
-        startData.CurrentGameState = CurrentGameState == GameState.PreGameLobby ? GameState.PreGameLobby : GameState.Gameplay;
-        startData.StartActions = Service.NetworkActions.CurrentActionsToSync;
-
-        SpawnPlayer(clientId, spawnInfo);
-        AssignPlayerClass(startData.PlayerTeamName, clientId);
-
-        Transform queenTransform = GetQueenForTeam(startData.PlayerTeamName);
-        PlayerEntity player = queenTransform.GetComponent<PlayerEntity>();
-        startData.TeamQueenPlayerId = player.OwnerClientId;
-
-        ReceiveGameMetadataClientRpc(startData, RpcTarget.Single(clientId, RpcTargetUse.Temp));
-    }
-    
-    // Called on server only
-    private void AssignPlayerClass(string teamName, ulong clientId)
-    {
-        bool isQueenAssigned = false;
-        List<ulong> teamPlayerIds = teamRosters[teamName];
-        for (int i = 0, count = teamPlayerIds.Count; i < count; ++i)
-        {
-            ulong playerId = teamPlayerIds[i];
-            Transform playerTransform = playerTransforms[playerId];
-            PlayerEntity player = playerTransform.GetComponent<PlayerEntity>();
-            Debug.Log($"Player {playerId} class: {player.CurrentPlayerClass.Value}");
-            if (player.CurrentPlayerClass.Value == PlayerClass.Queen)
-            {
-                isQueenAssigned = true;
-                break;
-            }
-        }
-
-        startData.PlayerClass = PlayerClass.Soldier;
-        if (!isQueenAssigned)
-        {
-            startData.PlayerClass = PlayerClass.Queen;
-            if (!teamQueens.ContainsKey(teamName))
-            {
-                teamQueens.Add(teamName, playerTransforms[clientId]);
-            }
-            else
-            {
-                teamQueens[teamName] = playerTransforms[clientId];
-            }
-            Debug.Log($"Promoting player {startData.PlayerName} to Queen role!");
-        }
-    }
-
-    // SERVER CALLED ONLY
-    private void SpawnPlayer(ulong clientId, SpawnInfo spawnInfo)
-    {
-        GameObject instantiatedPlayer = Instantiate(Resources.Load<GameObject>(PLAYER_RESOURCE));
-        NetworkObject netObj = instantiatedPlayer.GetComponent<NetworkObject>();
-        netObj.SpawnWithOwnership(clientId, true);
-        teamRosters[spawnInfo.TeamName].Add(clientId);
-    }
-
-    // Server message sent back to a specific player when they join the game
-    [Rpc(SendTo.SpecifiedInParams)]
-    private void ReceiveGameMetadataClientRpc(GameStartData serverStartData, RpcParams clientRpcParams = default)
-    {
-        // Debug.Log("Received start data, level: " + serverStartData.LevelName);
-        startData.LevelName = serverStartData.LevelName;
-        startData.PlayerStartPos = serverStartData.PlayerStartPos;
-        startData.PlayerStartEuler = serverStartData.PlayerStartEuler;
-        startData.PlayerTeamName = serverStartData.PlayerTeamName;
-        startData.PlayerClass = serverStartData.PlayerClass;
-        startData.TeamQueenPlayerId = serverStartData.TeamQueenPlayerId;
-        startData.StartActions = serverStartData.StartActions;
-        
-        startData.CurrentGameState = serverStartData.CurrentGameState;
-        CurrentGameState = startData.CurrentGameState;
-        if (CurrentGameState != GameState.PreGameLobby)
-        {
-            Service.EventManager.AddListener(EventId.OnGamePause, OnGamePaused);
-            Service.EventManager.AddListener(EventId.OnGameResume, OnGameResumed);
-            Service.EventManager.AddListener(EventId.OnGameQuit, OnGameQuit);
-        }
-
-        LoadLevel();
-    }
-
-    // CLIENT CALLED ONLY
-    private void LoadLevel()
-    {
-        Debug.Log("Load Level");
-        if (!IsServer)
-        {
-            levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
-            
-            Service.NetworkActions.RegisterNetworkActionsForLevel(levelPrefab);
-            Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
-            Service.NetworkActions.SyncActionsForLateJoiningUser(startData.StartActions);
-
-            GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
-            List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
-            for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
-            {
-                string teamName = teamSpawnPoints[i].name;
-                List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
-                spawnPoints.Add(teamName, spawnPointsTransforms);
-                
-                if (!teamRosters.ContainsKey(teamName))
-                    teamRosters.Add(teamName, new List<ulong>());
-
-                if (!teamQueens.ContainsKey(teamName))
-                    teamQueens.Add(teamName, null);
-            }
-        }
-
-        teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
-        Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
-
-        if (CurrentGameState != GameState.PreGameLobby)
-        {
-            Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
-        }
-    }
-
     [Rpc(SendTo.Server)]
     public void FireProjectileServerRpc(Vector3 position, Vector3 euler, Vector3 fwd, float verticalVel, ulong ownerId)
     {
@@ -434,32 +449,13 @@ public class GameManager : NetworkBehaviour
         pickupSystem.RegisterPickup(netObj.transform);
     }
 
-    // This gets called on each client for each player entity in the game.
-    // CLIENT CALLED ONLY
-    public void RegisterPlayer(PlayerEntity player)
-    {
-        Debug.Log("Registering player " + player.OwnerClientId);
-        playerTransforms.Add(player.OwnerClientId, player.transform);
-        string playerTeamName = player.TeamName.Value.ToString();
-        if (!teamRosters.ContainsKey(playerTeamName))
-        {
-            teamRosters.Add(playerTeamName, new List<ulong>());
-        }
-        teamRosters[playerTeamName].Add(player.OwnerClientId);
-        
-        if (!IsHost && player.CurrentPlayerClass.Value == PlayerClass.Queen)
-        {
-            Debug.Log($"Setting {playerTeamName} queen to {player.name}");
-            teamQueens[playerTeamName] = player.transform;
-        }
-    }
-
     public void DeregisterPlayer(PlayerEntity player)
     {
         ulong playerId = player.OwnerClientId;
         playerTransforms.Remove(playerId);
         string teamName = player.TeamName.Value.ToString();
         teamRosters[teamName].Remove(playerId);
+        Debug.Log($"Removed player {player.OwnerClientId} from team {teamName}");
         Debug.Log($"Deregistered player {playerId} - team size {teamRosters[teamName].Count}");
         
         if (IsServer && !player.IsOwner && player.CurrentPlayerClass.Value == PlayerClass.Queen && !player.IsFrozen)
@@ -516,6 +512,9 @@ public class GameManager : NetworkBehaviour
         Dictionary<string, List<PlayerEntity>> returnRoster = new Dictionary<string, List<PlayerEntity>>();
         foreach (KeyValuePair<string, List<ulong>> roster in teamRosters)
         {
+            if (roster.Key == Constants.TEAM_UNASSIGNED)
+                continue;
+
             List<PlayerEntity> teamEntities = new List<PlayerEntity>();
             int teamSize = roster.Value.Count;
             for (int i = 0; i < teamSize; ++i)
