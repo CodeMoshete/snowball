@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class SetGameObjectPositionAction : CustomAction
+public class SetGameObjectPositionAction : CustomNetworkAction
 {
     public GameObject TargetGameObject;
     public GameObject PositionReference;
@@ -8,6 +8,11 @@ public class SetGameObjectPositionAction : CustomAction
     public CustomAction OnDone;
 
     public override void Initiate()
+    {
+        base.Initiate();
+    }
+
+    public override void InitiateFromNetwork()
     {
         if (PositionReference != null)
         {
