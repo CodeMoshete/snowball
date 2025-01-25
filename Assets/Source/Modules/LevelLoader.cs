@@ -5,9 +5,9 @@ using UnityEngine.Networking;
 
 public class LevelLoader : MonoBehaviour
 {
-    private const bool DEBUG_DOWNLOAD_LOCAL = true;
-    private readonly string LOCAL_ASSET_PREFIX = $"{Application.streamingAssetsPath}/";
-    private const string REMOTE_ASSET_PREFIX = "http://www.codemoshete.com/snowball/levels/";
+    private const bool DEBUG_DOWNLOAD_LOCAL = false;
+    private readonly string LOCAL_ASSET_PREFIX = $"{Application.streamingAssetsPath}/Levels";
+    private const string REMOTE_ASSET_PREFIX = "https://www.codemoshete.com/snowball/levels";
 
 #if UNITY_STANDALONE_LINUX
     private const string PLATFORM_DIR = "StandaloneLinux64";
@@ -21,7 +21,7 @@ public class LevelLoader : MonoBehaviour
     private const string PLATFORM_DIR = "iOS";
 #endif
 
-    private const string PREFAB_SUFFIX = "Prefab";
+    private const string PREFAB_SUFFIX = ".prefab";
 
     private string levelName; // Name of the asset bundle (lowercase)
     private Action<GameObject> onDownloadSuccess;
@@ -62,6 +62,7 @@ public class LevelLoader : MonoBehaviour
         string[] assetNames = bundle.GetAllAssetNames();
         for (int i = 0, count = assetNames.Length; i < count; ++i)
         {
+            Debug.Log($"Checking asset named: {assetNames[i]}");
             if (assetNames[i].EndsWith(PREFAB_SUFFIX))
             {
                 prefabName = assetNames[i];

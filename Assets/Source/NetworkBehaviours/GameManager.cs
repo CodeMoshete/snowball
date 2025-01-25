@@ -64,7 +64,7 @@ public class GameManager : NetworkBehaviour
             GetGameMetadataServerRpc(NetworkManager.LocalClientId);
         }
 
-        // Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
+        // Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost); TODO - fire after prefab loaded
         // GetGameMetadataServerRpc(NetworkManager.LocalClientId);
     }
 
@@ -74,7 +74,13 @@ public class GameManager : NetworkBehaviour
     {
         Debug.Log("Server");
         pickupSystem = new PickupSystem(playerTransforms, OnSnowPickedUp);
-        levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
+        // levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
+        LevelLoader.LoadLevel(startData.LevelName, OnServerLevelPrefabLoaded, OnLevelLoadFail);
+    }
+
+    private void OnServerLevelPrefabLoaded(GameObject prefab)
+    {
+        levelPrefab = Instantiate(prefab);
         Service.NetworkActions.RegisterNetworkActionsForLevel(levelPrefab);
 
         // Populate team spawn points
@@ -91,6 +97,8 @@ public class GameManager : NetworkBehaviour
         Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
         Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
         Service.UpdateManager.AddObserver(OnUpdate);
+        Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
+        GetGameMetadataServerRpc(NetworkManager.LocalClientId);
     }
 
     // 2b. Entry point from Menu scene - triggers the network connection to be made.
@@ -241,16 +249,23 @@ public class GameManager : NetworkBehaviour
 
         if (!IsServer)
         {
-            LoadLevelAssetBundle("TestArena");
+            // Client must load the level after receiving start data from the server.
+            LevelLoader.LoadLevel(startData.LevelName, OnClientLevelPrefabLoaded, OnLevelLoadFail);
+        }
+        else
+        {
+            // The server has already loaded the level by this point, and is ready to start the game.
+            teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
+            Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
+
+            if (CurrentGameState != GameState.PreGameLobby)
+            {
+                Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+            }
         }
     }
 
-    private void LoadLevelAssetBundle(string levelName)
-    {
-        LevelLoader.LoadLevel(levelName, OnLevelLoadSuccess, OnLevelLoadFail);
-    }
-
-    private void OnLevelLoadSuccess(GameObject levelObject)
+    private void OnClientLevelPrefabLoaded(GameObject levelObject)
     {
         Debug.Log("Load Level");
         if (!IsServer)
