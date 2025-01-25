@@ -20,7 +20,7 @@ public class MobileHud : MonoBehaviour
         NextWallButton.onClick.AddListener(OnNextWallPressed);
         PrevWallButton.onClick.AddListener(OnPrevWallPressed);
         Service.EventManager.AddListener(EventId.OnWallPlacementStarted, ShowWallTypeContainer);
-        Service.EventManager.AddListener(EventId.OnWallPlacementStarted, HideWallTypeContainer);
+        Service.EventManager.AddListener(EventId.OnWallPlacementEnded, HideWallTypeContainer);
         WallTypeContainer.SetActive(false);
         gameObject.SetActive(false);
     }

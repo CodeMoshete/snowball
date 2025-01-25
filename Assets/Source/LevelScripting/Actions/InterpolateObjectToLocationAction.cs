@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class InterpolateObjectToLocationAction : CustomAction
+public class InterpolateObjectToLocationAction : CustomNetworkAction
 {
     public float Delay;
     public GameObject TargetObject;
@@ -15,7 +15,12 @@ public class InterpolateObjectToLocationAction : CustomAction
 
 	private bool isActive;
 
-	public override void Initiate()
+    public override void Initiate()
+    {
+        base.Initiate();
+    }
+
+    public override void InitiateFromNetwork()
 	{
 		isActive = true;
         currentDuration = MovementDuration;

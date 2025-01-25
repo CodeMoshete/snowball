@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class AnimationAction : CustomAction
+public class AnimationAction : CustomNetworkAction
 {
     [System.Serializable]
     public struct IntTrigger
@@ -41,6 +41,11 @@ public class AnimationAction : CustomAction
     public CustomAction OnComplete;
 
     public override void Initiate()
+    {
+        base.Initiate();
+    }
+
+    public override void InitiateFromNetwork()
     {
         int count = IntTriggers.Count;
         for (int i = 0; i < count; ++i)
