@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Utils;
 
@@ -15,13 +13,13 @@ struct SpawnInfo
 public class GameManager : NetworkBehaviour
 {
     public const string PLAYER_RESOURCE = "PlayerPrefab";
-    private const string WALL_RESOURCE = "WallSegment";
     private const string SNOW_PILE_RESOURCE = "SnowPile";
 
     public float SnowballThrowSpeed = Constants.SNOWBALL_THROW_SPEED;
     public float MinThrowAngle = Constants.MIN_THROW_ANGLE;
     public float MaxThrowAngle = Constants.MAX_THROW_ANGLE;
     public GameState CurrentGameState { get; private set; }
+    public LevelLoader LevelLoader;
     public PlayerEntity LocalPlayer 
     {
         get
@@ -63,10 +61,11 @@ public class GameManager : NetworkBehaviour
         {
             startData = GameObject.Find("Engine").GetComponent<Engine>().StartData;
             StartClient(startData);
+            GetGameMetadataServerRpc(NetworkManager.LocalClientId);
         }
 
-        Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
-        GetGameMetadataServerRpc(NetworkManager.LocalClientId);
+        // Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
+        // GetGameMetadataServerRpc(NetworkManager.LocalClientId);
     }
 
     // 2a. Server only - sets up only level related data.
@@ -238,9 +237,60 @@ public class GameManager : NetworkBehaviour
             Service.EventManager.AddListener(EventId.OnGameQuit, OnGameQuit);
         }
 
-        LoadLevel();
+        // LoadLevel();
+
+        if (!IsServer)
+        {
+            LoadLevelAssetBundle("TestArena");
+        }
     }
 
+    private void LoadLevelAssetBundle(string levelName)
+    {
+        LevelLoader.LoadLevel(levelName, OnLevelLoadSuccess, OnLevelLoadFail);
+    }
+
+    private void OnLevelLoadSuccess(GameObject levelObject)
+    {
+        Debug.Log("Load Level");
+        if (!IsServer)
+        {
+            levelPrefab = Instantiate(levelObject);
+            
+            Service.NetworkActions.RegisterNetworkActionsForLevel(levelPrefab);
+            Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
+            Service.NetworkActions.SyncActionsForLateJoiningUser(startData.StartActions);
+
+            GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
+            List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
+            for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
+            {
+                string teamName = teamSpawnPoints[i].name;
+                List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
+                spawnPoints.Add(teamName, spawnPointsTransforms);
+                
+                if (!teamRosters.ContainsKey(teamName))
+                    teamRosters.Add(teamName, new List<ulong>());
+
+                if (!teamQueens.ContainsKey(teamName))
+                    teamQueens.Add(teamName, null);
+            }
+        }
+
+        teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
+        Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
+
+        if (CurrentGameState != GameState.PreGameLobby)
+        {
+            Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+        }
+    }
+
+    private void OnLevelLoadFail()
+    {
+
+    }
+    
     // CLIENT CALLED ONLY
     private void LoadLevel()
     {

@@ -378,6 +378,7 @@ public class PlayerEntity : NetworkBehaviour
         iceCubeRenderer = null;
         Destroy(iceCube.gameObject);
         IsFrozen = false;
+        DefrostRangeFX.SetActive(false);
     }
 
     public override void OnDestroy()
