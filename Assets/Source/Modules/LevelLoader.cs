@@ -38,9 +38,12 @@ public class LevelLoader : MonoBehaviour
     private IEnumerator GetAssetBundle(string levelName, Action<AssetBundle> onComplete, Action onFail)
     {
         string urlPrefix = (Constants.IS_OFFLINE_DEBUG || DEBUG_DOWNLOAD_LOCAL) ? LOCAL_ASSET_PREFIX : REMOTE_ASSET_PREFIX;
-        string resourceUrl = $"{urlPrefix}/{PLATFORM_DIR}/{levelName}";
+        string resourceUrl = $"{urlPrefix}/{PLATFORM_DIR}/{levelName}.assetbundle";
         Debug.Log($"Downloading level from {resourceUrl}");
         UnityWebRequest www = UnityWebRequestAssetBundle.GetAssetBundle(resourceUrl);
+        // UnityWebRequest www = UnityWebRequest.Get(resourceUrl);
+        // www.SetRequestHeader("Accept", "*/*");
+        www.SetRequestHeader("User-Agent", "");
         yield return www.SendWebRequest();
  
         if (www.result != UnityWebRequest.Result.Success) {
