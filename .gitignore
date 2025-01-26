@@ -7,6 +7,13 @@
 MonitorBridgeScene/
 MonitorShuttlebayScene/
 Assets/AssetStoreTools*
+bin/
+bin-android/
+bin-ios/
+bin-linux/
+bin-mac/
+UserSettings/Layouts/
+.utmp/
 
 # Visual Studio 2015 cache directory
 .vs/
@@ -25,6 +32,7 @@ ExportedObj/
 *.booproj
 *.svd
 *.pdb
+*.zip
 
 # Unity3D generated meta files
 *.pidb.meta

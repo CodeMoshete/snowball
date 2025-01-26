@@ -7,7 +7,8 @@ public class LevelLoader : MonoBehaviour
 {
     private const bool DEBUG_DOWNLOAD_LOCAL = false;
     private readonly string LOCAL_ASSET_PREFIX = $"{Application.streamingAssetsPath}/Levels";
-    private const string REMOTE_ASSET_PREFIX = "https://www.codemoshete.com/snowball/levels";
+    // private const string REMOTE_ASSET_PREFIX = "https://www.codemoshete.com/snowball/levels";
+    private const string REMOTE_ASSET_PREFIX = "https://codemoshete.s3.us-east-2.amazonaws.com/snowball/levels";
 
 #if UNITY_STANDALONE_LINUX
     private const string PLATFORM_DIR = "StandaloneLinux64";
@@ -38,12 +39,12 @@ public class LevelLoader : MonoBehaviour
     private IEnumerator GetAssetBundle(string levelName, Action<AssetBundle> onComplete, Action onFail)
     {
         string urlPrefix = (Constants.IS_OFFLINE_DEBUG || DEBUG_DOWNLOAD_LOCAL) ? LOCAL_ASSET_PREFIX : REMOTE_ASSET_PREFIX;
-        string resourceUrl = $"{urlPrefix}/{PLATFORM_DIR}/{levelName}.assetbundle";
+        string resourceUrl = $"{urlPrefix}/{PLATFORM_DIR}/{levelName}";
         Debug.Log($"Downloading level from {resourceUrl}");
         UnityWebRequest www = UnityWebRequestAssetBundle.GetAssetBundle(resourceUrl);
         // UnityWebRequest www = UnityWebRequest.Get(resourceUrl);
         // www.SetRequestHeader("Accept", "*/*");
-        www.SetRequestHeader("User-Agent", "");
+        // www.SetRequestHeader("User-Agent", "");
         yield return www.SendWebRequest();
  
         if (www.result != UnityWebRequest.Result.Success) {
