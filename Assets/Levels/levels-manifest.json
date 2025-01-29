@@ -1,0 +1,13 @@
+{
+	"Levels":
+	[
+		{
+			"Name": "testarena",
+			"Version": 1
+		},
+		{
+			"Name": "testarena2",
+			"Version": 2
+		}
+	]
+}

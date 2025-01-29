@@ -10,7 +10,7 @@ using UnityEngine.UI;
 public class MainMenu : MonoBehaviour
 {
     // private const string TEST_ARENA_RESOURCE = "Levels/TestArena/TestArenaPrefab";
-    private const string TEST_ARENA_RESOURCE = "TestArena";
+    private const string TEST_ARENA_RESOURCE = "TestArena2";
     public TMP_InputField SessionNameField;
     public Button HostButton;
     public Button JoinButton;

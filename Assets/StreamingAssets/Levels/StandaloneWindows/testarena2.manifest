@@ -1,0 +1,55 @@
+ManifestFileVersion: 0
+UnityVersion: 6000.0.28f1
+CRC: 2934306830
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 1ba7ddbf3de183c6d06626101740c958
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 6ef578e87a34d8c03674b411ff921dd0
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 1e1bc79ed338967bc07b2949119cc65f
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 64
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: 8eab26adcebcf400a82d984a125a3232, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: ba969e1721b764a3ead16e65a8054053, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: cea50ff79095744b994eb85e454f2cfb, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 37dd45c7668fc49c6943b14ca5d417b0, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 3e31272a9da85a24582b296db8dc0e8c, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: aff0628f6fe264d4caf4ae40f3a24a5b, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 40f149b4582fd46a0b829a80eeb945f8, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Levels/TestArena2/TestArena2Prefab.prefab
+Dependencies: []

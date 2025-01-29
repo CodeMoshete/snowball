@@ -7,8 +7,8 @@ public class LevelLoader : MonoBehaviour
 {
     private const bool DEBUG_DOWNLOAD_LOCAL = false;
     private readonly string LOCAL_ASSET_PREFIX = $"{Application.streamingAssetsPath}/Levels";
-    // private const string REMOTE_ASSET_PREFIX = "https://www.codemoshete.com/snowball/levels";
-    private const string REMOTE_ASSET_PREFIX = "https://codemoshete.s3.us-east-2.amazonaws.com/snowball/levels";
+    private const string REMOTE_ASSET_PREFIX = "https://www.codemoshete.com/snowball/levels";
+    // private const string REMOTE_ASSET_PREFIX = "https://codemoshete.s3.us-east-2.amazonaws.com/snowball/levels";
 
 #if UNITY_STANDALONE_LINUX
     private const string PLATFORM_DIR = "StandaloneLinux64";
