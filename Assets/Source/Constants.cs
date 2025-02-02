@@ -12,6 +12,8 @@ public class Constants
     public const float MIN_THROW_ANGLE = 5f;
     public const float MAX_THROW_ANGLE = 25f;
     public const float BLIZZARD_TIMEOUT = 90f;
+    public const string LEVEL_MANIFEST_ASSET_PATH = "Levels/levels-manifest.json";
+    public const string REMOTE_MANIFEST_URL = "https://www.codemoshete.com/snowball/levels/levels-manifest.json";
 
     // Platform specific string values.
 #if UNITY_STANDALONE_LINUX

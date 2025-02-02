@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
-using Unity.Services.Multiplayer;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,10 +11,18 @@ public class MainMenu : MonoBehaviour
     public Button HostButton;
     public Button JoinButton;
     public Button QuitButton;
-    public Button NetworkJoinButton;
-    public Button NetworkCreateButton;
+    // public Button NetworkJoinButton;
+    // public Button NetworkCreateButton;
     public GameObject CreateSessionContainer;
     public GameObject JoinSessionContainer;
+    
+    public Button CreateMenuButton;
+    public Button JoinMenuButton;
+
+    public GameObject MainMenuPanel;
+    public JoinGamePanel JoinGamePanel;
+    public HostGamePanel HostGamePanel;
+
     private Engine engine;
 
     private bool initialized;
@@ -35,8 +39,31 @@ public class MainMenu : MonoBehaviour
         HostButton.gameObject.SetActive(Constants.IS_OFFLINE_DEBUG);
         JoinButton.gameObject.SetActive(Constants.IS_OFFLINE_DEBUG);
 
-        NetworkJoinButton.enabled = true;
-        NetworkCreateButton.enabled = true;
+        // NetworkJoinButton.enabled = true;
+        // NetworkCreateButton.enabled = true;
+        
+        JoinMenuButton.onClick.AddListener(ShowJoinPanel);
+        CreateMenuButton.onClick.AddListener(ShowCreatePanel);
+
+        JoinGamePanel.Initialize(ShowMainMenu);
+        HostGamePanel.Initialize(ShowMainMenu);
+    }
+
+    private void ShowMainMenu()
+    {
+        MainMenuPanel.SetActive(true);
+    }
+
+    private void ShowJoinPanel()
+    {
+        MainMenuPanel.SetActive(false);
+        JoinGamePanel.gameObject.SetActive(true);
+    }
+
+    private void ShowCreatePanel()
+    {
+        MainMenuPanel.SetActive(false);
+        HostGamePanel.ShowPanel();
     }
 
     public void OnHostClicked()
@@ -48,8 +75,8 @@ public class MainMenu : MonoBehaviour
         initialized = true;
         GameStartData gameData = new GameStartData();
         gameData.IsHost = true;
-        gameData.LevelName = TEST_ARENA_RESOURCE;
         gameData.SessionName = SessionNameField.text;
+        gameData.LevelName = HostGamePanel.SelectedLevel;
         engine.StartGame(gameData);
     }
 
@@ -74,10 +101,11 @@ public class MainMenu : MonoBehaviour
 
         if (NetworkManager.Singleton.IsHost)
         {
-            Debug.Log("Hosting session");
+            string selectedLevel = HostGamePanel.SelectedLevel;
+            Debug.Log($"Hosting session on level {selectedLevel}");
             GameStartData gameData = new GameStartData();
             gameData.IsHost = true;
-            gameData.LevelName = TEST_ARENA_RESOURCE;
+            gameData.LevelName = selectedLevel;
             gameData.SessionName = SessionNameField.text;
             engine.StartGame(gameData);
         }

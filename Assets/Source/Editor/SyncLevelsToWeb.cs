@@ -8,23 +8,10 @@ using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-[Serializable]
-public class LevelManifestDataItem
-{
-    public string Name;
-    public uint Version;
-}
-
-[Serializable]
-public class LevelManifestData
-{
-    public LevelManifestDataItem[] Levels;
-}
-
 public class JsonDownloader : EditorWindow
 {
     // private const string MANIFEST_URL = "https://codemoshete.s3.us-east-2.amazonaws.com/snowball/levels/levels-manifest.json";
-    private const string MANIFEST_URL = "https://www.codemoshete.com/snowball/levels/levels-manifest.json";
+    // private const string MANIFEST_URL = "https://www.codemoshete.com/snowball/levels/levels-manifest.json";
     private const string MANIFEST_LOCAL_PATH = "Levels/levels-manifest.json";
     private const string LEVELS_LOCAL_PATH = "StreamingAssets/Levels";
     private const string LEVELS_DEST_PATH = "public_html/snowball/levels";
@@ -50,7 +37,7 @@ public class JsonDownloader : EditorWindow
     {
         if (GUILayout.Button("Download Remote Manifest"))
         {
-            DownloadJsonFile(MANIFEST_URL);
+            DownloadJsonFile(Constants.REMOTE_MANIFEST_URL);
         }
 
         GUILayout.Label("Levels to sync:");
