@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class GameHud : MonoBehaviour
 {
+    private const string HIT_NOTIFICATION_RESOURCE = "UI/PlayerHitNotification";
+    private readonly Color GREEN_HIT_NOTIFICATION = new Color(0.41f, 1f, 0.57f);
+    private readonly Color RED_HIT_NOTIFICATION = new Color(1f, 0.76f, 0.78f);
     public TMP_Text AmmoCountField;
     public GameObject TooltipObject;
     public TMP_Text TooltipText;
@@ -22,6 +25,7 @@ public class GameHud : MonoBehaviour
         Service.EventManager.AddListener(EventId.DisplayMessage, OnDisplayMessage);
         Service.EventManager.AddListener(EventId.HideMessage, OnHideMessage);
         Service.EventManager.AddListener(EventId.OnWallBuildStageStarted, OnWallBuilding);
+        Service.EventManager.AddListener(EventId.PlayerHit, OnPlayerHit);
         gameObject.SetActive(false);
     }
 
@@ -54,6 +58,52 @@ public class GameHud : MonoBehaviour
         currentBuildTime = 0f;
         BuildingProgressBar.fillAmount = 0f;
         isBuilding = true;
+        return false;
+    }
+
+    private bool OnPlayerHit(object cookie)
+    {
+        PlayerHitData hitData = (PlayerHitData)cookie;
+        PlayerEntity throwingPlayer = hitData.ThrowingPlayer;
+        string throwingPlayerName = throwingPlayer != null ? 
+            throwingPlayer.PlayerName.Value.ToString() : 
+            Constants.ENVIRONMENT_NAME;
+
+        PlayerEntity hitPlayer = hitData.HitPlayer;
+
+        GameObject notificationObj = Instantiate(Resources.Load<GameObject>(HIT_NOTIFICATION_RESOURCE), transform);
+        PlayerHitNotification notification = notificationObj.GetComponent<PlayerHitNotification>();
+        string notificationContent = string.Empty;
+        Color notificationColor = Color.white;
+        switch(hitData.Outcome)
+        {
+            case PlayerFrozenState.AllyFrozen:
+                notificationContent = $"{hitPlayer} was frozen by {throwingPlayerName}!";
+                notificationColor = RED_HIT_NOTIFICATION;
+                break;
+            case PlayerFrozenState.EnemyFrozen:
+                notificationContent = $"{hitPlayer} was frozen by {throwingPlayerName}!";
+                notificationColor = GREEN_HIT_NOTIFICATION;
+                break;
+            case PlayerFrozenState.AllyQueenFrozen:
+                notificationContent = $"Yor Queen was frozen by {throwingPlayerName}!";
+                notificationColor = RED_HIT_NOTIFICATION;
+                break;
+            case PlayerFrozenState.LocalPlayerFrozeEnemy:
+                notificationContent = $"You froze {hitPlayer}!";
+                notificationColor = GREEN_HIT_NOTIFICATION;
+                break;
+            case PlayerFrozenState.LocalPlayerFrozeTeammate:
+                notificationContent = $"You froze a teammate {hitPlayer}!";
+                notificationColor = RED_HIT_NOTIFICATION;
+                break;
+            case PlayerFrozenState.LocalPlayerFrozen:
+                notificationContent = $"You were frozen by {throwingPlayerName}!";
+                notificationColor = RED_HIT_NOTIFICATION;
+                break;
+        }
+        notification.ShowNotification(notificationContent, notificationColor);
+        
         return false;
     }
 
@@ -90,5 +140,6 @@ public class GameHud : MonoBehaviour
         Service.EventManager.RemoveListener(EventId.DisplayMessage, OnDisplayMessage);
         Service.EventManager.RemoveListener(EventId.HideMessage, OnHideMessage);
         Service.EventManager.RemoveListener(EventId.OnWallBuildStageStarted, OnWallBuilding);
+        Service.EventManager.RemoveListener(EventId.PlayerHit, OnPlayerHit);
     }
 }

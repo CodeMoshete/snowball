@@ -6,6 +6,8 @@ public class Constants
     public static int WallCost = 0;
     public static float WallBuildTime = 0f;
     public const string TEAM_UNASSIGNED = "Unassigned";
+    public const string PLAYER_NAME_DEFAULT = "Cahill";
+    public const string ENVIRONMENT_NAME = "The Storm";
     public static float MoveSpeed = 5f;
     public const string GAME_MANAGER_NAME = "GameManager(Clone)";
     public const float SNOWBALL_THROW_SPEED = 2400f;

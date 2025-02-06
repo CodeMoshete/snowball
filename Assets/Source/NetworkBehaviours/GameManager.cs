@@ -61,7 +61,7 @@ public class GameManager : NetworkBehaviour
         {
             startData = GameObject.Find("Engine").GetComponent<Engine>().StartData;
             StartClient(startData);
-            GetGameMetadataServerRpc(NetworkManager.LocalClientId);
+            GetGameMetadataServerRpc(NetworkManager.LocalClientId, startData.PlayerName);
         }
 
         // Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost); TODO - fire after prefab loaded
@@ -98,7 +98,7 @@ public class GameManager : NetworkBehaviour
         Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
         Service.UpdateManager.AddObserver(OnUpdate);
         Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
-        GetGameMetadataServerRpc(NetworkManager.LocalClientId);
+        GetGameMetadataServerRpc(NetworkManager.LocalClientId, startData.PlayerName);
     }
 
     // 2b. Entry point from Menu scene - triggers the network connection to be made.
@@ -158,7 +158,7 @@ public class GameManager : NetworkBehaviour
 
     // 3. Sets up a new player and returns relevant game state information to the caller
     [Rpc(SendTo.Server)]
-    private void GetGameMetadataServerRpc(ulong clientId)
+    private void GetGameMetadataServerRpc(ulong clientId, string playerName)
     {
         Debug.Log("Requesting game data from server");
         SpawnInfo spawnInfo = SelectTeamAndSpawnPos();
@@ -166,23 +166,27 @@ public class GameManager : NetworkBehaviour
         startData.PlayerStartPos = spawnInfo.SpawnPoint.position;
         startData.PlayerStartEuler = spawnInfo.SpawnPoint.eulerAngles;
         startData.PlayerId = clientId;
+        startData.PlayerName = playerName;
         startData.CurrentGameState = CurrentGameState == GameState.PreGameLobby ? GameState.PreGameLobby : GameState.Gameplay;
         startData.StartActions = Service.NetworkActions.CurrentActionsToSync;
 
-        SpawnPlayer(clientId, spawnInfo);
+        SpawnPlayer(clientId, playerName, spawnInfo);
         AssignPlayerClass(startData.PlayerTeamName, clientId);
 
         Transform queenTransform = GetQueenForTeam(startData.PlayerTeamName);
         PlayerEntity player = queenTransform.GetComponent<PlayerEntity>();
+        
         startData.TeamQueenPlayerId = player.OwnerClientId;
 
         ReceiveGameMetadataClientRpc(startData, RpcTarget.Single(clientId, RpcTargetUse.Temp));
     }
 
     // SERVER CALLED ONLY
-    private void SpawnPlayer(ulong clientId, SpawnInfo spawnInfo)
+    private void SpawnPlayer(ulong clientId, string clientName, SpawnInfo spawnInfo)
     {
         GameObject instantiatedPlayer = Instantiate(Resources.Load<GameObject>(PLAYER_RESOURCE));
+        PlayerEntity entity = instantiatedPlayer.GetComponent<PlayerEntity>();
+        entity.PlayerName.Value = clientName;
         NetworkObject netObj = instantiatedPlayer.GetComponent<NetworkObject>();
         netObj.SpawnWithOwnership(clientId, true);
         teamRosters[spawnInfo.TeamName].Add(clientId);
@@ -232,6 +236,7 @@ public class GameManager : NetworkBehaviour
         startData.PlayerStartPos = serverStartData.PlayerStartPos;
         startData.PlayerStartEuler = serverStartData.PlayerStartEuler;
         startData.PlayerTeamName = serverStartData.PlayerTeamName;
+        startData.PlayerName = serverStartData.PlayerName;
         startData.PlayerClass = serverStartData.PlayerClass;
         startData.TeamQueenPlayerId = serverStartData.TeamQueenPlayerId;
         startData.StartActions = serverStartData.StartActions;
@@ -303,45 +308,45 @@ public class GameManager : NetworkBehaviour
 
     private void OnLevelLoadFail()
     {
-
+        Debug.LogError("Level load failed.");
     }
     
-    // CLIENT CALLED ONLY
-    private void LoadLevel()
-    {
-        Debug.Log("Load Level");
-        if (!IsServer)
-        {
-            levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
+    // // CLIENT CALLED ONLY
+    // private void LoadLevel()
+    // {
+    //     Debug.Log("Load Level");
+    //     if (!IsServer)
+    //     {
+    //         levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
             
-            Service.NetworkActions.RegisterNetworkActionsForLevel(levelPrefab);
-            Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
-            Service.NetworkActions.SyncActionsForLateJoiningUser(startData.StartActions);
+    //         Service.NetworkActions.RegisterNetworkActionsForLevel(levelPrefab);
+    //         Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
+    //         Service.NetworkActions.SyncActionsForLateJoiningUser(startData.StartActions);
 
-            GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
-            List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
-            for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
-            {
-                string teamName = teamSpawnPoints[i].name;
-                List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
-                spawnPoints.Add(teamName, spawnPointsTransforms);
+    //         GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
+    //         List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
+    //         for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
+    //         {
+    //             string teamName = teamSpawnPoints[i].name;
+    //             List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
+    //             spawnPoints.Add(teamName, spawnPointsTransforms);
                 
-                if (!teamRosters.ContainsKey(teamName))
-                    teamRosters.Add(teamName, new List<ulong>());
+    //             if (!teamRosters.ContainsKey(teamName))
+    //                 teamRosters.Add(teamName, new List<ulong>());
 
-                if (!teamQueens.ContainsKey(teamName))
-                    teamQueens.Add(teamName, null);
-            }
-        }
+    //             if (!teamQueens.ContainsKey(teamName))
+    //                 teamQueens.Add(teamName, null);
+    //         }
+    //     }
 
-        teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
-        Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
+    //     teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
+    //     Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
 
-        if (CurrentGameState != GameState.PreGameLobby)
-        {
-            Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
-        }
-    }
+    //     if (CurrentGameState != GameState.PreGameLobby)
+    //     {
+    //         Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+    //     }
+    // }
 
     // Triggered when the host presses the "Start Game" button.
     private bool OnStartGameplayPressed(object cookie)
@@ -438,11 +443,14 @@ public class GameManager : NetworkBehaviour
 
     private void OnUpdate(float dt)
     {
-        blizzardCountdown -= dt;
-        if (blizzardCountdown <= 0f)
+        if (CurrentGameState == GameState.Gameplay || CurrentGameState == GameState.GameplayPaused)
         {
-            SpawnSnowballs(5);
-            blizzardCountdown = Constants.BLIZZARD_TIMEOUT;
+            blizzardCountdown -= dt;
+            if (blizzardCountdown <= 0f)
+            {
+                SpawnSnowballs(5);
+                blizzardCountdown = Constants.BLIZZARD_TIMEOUT;
+            }
         }
     }
 
@@ -482,15 +490,48 @@ public class GameManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Everyone)]
-    public void TransmitProjectileHitClientRpc(ulong hitPlayerId)
+    public void TransmitProjectileHitClientRpc(long thrownPlayerId, ulong hitPlayerId)
     {
         PlayerEntity hitPlayer = playerTransforms[hitPlayerId].GetComponent<PlayerEntity>();
+        PlayerEntity throwingPlayer = thrownPlayerId >= 0 ? playerTransforms[(ulong)thrownPlayerId].GetComponent<PlayerEntity>() : null;
         hitPlayer.OnPlayerFrozen();
 
-        if (IsServer)
+        PlayerHitData hitData = new PlayerHitData();
+        hitData.ThrowingPlayer = throwingPlayer;
+        hitData.HitPlayer = hitPlayer;
+        
+        if (hitPlayerId == LocalPlayer.OwnerClientId)
         {
-            Service.EventManager.SendEvent(EventId.PlayerHit, hitPlayer);
+            hitData.Outcome = PlayerFrozenState.LocalPlayerFrozen;
         }
+        else if (throwingPlayer != null && throwingPlayer.OwnerClientId == LocalPlayer.OwnerClientId)
+        {
+            if (throwingPlayer.TeamName.Value == hitPlayer.TeamName.Value)
+            {
+                hitData.Outcome = PlayerFrozenState.LocalPlayerFrozeEnemy;
+            }
+            else
+            {
+                hitData.Outcome = PlayerFrozenState.LocalPlayerFrozeEnemy;
+            }
+        }
+        else if (hitPlayer.TeamName.Value == LocalPlayer.TeamName.Value)
+        {
+            if (hitPlayer.CurrentPlayerClass.Value == PlayerClass.Queen)
+            {
+                hitData.Outcome = PlayerFrozenState.AllyQueenFrozen;
+            }
+            else
+            {
+                hitData.Outcome = PlayerFrozenState.AllyFrozen;
+            }
+        }
+        else
+        {
+            hitData.Outcome = PlayerFrozenState.EnemyFrozen;
+        }
+
+        Service.EventManager.SendEvent(EventId.PlayerHit, hitData);
     }
 
     [Rpc(SendTo.Everyone)]
@@ -643,9 +684,11 @@ public class GameManager : NetworkBehaviour
             BoxCollider volume = spawnVolumes[i];
             for (int j = 0; j < numToSpawnPerSide; ++j)
             {
-                float xVal = Random.Range(volume.bounds.min.x, volume.bounds.max.x);
+                // float xVal = Random.Range(volume.bounds.min.x, volume.bounds.max.x);
+                float xVal = LocalPlayer.transform.position.x;
                 float yVal = Random.Range(volume.bounds.min.y, volume.bounds.max.y);
-                float zVal = Random.Range(volume.bounds.min.z, volume.bounds.max.z);
+                // float zVal = Random.Range(volume.bounds.min.z, volume.bounds.max.z);
+                float zVal = LocalPlayer.transform.position.z;
                 spawnPositions.Add(new Vector3(xVal, yVal, zVal));
             }
         }

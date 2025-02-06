@@ -21,6 +21,7 @@ public struct GameStartData : INetworkSerializable
     {
         serializer.SerializeValue(ref LevelName);
         serializer.SerializeValue(ref PlayerTeamName);
+        serializer.SerializeValue(ref PlayerName);
         serializer.SerializeValue(ref TeamQueenPlayerId);
         serializer.SerializeValue(ref PlayerStartPos);
         serializer.SerializeValue(ref PlayerStartEuler);

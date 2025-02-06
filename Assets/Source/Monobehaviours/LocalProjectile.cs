@@ -3,13 +3,14 @@ using UnityEngine;
 
 public class LocalProjectlie : MonoBehaviour
 {
-    private const string IMPACT_EFFECT_RESOURCE = "SnowballImpactEffect";
-    private const string MINOR_IMPACT_EFFECT_RESOURCE = "SnowballMinorImpactEffect";
+    private const string IMPACT_EFFECT_RESOURCE = "Effects/SnowballImpactEffect";
+    private const string MINOR_IMPACT_EFFECT_RESOURCE = "Effects/SnowballMinorImpactEffect";
     private const string PLAYER_TAG = "Player";
     private const string FLOOR_TAG = "Floor";
     private const string CHASM_TAG = "Chasm";
     private Rigidbody rigidBody;
     private Transform owner;
+    private PlayerEntity ownerPlayer;
     private string ownerTeamName;
     private GameManager gameManager;
     private List<string> collisionTags;
@@ -33,7 +34,7 @@ public class LocalProjectlie : MonoBehaviour
         this.owner = owner;
         if (owner != null)
         {
-            PlayerEntity ownerPlayer = owner.GetComponent<PlayerEntity>();
+            ownerPlayer = owner.GetComponent<PlayerEntity>();
             ownerTeamName = ownerPlayer.TeamName.Value.ToString();
         }
         ownerTeamName = "None";
@@ -57,7 +58,8 @@ public class LocalProjectlie : MonoBehaviour
                 if (otherPlayer != null && !otherPlayer.IsFrozen && (otherPlayer.TeamName.Value != ownerTeamName || Constants.IS_FRIENDLY_FIRE_ON))
                 {
                     Debug.Log("Collide with player " + otherPlayer.name + "(" + otherPlayer.TeamName.Value + ")");
-                    gameManager.TransmitProjectileHitClientRpc(otherPlayer.OwnerClientId);
+                    long ownerClientId = ownerPlayer != null ? (long)ownerPlayer.OwnerClientId : -1;
+                    gameManager.TransmitProjectileHitClientRpc(ownerClientId, otherPlayer.OwnerClientId);
                 }
                 else if(collision.gameObject.tag == FLOOR_TAG)
                 {

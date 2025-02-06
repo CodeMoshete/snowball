@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CollisionEventDispatcher : MonoBehaviour
 {
-    public const string IMPACT_EFFECT_RESOURCE = "WallToppleEffect";
+    public const string IMPACT_EFFECT_RESOURCE = "Effects/WallToppleEffect";
 
     private List<Action<GameObject>> collisionStartListeners = new List<Action<GameObject>>();
     private List<Action<GameObject>> collisionEndListeners = new List<Action<GameObject>>();

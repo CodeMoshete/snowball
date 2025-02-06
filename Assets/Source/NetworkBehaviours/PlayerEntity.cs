@@ -28,6 +28,7 @@ public class PlayerEntity : NetworkBehaviour
     public Transform ProjectileOriginReference;
     public GameObject DefrostRangeFX;
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>(Constants.TEAM_UNASSIGNED);
+    public NetworkVariable<FixedString64Bytes> PlayerName = new NetworkVariable<FixedString64Bytes>(Constants.PLAYER_NAME_DEFAULT);
     public NetworkVariable<PlayerClass> CurrentPlayerClass = new NetworkVariable<PlayerClass>(global::PlayerClass.Soldier);
     public NetworkVariable<int> SnowCount = new NetworkVariable<int>(3);
 
@@ -54,7 +55,9 @@ public class PlayerEntity : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+        name = PlayerName.Value.ToString();
         TeamName.OnValueChanged += OnTeamNameChanged;
+        PlayerName.OnValueChanged += OnPlayerNameChanged;
         CurrentPlayerClass.OnValueChanged += OnPlayerClassChanged;
         SnowCount.OnValueChanged += OnSnowResourceChanged;
         wallOptions = Resources.Load<Buildables>(BUILDABLES_RESOURCE);
@@ -110,6 +113,7 @@ public class PlayerEntity : NetworkBehaviour
         Debug.Log("Level Load Complete for " + OwnerClientId + " (" + startData.PlayerTeamName + "), " + IsOwner);
         AssignPlayerClassServerRpc(startData.PlayerClass);
         AssignTeamNameServerRpc(startData.PlayerTeamName);
+        AssignPlayerNameRpc(startData.PlayerName);
         PlacePlayerAtSpawn(startData);
         
         Transform teamQueen = gameManager.GetQueenForTeam(startData.PlayerTeamName);
@@ -147,6 +151,20 @@ public class PlayerEntity : NetworkBehaviour
     {
         // Update UI or visuals to reflect the new team name
         Debug.Log($"Team name changed from {oldValue} to {newValue}");
+        gameManager.BroadcastRosterUpdate();
+    }
+
+    [Rpc(SendTo.Server)]
+    public void AssignPlayerNameRpc(FixedString64Bytes playerName)
+    {
+        PlayerName.Value = playerName;
+        name = playerName.ToString();
+    }
+
+    private void OnPlayerNameChanged(FixedString64Bytes oldValue, FixedString64Bytes newValue)
+    {
+        Debug.Log($"Player name changed from {oldValue} to {newValue}");
+        name = newValue.ToString();
         gameManager.BroadcastRosterUpdate();
     }
 
@@ -385,5 +403,8 @@ public class PlayerEntity : NetworkBehaviour
     {
         base.OnDestroy();
         TeamName.OnValueChanged -= OnTeamNameChanged;
+        PlayerName.OnValueChanged -= OnPlayerNameChanged;
+        CurrentPlayerClass.OnValueChanged -= OnPlayerClassChanged;
+        SnowCount.OnValueChanged -= OnSnowResourceChanged;
     }
 }

@@ -77,6 +77,7 @@ public class MainMenu : MonoBehaviour
         gameData.IsHost = true;
         gameData.SessionName = SessionNameField.text;
         gameData.LevelName = HostGamePanel.SelectedLevel;
+        gameData.PlayerName = HostGamePanel.NameField.text;
         engine.StartGame(gameData);
     }
 
@@ -89,6 +90,7 @@ public class MainMenu : MonoBehaviour
         initialized = true;
         GameStartData gameData = new GameStartData();
         gameData.IsHost = false;
+        gameData.PlayerName = JoinGamePanel.NameField.text;
         engine.StartGame(gameData);
     }
 
@@ -107,6 +109,7 @@ public class MainMenu : MonoBehaviour
             gameData.IsHost = true;
             gameData.LevelName = selectedLevel;
             gameData.SessionName = SessionNameField.text;
+            gameData.PlayerName = HostGamePanel.NameField.text;
             engine.StartGame(gameData);
         }
         else
@@ -114,6 +117,7 @@ public class MainMenu : MonoBehaviour
             Debug.Log("Joining session");
             GameStartData gameData = new GameStartData();
             gameData.IsHost = false;
+            gameData.PlayerName = JoinGamePanel.NameField.text;
             engine.StartGame(gameData);
         }
     }

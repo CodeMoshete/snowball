@@ -1,18 +1,25 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class OnPlayerFrozenTrigger : MonoBehaviour
 {
     public PlayerEntity HitPlayer { get; private set; }
+    public PlayerEntity ThrownPlayer { get; private set; }
     public bool DisableAfterUse;
     public CustomAction OnHit;
     private void Start()
     {
-        Service.EventManager.AddListener(EventId.PlayerHit, OnPlayerHit);
+        if (NetworkManager.Singleton.IsServer)
+        {
+            Service.EventManager.AddListener(EventId.PlayerHit, OnPlayerHit);
+        }
     }
 
     private bool OnPlayerHit(object cookie)
     {
-        HitPlayer = (PlayerEntity)cookie;
+        PlayerHitData hitData = (PlayerHitData)cookie;
+        HitPlayer = hitData.HitPlayer;
+        ThrownPlayer = hitData.ThrowingPlayer;
 
         if (DisableAfterUse)
         {
