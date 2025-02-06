@@ -86,7 +86,7 @@ public class GameHud : MonoBehaviour
                 notificationColor = GREEN_HIT_NOTIFICATION;
                 break;
             case PlayerFrozenState.AllyQueenFrozen:
-                notificationContent = $"Yor Queen was frozen by {throwingPlayerName}!";
+                notificationContent = $"Your Queen was frozen by {throwingPlayerName}!";
                 notificationColor = RED_HIT_NOTIFICATION;
                 break;
             case PlayerFrozenState.LocalPlayerFrozeEnemy:

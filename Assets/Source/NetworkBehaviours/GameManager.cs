@@ -508,7 +508,7 @@ public class GameManager : NetworkBehaviour
         {
             if (throwingPlayer.TeamName.Value == hitPlayer.TeamName.Value)
             {
-                hitData.Outcome = PlayerFrozenState.LocalPlayerFrozeEnemy;
+                hitData.Outcome = PlayerFrozenState.LocalPlayerFrozeTeammate;
             }
             else
             {
@@ -684,11 +684,11 @@ public class GameManager : NetworkBehaviour
             BoxCollider volume = spawnVolumes[i];
             for (int j = 0; j < numToSpawnPerSide; ++j)
             {
-                // float xVal = Random.Range(volume.bounds.min.x, volume.bounds.max.x);
-                float xVal = LocalPlayer.transform.position.x;
+                float xVal = Random.Range(volume.bounds.min.x, volume.bounds.max.x);
+                // float xVal = LocalPlayer.transform.position.x;
                 float yVal = Random.Range(volume.bounds.min.y, volume.bounds.max.y);
-                // float zVal = Random.Range(volume.bounds.min.z, volume.bounds.max.z);
-                float zVal = LocalPlayer.transform.position.z;
+                float zVal = Random.Range(volume.bounds.min.z, volume.bounds.max.z);
+                // float zVal = LocalPlayer.transform.position.z;
                 spawnPositions.Add(new Vector3(xVal, yVal, zVal));
             }
         }
