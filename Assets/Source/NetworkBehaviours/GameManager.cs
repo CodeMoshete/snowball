@@ -369,6 +369,11 @@ public class GameManager : NetworkBehaviour
         Service.EventManager.AddListener(EventId.OnGamePause, OnGamePaused);
         Service.EventManager.AddListener(EventId.OnGameResume, OnGameResumed);
         Service.EventManager.AddListener(EventId.OnGameQuit, OnGameQuit);
+        
+        if (IsServer)
+        {
+            Service.EventManager.AddListener(EventId.OnSnowballsSpawnedFromScript, OnSnowballsSpanwedFromScript);
+        }
     }
 
     private void OnClientDisconnected(ulong clientId)
@@ -381,7 +386,9 @@ public class GameManager : NetworkBehaviour
             Service.EventManager.RemoveListener(EventId.OnGameResume, OnGameResumed);
             Service.EventManager.RemoveListener(EventId.OnGameQuit, OnGameQuit);
             Service.EventManager.RemoveListener(EventId.NetworkActionTriggered, OnNetworkAction);
+            Service.EventManager.RemoveListener(EventId.OnSnowballsSpawnedFromScript, OnSnowballsSpanwedFromScript);
             Service.NetworkActions.ClearNetworkActionsForCurrentLevel();
+            Constants.ResetDefaultValues();
 
             GameObject engineObj = GameObject.Find("Engine");
             if (engineObj != null)
@@ -693,6 +700,13 @@ public class GameManager : NetworkBehaviour
             }
         }
         SpawnSnowballsClientRpc(spawnPositions.ToArray());
+    }
+
+    private bool OnSnowballsSpanwedFromScript(object cookie)
+    {
+        Vector3[] spawnPositions = (Vector3[])cookie;
+        SpawnSnowballsClientRpc(spawnPositions);
+        return false;
     }
 
     [Rpc(SendTo.Everyone)]

@@ -67,6 +67,7 @@ public class PlayerEntity : NetworkBehaviour
         {
             Debug.Log("Player OnNetworkSpawn - Setting up new player!");
             Service.EventManager.AddListener(EventId.LevelLoadCompleted, OnLevelLoadComplete);
+            Service.EventManager.AddListener(EventId.OnWallBuildingDisabled, OnWallBuildingDisabled);
             SetUpCamera();
         }
     }
@@ -297,6 +298,9 @@ public class PlayerEntity : NetworkBehaviour
 
     public void OnPlaceWallPressed()
     {
+        if (!Constants.IsWallBuildingEnabled)
+            return;
+
         if (!isPlacingWall)
         {
             StartPlacingWall();
@@ -371,6 +375,19 @@ public class PlayerEntity : NetworkBehaviour
         DisplayBuildableOptionAtIndex(currentWallOptionIndex);
     }
 
+    private bool OnWallBuildingDisabled(object cookie)
+    {
+        if (isPlacingWall)
+        {
+            // Positioning wall before committing to placement.
+            Service.EventManager.SendEvent(EventId.HideMessage, null);
+            isPlacingWall = false;
+            Destroy(ghostWall.gameObject);
+            ghostWall = null;
+        }
+        return false;
+    }
+
     public void OnPlayerFrozen()
     {
         iceCube = Instantiate(Resources.Load<GameObject>(ICE_CUBE_RESOURCE)).transform;
@@ -402,6 +419,7 @@ public class PlayerEntity : NetworkBehaviour
     public override void OnDestroy()
     {
         base.OnDestroy();
+        Service.EventManager.RemoveListener(EventId.OnWallBuildingDisabled, OnWallBuildingDisabled);
         TeamName.OnValueChanged -= OnTeamNameChanged;
         PlayerName.OnValueChanged -= OnPlayerNameChanged;
         CurrentPlayerClass.OnValueChanged -= OnPlayerClassChanged;

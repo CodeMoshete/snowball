@@ -52,6 +52,7 @@ public class MobileHud : MonoBehaviour
 
     private bool HideWallTypeContainer(object cookie)
     {
+
         WallTypeContainer.SetActive(false);
         return false;
     }
@@ -70,6 +71,6 @@ public class MobileHud : MonoBehaviour
     private void OnDestroy()
     {
         Service.EventManager.RemoveListener(EventId.OnWallPlacementStarted, ShowWallTypeContainer);
-        Service.EventManager.RemoveListener(EventId.OnWallPlacementStarted, HideWallTypeContainer);
+        Service.EventManager.RemoveListener(EventId.OnWallPlacementEnded, HideWallTypeContainer);
     }
 }

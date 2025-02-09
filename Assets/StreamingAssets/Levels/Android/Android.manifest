@@ -1,12 +1,9 @@
 ManifestFileVersion: 0
 UnityVersion: 6000.0.28f1
-CRC: 1238452457
+CRC: 4112584399
 HashAppended: 0
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
       Name: testarena
-      Dependencies: {}
-    Info_1:
-      Name: testarena2
       Dependencies: {}

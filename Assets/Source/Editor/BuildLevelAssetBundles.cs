@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ public class BuildLevelAssetBundles : MonoBehaviour
     private const string LEVELS_FOLDER_PATH = "Assets/Levels";
     private const string OUTPUT_FOLDER_PATH = "Assets/StreamingAssets/Levels";
 
-    [MenuItem("Tools/Build Level Bundles - All")]
+    [MenuItem("Tools/Build Selected Levels - All")]
     public static void BuildBundlesForAllPlatforms()
     {
         BuildBundlesForPlatform(BuildTarget.StandaloneWindows);
@@ -16,32 +17,32 @@ public class BuildLevelAssetBundles : MonoBehaviour
         BuildBundlesForPlatform(BuildTarget.StandaloneOSX);
     }
 
-    [MenuItem("Tools/Build Level Bundles - Current")]
+    [MenuItem("Tools/Build Selected Levels - Current")]
     public static void BuildBundlesForCurrentPlatform()
     {
         BuildTarget currentTarget = EditorUserBuildSettings.activeBuildTarget;
         BuildBundlesForPlatform(currentTarget);
     }
 
-    [MenuItem("Tools/Build Level Bundles - Windows")]
+    [MenuItem("Tools/Build Selected Levels - Windows")]
     public static void BuildBundlesForWindows()
     {
         BuildBundlesForPlatform(BuildTarget.StandaloneWindows);
     }
 
-    [MenuItem("Tools/Build Level Bundles - Android")]
+    [MenuItem("Tools/Build Selected Levels - Android")]
     public static void BuildBundlesForAndroid()
     {
         BuildBundlesForPlatform(BuildTarget.Android);
     }
 
-    [MenuItem("Tools/Build Level Bundles - Linux")]
+    [MenuItem("Tools/Build Selected Levels - Linux")]
     public static void BuildBundlesForLinux()
     {
         BuildBundlesForPlatform(BuildTarget.StandaloneLinux64);
     }
 
-    [MenuItem("Tools/Build Level Bundles - Mac")]
+    [MenuItem("Tools/Build Selected Levels - Mac")]
     public static void BuildBundlesForMac()
     {
         BuildBundlesForPlatform(BuildTarget.StandaloneOSX);
@@ -53,12 +54,26 @@ public class BuildLevelAssetBundles : MonoBehaviour
         CreateOutputFolderForPlatform(platform);
 
         // Get all subdirectories in the Levels folder
-        var levelDirectories = Directory.GetDirectories(LEVELS_FOLDER_PATH);
+        // string[] levelDirectories = Directory.GetDirectories(LEVELS_FOLDER_PATH);
+
+        // if (levelDirectories.Length == 0)
+        // {
+        //     Debug.LogWarning("No level folders found in Assets/Levels.");
+        //     return;
+        // }
+
+        var levelDirectories = Selection.GetFiltered<Object>(SelectionMode.Assets)
+            .Select(AssetDatabase.GetAssetPath)
+            .Where(AssetDatabase.IsValidFolder) // Filter only valid folders
+            .ToArray();
 
         if (levelDirectories.Length == 0)
         {
-            Debug.LogWarning("No level folders found in Assets/Levels.");
-            return;
+            Debug.Log("No folders selected!");
+        }
+        else
+        {
+            Debug.Log("Selected Folders:\n" + string.Join("\n", levelDirectories));
         }
 
         // Prepare a list to hold asset bundle build configurations

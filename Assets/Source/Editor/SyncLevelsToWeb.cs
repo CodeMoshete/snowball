@@ -69,7 +69,7 @@ public class JsonDownloader : EditorWindow
         else
         {
             remoteJsonData = request.downloadHandler.text;
-            UnityEngine.Debug.Log("JSON downloaded successfully!");
+            UnityEngine.Debug.Log($"JSON downloaded successfully!:\n{remoteJsonData}");
             ParseAndCompareJson();
         }
 
@@ -102,7 +102,7 @@ public class JsonDownloader : EditorWindow
             }
             else if (remoteItem.Version < localItem.Version)
             {
-                UnityEngine.Debug.Log($"Level {localItem.Name} is outdated in remote manifest.");
+                UnityEngine.Debug.Log($"Level {localItem.Name} is outdated in remote manifest ({remoteItem.Version} < {localItem.Version}).");
                 // levelsToUpdate.Add(localItem.Name);
                 AddLevelToUpload(localItem, levelsToUpdate);
             }
@@ -133,7 +133,7 @@ public class JsonDownloader : EditorWindow
             string sourcePath = Path.Combine(Application.dataPath, LEVELS_LOCAL_PATH, PLATFORMS[i], level.Name);
             string manifestSourcePath = Path.Combine(Application.dataPath, LEVELS_LOCAL_PATH, PLATFORMS[i], $"{level.Name}.manifest");
 
-            string destPath = Path.Combine(LEVELS_DEST_PATH, level.Name);
+            string destPath = Path.Combine(LEVELS_DEST_PATH, PLATFORMS[i]);
 
             uploadCommands.Add($"ftp_upload {destPath} {sourcePath}");
             uploadCommands.Add($"ftp_upload {destPath} {manifestSourcePath}");
@@ -145,7 +145,7 @@ public class JsonDownloader : EditorWindow
         for (int i = 0, count = levelsToUpdate.Count; i < count; ++i)
         {
             UnityEngine.Debug.Log($"Execute command: {levelsToUpdate[i]}");
-            // ExecuteCommand(levelsToUpdate[i]);
+            ExecuteCommand(levelsToUpdate[i]);
         }
         levelsToUpdate.Clear();
         levelsToSyncText = DEFAULT_SYNC_TEXT;
@@ -156,7 +156,7 @@ public class JsonDownloader : EditorWindow
         Process process = new Process();
         
         // Set up the process start information
-        process.StartInfo.FileName = "/bin/bash"; // Use "cmd.exe" for Windows
+        process.StartInfo.FileName = "/bin/zsh"; // Use "cmd.exe" for Windows
         process.StartInfo.Arguments = $"-c \"{command}\""; // Wrap command for proper execution
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
