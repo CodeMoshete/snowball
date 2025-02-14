@@ -49,4 +49,12 @@
             return UpdateManager.Instance;
         }
     }
+
+    public static LevelLoader LevelLoader
+    {
+        get
+        {
+            return LevelLoader.Instance;
+        }
+    }
 }

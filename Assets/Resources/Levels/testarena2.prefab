@@ -114,6 +114,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 3920048672180901514}
   - {fileID: 5887960826781569555}
   - {fileID: 6771236987158602282}
   - {fileID: 3580824489812609224}
@@ -125,6 +126,7 @@ Transform:
   - {fileID: 2034789676214379494}
   - {fileID: 4101713790009200387}
   - {fileID: 5606853482765875956}
+  - {fileID: 7677431526863011891}
   m_Father: {fileID: 2864336366926709805}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4056184977343820761
@@ -139,7 +141,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba969e1721b764a3ead16e65a8054053, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OnTriggered: {fileID: 8470560687440379079}
+  OnTriggered: {fileID: 7925073908834100482}
 --- !u!1 &1122573516699993185
 GameObject:
   m_ObjectHideFlags: 0
@@ -414,7 +416,7 @@ GameObject:
   m_Component:
   - component: {fileID: 140144009199014789}
   m_Layer: 0
-  m_Name: TestArenaPrefab
+  m_Name: TestArena2Prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -564,6 +566,54 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Duration: 5
   NextAction: {fileID: 1846562614994983279}
+--- !u!1 &2850305166207666384
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3920048672180901514}
+  - component: {fileID: 7925073908834100482}
+  m_Layer: 0
+  m_Name: SetBuildTime
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3920048672180901514
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2850305166207666384}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5825228591310349626}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7925073908834100482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2850305166207666384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dec5f678111a84536aeccc11f82fee45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 1
+  BuildTime: 1
+  NextAction: {fileID: 7012651215341900940}
 --- !u!1 &2982542906556807755
 GameObject:
   m_ObjectHideFlags: 0
@@ -629,6 +679,54 @@ Transform:
   - {fileID: 577076665570680753}
   m_Father: {fileID: 140144009199014789}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3534731871130626605
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7677431526863011891}
+  - component: {fileID: 2914475550558481357}
+  m_Layer: 0
+  m_Name: DisableBuilding
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7677431526863011891
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3534731871130626605}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5825228591310349626}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2914475550558481357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3534731871130626605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2779509e896984ed98442fb9e4cdae9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 1
+  IsBuildingAllowed: 0
+  NextAction: {fileID: 0}
 --- !u!1 &3584578148749852885
 GameObject:
   m_ObjectHideFlags: 0
@@ -1780,7 +1878,7 @@ MonoBehaviour:
   IsSyncedOnJoin: 1
   Targets:
   - {fileID: 7443935738085445915}
-  OnDone: {fileID: 0}
+  OnDone: {fileID: 2914475550558481357}
   SetActive: 0
 --- !u!1 &8417325679533208180
 GameObject:

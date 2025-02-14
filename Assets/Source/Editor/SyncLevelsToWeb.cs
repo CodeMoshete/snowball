@@ -40,6 +40,12 @@ public class JsonDownloader : EditorWindow
             DownloadJsonFile(Constants.REMOTE_MANIFEST_URL);
         }
 
+        if (GUILayout.Button("Sync for Local Testing"))
+        {
+            SyncForLocalTesting();
+            UnityEngine.Debug.Log("Copied local manifest for local testing purposes.");
+        }
+
         GUILayout.Label("Levels to sync:");
         GUILayout.TextArea(levelsToSyncText, GUILayout.Height(200));
 
@@ -47,6 +53,36 @@ public class JsonDownloader : EditorWindow
         {
             SyncAssets();
         }
+    }
+
+    // Copy Assets/Levels/levels-manifest.json to StreamingAssets/Levels/debug-levels-manifest.json
+    private void SyncForLocalTesting()
+    {
+        string sourcePath = Path.Combine(Application.dataPath, MANIFEST_LOCAL_PATH);
+        string destPath = Path.Combine(Application.dataPath, LEVELS_LOCAL_PATH, "debug-levels-manifest.json");
+        File.Copy(sourcePath, destPath, true);
+
+        // Get a list of all sub-folders inside Assets/Levels
+        string levelFolderPath = Path.Combine(Application.dataPath, "Levels");
+        string[] levelFolders = Directory.GetDirectories(levelFolderPath);
+        for (int i = 0, count = levelFolders.Length; i < count; ++i)
+        {
+            string levelFolder = levelFolders[i];
+            string levelFolderName = Path.GetFileName(levelFolder);
+            UnityEngine.Debug.Log($"Scanning level folder {levelFolder}, name: {levelFolderName}");
+            // Scan for prefab files in each sub-folder
+            string[] prefabFiles = Directory.GetFiles(levelFolder, "*.prefab");
+            if (prefabFiles.Length == 1)
+            {
+                // Copy the prefab into Resources/Levels
+                string prefabPath = Path.Combine(levelFolderPath, prefabFiles[0]);
+                string destinationPath = Path.Combine(Application.dataPath, "Resources", "Levels", $"{levelFolderName.ToLower()}.prefab");
+
+                // Copy prefab file to destination path.
+                File.Copy(prefabPath, destinationPath, true);
+            }
+        }
+        AssetDatabase.Refresh();
     }
 
     private void DownloadJsonFile(string url)

@@ -3,11 +3,19 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
+public enum DownloadSource
+{
+    ProductionRemote,
+    DebugResourcesLocal,
+    DebugStreamingLocal
+}
+
 public class LevelLoader : MonoBehaviour
 {
-    private const bool DEBUG_DOWNLOAD_LOCAL = false;
-    private readonly string LOCAL_ASSET_PREFIX = $"{Application.streamingAssetsPath}/Levels";
+    private readonly string LOCAL_ASSET_PREFIX = $"file://{Application.streamingAssetsPath}/Levels";
     private const string REMOTE_ASSET_PREFIX = "https://www.codemoshete.com/snowball/levels";
+    public const string LEVEL_MANIFEST_ASSET_PATH = "levels-manifest.json";
+    public const string DEBUG_LEVEL_MANIFEST_ASSET_PATH = "debug-levels-manifest.json";
     // private const string REMOTE_ASSET_PREFIX = "https://codemoshete.s3.us-east-2.amazonaws.com/snowball/levels";
 
 #if UNITY_STANDALONE_LINUX
@@ -22,10 +30,58 @@ public class LevelLoader : MonoBehaviour
     private const string PLATFORM_DIR = "iOS";
 #endif
 
+    public DownloadSource DownloadSource = DownloadSource.ProductionRemote;
+
     private const string PREFAB_SUFFIX = ".prefab";
 
     private string levelName; // Name of the asset bundle (lowercase)
     private Action<GameObject> onDownloadSuccess;
+
+    public static LevelLoader Instance
+    {
+        get; private set;
+    }
+
+    private void Start()
+    {
+        Instance = this;
+    }
+
+    public void LoadLevelManifest(Action<LevelManifestData> onDownloadSuccess, Action onDownloadFailure)
+    {
+        StartCoroutine(DownloadLevelsManifest(onDownloadSuccess, onDownloadFailure));
+    }
+
+    private IEnumerator DownloadLevelsManifest(Action<LevelManifestData> onDownloadSuccess, Action onDownloadFailure)
+    {
+        string urlPrefix;
+        string manifestName;
+        if (Constants.IS_OFFLINE_DEBUG || DownloadSource != DownloadSource.ProductionRemote)
+        {
+            urlPrefix = REMOTE_ASSET_PREFIX;
+            manifestName = LEVEL_MANIFEST_ASSET_PATH;
+        }
+        else
+        {
+            urlPrefix = LOCAL_ASSET_PREFIX;
+            manifestName = DEBUG_LEVEL_MANIFEST_ASSET_PATH;
+        }
+
+        string resourceUrl = $"{urlPrefix}/{manifestName}";
+        Debug.Log($"Downloading {resourceUrl}");
+        UnityWebRequest request = UnityWebRequest.Get(resourceUrl);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success) {
+            Debug.LogError($"Asset download error: {request.error}");
+            onDownloadFailure();
+        }
+        else {
+            string jsonData = request.downloadHandler.text;
+            LevelManifestData manifestData = JsonUtility.FromJson<LevelManifestData>(jsonData);
+            onDownloadSuccess(manifestData);
+        }
+    }
 
     public void LoadLevel(string levelName, Action<GameObject> onDownloadSuccess, Action onDownloadFailure)
     {
@@ -33,12 +89,31 @@ public class LevelLoader : MonoBehaviour
         this.onDownloadSuccess = onDownloadSuccess;
 
         // Load the asset bundle
-        StartCoroutine(GetAssetBundle(this.levelName, OnBundleDownloadComplete, onDownloadFailure));
+        if (DownloadSource == DownloadSource.DebugResourcesLocal)
+        {
+            GameObject levelResource = Resources.Load<GameObject>($"Levels/{this.levelName}");
+            if (levelResource == null)
+            {
+                Debug.LogError($"Level {this.levelName} not found in Resources.");
+                onDownloadFailure();
+            }
+            else
+            {
+                Debug.Log($"Loaded level {this.levelName} from Resources.");
+                onDownloadSuccess(levelResource);
+            }
+        }
+        else
+        {
+            StartCoroutine(GetAssetBundle(this.levelName, OnBundleDownloadComplete, onDownloadFailure));
+        }
     }
 
     private IEnumerator GetAssetBundle(string levelName, Action<AssetBundle> onComplete, Action onFail)
     {
-        string urlPrefix = (Constants.IS_OFFLINE_DEBUG || DEBUG_DOWNLOAD_LOCAL) ? LOCAL_ASSET_PREFIX : REMOTE_ASSET_PREFIX;
+        string urlPrefix = (Constants.IS_OFFLINE_DEBUG || DownloadSource == DownloadSource.DebugStreamingLocal) ? 
+            LOCAL_ASSET_PREFIX : REMOTE_ASSET_PREFIX;
+
         string resourceUrl = $"{urlPrefix}/{PLATFORM_DIR}/{levelName}";
         Debug.Log($"Downloading level from {resourceUrl}");
         UnityWebRequest www = UnityWebRequestAssetBundle.GetAssetBundle(resourceUrl);

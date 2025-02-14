@@ -32,31 +32,11 @@ public class HostGamePanel : MonoBehaviour
     {
         gameObject.SetActive(true);
         LevelSelectDropdown.ClearOptions();
-        StartCoroutine(DownloadLevelsManifest());
+        Service.LevelLoader.LoadLevelManifest(OnRemoteManifestLoaded, null);
     }
 
-    private IEnumerator DownloadLevelsManifest()
+    private void OnRemoteManifestLoaded(LevelManifestData levelManifest)
     {
-        UnityWebRequest request = UnityWebRequest.Get(Constants.REMOTE_MANIFEST_URL);
-
-        yield return request.SendWebRequest();
-
-        string remoteJsonData;
-        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-        {
-            Debug.LogError($"Failed to download JSON: {request.error}");
-        }
-        else
-        {
-            remoteJsonData = request.downloadHandler.text;
-            Debug.Log("JSON downloaded successfully!");
-            OnRemoteManifestLoaded(remoteJsonData);
-        }
-    }
-
-    private void OnRemoteManifestLoaded(string json)
-    {
-        LevelManifestData levelManifest = JsonUtility.FromJson<LevelManifestData>(json);
         List<string> options = new List<string>();
         for (int i = 0, count = levelManifest.Levels.Length; i < count; ++i)
         {

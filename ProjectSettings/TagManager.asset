@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Floor
   - Chasm
+  - ProjectileObjective
   layers:
   - Default
   - TransparentFX

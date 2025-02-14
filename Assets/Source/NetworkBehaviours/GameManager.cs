@@ -19,7 +19,6 @@ public class GameManager : NetworkBehaviour
     public float MinThrowAngle = Constants.MIN_THROW_ANGLE;
     public float MaxThrowAngle = Constants.MAX_THROW_ANGLE;
     public GameState CurrentGameState { get; private set; }
-    public LevelLoader LevelLoader;
     public PlayerEntity LocalPlayer 
     {
         get
@@ -75,7 +74,7 @@ public class GameManager : NetworkBehaviour
         Debug.Log("Server");
         pickupSystem = new PickupSystem(playerTransforms, OnSnowPickedUp);
         // levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
-        LevelLoader.LoadLevel(startData.LevelName, OnServerLevelPrefabLoaded, OnLevelLoadFail);
+        Service.LevelLoader.LoadLevel(startData.LevelName, OnServerLevelPrefabLoaded, OnLevelLoadFail);
     }
 
     private void OnServerLevelPrefabLoaded(GameObject prefab)
@@ -255,7 +254,7 @@ public class GameManager : NetworkBehaviour
         if (!IsServer)
         {
             // Client must load the level after receiving start data from the server.
-            LevelLoader.LoadLevel(startData.LevelName, OnClientLevelPrefabLoaded, OnLevelLoadFail);
+            Service.LevelLoader.LoadLevel(startData.LevelName, OnClientLevelPrefabLoaded, OnLevelLoadFail);
         }
         else
         {
@@ -560,6 +559,17 @@ public class GameManager : NetworkBehaviour
         instantiatedPile.transform.eulerAngles = new Vector3(-90f, Random.Range(0f, 360f), 0f);
         netObj.Spawn(true);
         pickupSystem.RegisterPickup(netObj.transform);
+    }
+
+    // SERVER CALLED ONLY
+    [Rpc(SendTo.Server)]
+    public void ProjectileHitObjectiveServerRpc(long thrownPlayerId, string objectiveName)
+    {
+        PlayerEntity throwingPlayer = thrownPlayerId >= 0 ? playerTransforms[(ulong)thrownPlayerId].GetComponent<PlayerEntity>() : null;
+        ObjectiveHitData hitData = new ObjectiveHitData();
+        hitData.ObjectiveName = objectiveName;
+        hitData.ThrowingPlayer = throwingPlayer;
+        Service.EventManager.SendEvent(EventId.ObjectiveHit, hitData);
     }
 
     public void DeregisterPlayer(PlayerEntity player)

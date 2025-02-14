@@ -8,6 +8,7 @@ public class LocalProjectlie : MonoBehaviour
     private const string PLAYER_TAG = "Player";
     private const string FLOOR_TAG = "Floor";
     private const string CHASM_TAG = "Chasm";
+    private const string OBJECTIVE_TAG = "ProjectileObjective";
     private Rigidbody rigidBody;
     private Transform owner;
     private PlayerEntity ownerPlayer;
@@ -23,7 +24,8 @@ public class LocalProjectlie : MonoBehaviour
         {
             PLAYER_TAG,
             FLOOR_TAG,
-            CHASM_TAG
+            CHASM_TAG,
+            OBJECTIVE_TAG
         };
         rigidBody = GetComponent<Rigidbody>();
         gameManager = GameObject.Find(Constants.GAME_MANAGER_NAME).GetComponent<GameManager>();
@@ -64,6 +66,11 @@ public class LocalProjectlie : MonoBehaviour
                 else if(collision.gameObject.tag == FLOOR_TAG)
                 {
                     gameManager.ProjectileHitFloorServerRpc(contactPt.point);
+                }
+                else if (collision.gameObject.tag == OBJECTIVE_TAG)
+                {
+                    long ownerClientId = ownerPlayer != null ? (long)ownerPlayer.OwnerClientId : -1;
+                    gameManager.ProjectileHitObjectiveServerRpc(ownerClientId, collision.gameObject.name);
                 }
             }
             TriggerCollisionEffect(IMPACT_EFFECT_RESOURCE, contactPt);
