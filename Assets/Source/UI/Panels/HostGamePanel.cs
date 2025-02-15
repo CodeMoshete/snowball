@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using UnityEngine.Networking;
 
 public class HostGamePanel : MonoBehaviour
 {

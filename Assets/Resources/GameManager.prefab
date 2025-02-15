@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5885005721874771983}
   - component: {fileID: 2010886424483141395}
   - component: {fileID: 734875947253823558}
+  - component: {fileID: -5124431070991648272}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -74,4 +75,15 @@ MonoBehaviour:
   SnowballThrowSpeed: 1800
   MinThrowAngle: 2.5
   MaxThrowAngle: 25
-  LevelLoader: {fileID: 0}
+--- !u!114 &-5124431070991648272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4985449795353809648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a18c30b950f764abaa53cd1d6bd73035, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

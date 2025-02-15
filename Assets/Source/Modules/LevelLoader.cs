@@ -58,13 +58,13 @@ public class LevelLoader : MonoBehaviour
         string manifestName;
         if (Constants.IS_OFFLINE_DEBUG || DownloadSource != DownloadSource.ProductionRemote)
         {
-            urlPrefix = REMOTE_ASSET_PREFIX;
-            manifestName = LEVEL_MANIFEST_ASSET_PATH;
+            urlPrefix = LOCAL_ASSET_PREFIX;
+            manifestName = DEBUG_LEVEL_MANIFEST_ASSET_PATH;
         }
         else
         {
-            urlPrefix = LOCAL_ASSET_PREFIX;
-            manifestName = DEBUG_LEVEL_MANIFEST_ASSET_PATH;
+            urlPrefix = REMOTE_ASSET_PREFIX;
+            manifestName = LEVEL_MANIFEST_ASSET_PATH;
         }
 
         string resourceUrl = $"{urlPrefix}/{manifestName}";

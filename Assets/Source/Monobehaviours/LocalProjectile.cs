@@ -69,6 +69,7 @@ public class LocalProjectlie : MonoBehaviour
                 }
                 else if (collision.gameObject.tag == OBJECTIVE_TAG)
                 {
+                    Debug.Log("Projectile hit an objective!");
                     long ownerClientId = ownerPlayer != null ? (long)ownerPlayer.OwnerClientId : -1;
                     gameManager.ProjectileHitObjectiveServerRpc(ownerClientId, collision.gameObject.name);
                 }

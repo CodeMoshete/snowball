@@ -3,23 +3,23 @@ using UnityEngine;
 
 public class OnObjectiveHitTrigger : MonoBehaviour
 {
-    public GameObject HitObject { get; private set; }
-    public PlayerEntity ThrownPlayer { get; private set; }
+    public string TargetObjectiveName;
     public CustomAction OnHit;
+
     private void Start()
     {
         if (NetworkManager.Singleton.IsServer)
         {
-            Service.EventManager.AddListener(EventId.PlayerHit, OnObjectiveHit);
+            Service.EventManager.AddListener(EventId.ObjectiveHit, OnObjectiveHit);
         }
     }
 
     private bool OnObjectiveHit(object cookie)
     {
         ObjectiveHitData hitData = (ObjectiveHitData)cookie;
-        ThrownPlayer = hitData.ThrowingPlayer;
+        Debug.Log($"[OnObjectiveHitTrigger] Hit Objective: {hitData.ObjectiveName} Target: {TargetObjectiveName}");
 
-        if (OnHit != null)
+        if (hitData.ObjectiveName == TargetObjectiveName && OnHit != null)
         {
             OnHit.Initiate();
         }
@@ -28,6 +28,6 @@ public class OnObjectiveHitTrigger : MonoBehaviour
 
     private void OnDestroy()
     {
-        Service.EventManager.RemoveListener(EventId.PlayerHit, OnObjectiveHit);
+        Service.EventManager.RemoveListener(EventId.ObjectiveHit, OnObjectiveHit);
     }
 }
