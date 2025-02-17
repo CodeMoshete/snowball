@@ -5,7 +5,11 @@ using Utils;
 public class PlayerEntityControls
 {
     private string FEET_OBJECT_NAME = "FeetCollision";
+    private const string CAMERA_NAME = "Main Camera";
     private string CAMERA_ORIGIN = "CameraOrigin";
+    private string CAMERA_ARMATURE = "CameraArmature";
+    private string CAMERA_CENTERPOINT = "CameraCenterpoint";
+    private readonly LayerMask CAMERA_COLLISION_LAYERS = LayerMask.GetMask("Default", "Floor", "Buildable");
     private const float MAX_PITCH = 45f;
     private const float JUMP_FORCE = 150f;
     private float fullPitchRange = 2f * MAX_PITCH;
@@ -29,6 +33,10 @@ public class PlayerEntityControls
 
     private PlayerEntity player;
     private Transform cameraArmature;
+    private Transform cameraOrigin;
+    private Transform cameraCenterpoint;
+    private Transform cameraTransform;
+    private float armatureMagnitude;
     private IControlScheme currentControlScheme;
     private bool isGrounded;
     
@@ -39,7 +47,13 @@ public class PlayerEntityControls
     public PlayerEntityControls(PlayerEntity player)
     {
         this.player = player;
-        cameraArmature = UnityUtils.FindGameObject(player.gameObject, CAMERA_ORIGIN).transform;
+        cameraArmature = UnityUtils.FindGameObject(player.gameObject, CAMERA_ARMATURE).transform;
+        cameraCenterpoint = UnityUtils.FindGameObject(player.gameObject, CAMERA_CENTERPOINT).transform;
+        cameraOrigin = UnityUtils.FindGameObject(player.gameObject, CAMERA_ORIGIN).transform;
+        cameraTransform = GameObject.Find(CAMERA_NAME).transform;
+
+        // This value does not change, so we cache it.
+        armatureMagnitude = (cameraOrigin.position - cameraCenterpoint.position).magnitude;
     }
 
     public void Initialize(IControlScheme controlScheme)
@@ -51,6 +65,12 @@ public class PlayerEntityControls
         feet.AddListenerCollisionStart(OnFeetCollisionStart);
         feet.AddListenerCollisionEnd(OnFeetCollisionEnd);
         Service.EventManager.AddListener(EventId.OnLookInvertToggled, OnLookInverted);
+        Service.UpdateManager.AddObserver(OnUpdate);
+    }
+
+    private void OnUpdate(float dt)
+    {
+        UpdateCameraCollision();
     }
 
     private bool OnLookInverted(object cookie)
@@ -80,12 +100,33 @@ public class PlayerEntityControls
 
         value.y = isLookInverted ? -value.y : value.y;
         player.transform.Rotate(new Vector3(0f, value.x, 0f));
-        Vector3 armatureRotation = cameraArmature.localEulerAngles;
+        Vector3 armatureRotation = cameraTransform.localEulerAngles;
         float minPitch = 360f - MAX_PITCH;
         armatureRotation.x -= value.y;
         armatureRotation.x = (armatureRotation.x > MAX_PITCH && armatureRotation.x < 180f) ? MAX_PITCH : armatureRotation.x;
         armatureRotation.x = (armatureRotation.x < minPitch && armatureRotation.x > 180f) ? minPitch : armatureRotation.x;
-        cameraArmature.localEulerAngles = armatureRotation;
+        cameraTransform.localEulerAngles = armatureRotation;
+    }
+
+    private void UpdateCameraCollision()
+    {
+        Vector3 direction = cameraOrigin.position - cameraCenterpoint.position;
+
+        if (Physics.Raycast(
+            cameraCenterpoint.position, 
+            direction.normalized, 
+            out RaycastHit hit, 
+            armatureMagnitude, CAMERA_COLLISION_LAYERS))
+        {
+            float pct = hit.distance / armatureMagnitude;
+            pct = Mathf.Max(pct - 0.1f, 0f);
+            cameraTransform.localPosition =
+                Vector3.Lerp(cameraCenterpoint.localPosition, cameraOrigin.localPosition, pct);
+        }
+        else
+        {
+            cameraTransform.localPosition = cameraOrigin.localPosition;
+        }
     }
 
     private void UpdateMovement(Vector2 value)
@@ -141,6 +182,7 @@ public class PlayerEntityControls
 
     public void Dispose()
     {
+        Service.UpdateManager.RemoveObserver(OnUpdate);
         Service.EventManager.RemoveListener(EventId.OnLookInvertToggled, OnLookInverted);
         currentControlScheme.Dispose();
         player = null;

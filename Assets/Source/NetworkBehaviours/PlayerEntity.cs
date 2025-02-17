@@ -97,7 +97,7 @@ public class PlayerEntity : NetworkBehaviour
         GameObject cameraObj = GameObject.Find(CAMERA_NAME);
         if (cameraObj != null)
         {
-            GameObject camOrigin = UnityUtils.FindGameObject(gameObject, "CameraOrigin");
+            GameObject camOrigin = UnityUtils.FindGameObject(gameObject, "CameraArmature");
             cameraObj.transform.SetParent(camOrigin.transform);
             cameraObj.transform.localPosition = Vector3.zero;
         }

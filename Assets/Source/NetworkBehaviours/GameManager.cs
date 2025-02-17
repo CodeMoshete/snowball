@@ -381,6 +381,7 @@ public class GameManager : NetworkBehaviour
         {
             Debug.Log("Client successfully disconnected from the server.");
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+            Service.UpdateManager.RemoveObserver(OnUpdate);
             Service.EventManager.RemoveListener(EventId.OnGamePause, OnGamePaused);
             Service.EventManager.RemoveListener(EventId.OnGameResume, OnGameResumed);
             Service.EventManager.RemoveListener(EventId.OnGameQuit, OnGameQuit);
