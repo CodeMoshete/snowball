@@ -62,9 +62,6 @@ public class GameManager : NetworkBehaviour
             StartClient(startData);
             GetGameMetadataServerRpc(NetworkManager.LocalClientId, startData.PlayerName);
         }
-
-        // Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost); TODO - fire after prefab loaded
-        // GetGameMetadataServerRpc(NetworkManager.LocalClientId);
     }
 
     // 2a. Server only - sets up only level related data.
@@ -73,7 +70,6 @@ public class GameManager : NetworkBehaviour
     {
         Debug.Log("Server");
         pickupSystem = new PickupSystem(playerTransforms, OnSnowPickedUp);
-        // levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
         Service.LevelLoader.LoadLevel(startData.LevelName, OnServerLevelPrefabLoaded, OnLevelLoadFail);
     }
 
@@ -310,43 +306,6 @@ public class GameManager : NetworkBehaviour
         Debug.LogError("Level load failed.");
     }
     
-    // // CLIENT CALLED ONLY
-    // private void LoadLevel()
-    // {
-    //     Debug.Log("Load Level");
-    //     if (!IsServer)
-    //     {
-    //         levelPrefab = Instantiate(Resources.Load<GameObject>(startData.LevelName));
-            
-    //         Service.NetworkActions.RegisterNetworkActionsForLevel(levelPrefab);
-    //         Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
-    //         Service.NetworkActions.SyncActionsForLateJoiningUser(startData.StartActions);
-
-    //         GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
-    //         List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
-    //         for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
-    //         {
-    //             string teamName = teamSpawnPoints[i].name;
-    //             List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
-    //             spawnPoints.Add(teamName, spawnPointsTransforms);
-                
-    //             if (!teamRosters.ContainsKey(teamName))
-    //                 teamRosters.Add(teamName, new List<ulong>());
-
-    //             if (!teamQueens.ContainsKey(teamName))
-    //                 teamQueens.Add(teamName, null);
-    //         }
-    //     }
-
-    //     teamQueens[startData.PlayerTeamName] = playerTransforms[startData.TeamQueenPlayerId];
-    //     Service.EventManager.SendEvent(EventId.LevelLoadCompleted, startData);
-
-    //     if (CurrentGameState != GameState.PreGameLobby)
-    //     {
-    //         Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
-    //     }
-    // }
-
     // Triggered when the host presses the "Start Game" button.
     private bool OnStartGameplayPressed(object cookie)
     {

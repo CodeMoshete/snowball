@@ -1,7 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class OnPlayerFrozenTrigger : MonoBehaviour
+public class OnPlayerFrozenTrigger : PlayerEntityProvider
 {
     public PlayerEntity HitPlayer { get; private set; }
     public PlayerEntity ThrownPlayer { get; private set; }
@@ -36,5 +36,10 @@ public class OnPlayerFrozenTrigger : MonoBehaviour
     private void OnDestroy()
     {
         Service.EventManager.RemoveListener(EventId.PlayerHit, OnPlayerHit);
+    }
+
+    public override PlayerEntity GetPlayerEntity()
+    {
+        return HitPlayer;
     }
 }

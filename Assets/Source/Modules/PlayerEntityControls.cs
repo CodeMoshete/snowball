@@ -18,7 +18,7 @@ public class PlayerEntityControls
     {
         get
         {
-            float pitch = cameraArmature.eulerAngles.x;
+            float pitch = cameraTransform.eulerAngles.x;
             if (pitch <= MAX_PITCH)
             {
                 pitch = (MAX_PITCH - pitch) / fullPitchRange;

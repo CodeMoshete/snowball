@@ -388,6 +388,14 @@ public class PlayerEntity : NetworkBehaviour
         return false;
     }
 
+    public void FreezePlayerFromScript()
+    {
+        if (!IsFrozen)
+        {
+            gameManager.TransmitProjectileHitClientRpc(-1, OwnerClientId);
+        }
+    }
+
     public void OnPlayerFrozen()
     {
         iceCube = Instantiate(Resources.Load<GameObject>(ICE_CUBE_RESOURCE)).transform;

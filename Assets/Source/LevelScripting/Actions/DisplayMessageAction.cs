@@ -1,10 +1,11 @@
-using Unity.VisualScripting;
+using Unity.Netcode;
 using UnityEngine;
 
 public class DisplayMessageAction : CustomNetworkAction
 {
     public string Message;
     public float DisplayTime;
+    public PlayerEntityProvider TargetPlayer;
     public CustomAction OnComplete;
     public CustomAction OnMessageDone;
 
@@ -16,8 +17,13 @@ public class DisplayMessageAction : CustomNetworkAction
     public override void InitiateFromNetwork()
     {
         Debug.Log($"Display message: {Message}");
-        Service.EventManager.SendEvent(EventId.DisplayMessage, Message);
-        Service.TimerManager.CreateTimer(DisplayTime, DisplayTimeExpired, null);
+        if (TargetPlayer == null || 
+            NetworkManager.Singleton.LocalClientId == TargetPlayer.GetPlayerEntity().OwnerClientId)
+        {
+            Service.EventManager.SendEvent(EventId.DisplayMessage, Message);
+            Service.TimerManager.CreateTimer(DisplayTime, DisplayTimeExpired, null);
+        }
+            
         if (OnComplete != null)
         {
             OnComplete.Initiate();
