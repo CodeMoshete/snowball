@@ -281,6 +281,24 @@ namespace Utils
             return returnList;
         }
 
+        public static T FindFirstComponentInParents<T>(GameObject baseObject)
+            where T : Component
+        {
+            Component parentComponent = baseObject.GetComponent<T>();
+            if (parentComponent != null)
+            {
+                return parentComponent as T;
+            }
+
+            GameObject parent = baseObject.transform.parent.gameObject;
+            if (parent != null)
+            {
+                return FindFirstComponentInParents<T>(parent);
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Adds a GameObject to a parent with the transform properties it was loaded with.
         /// </summary>

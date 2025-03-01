@@ -42,6 +42,7 @@ public class GameManager : NetworkBehaviour
     private Dictionary<GameObject, GameObject> walls = new Dictionary<GameObject, GameObject>();
     private PickupSystem pickupSystem;
     private List<BoxCollider> spawnVolumes;
+    private AudioSource soundEffectPlayer;
     private float blizzardCountdown = Constants.BLIZZARD_TIMEOUT;
     private bool didInitQuit;
 
@@ -50,6 +51,7 @@ public class GameManager : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         Debug.Log("GameManager: OnNetworkSpawn");
+        soundEffectPlayer = GetComponent<AudioSource>();
         CurrentGameState = GameState.PreGameLobby;
         if (IsServer)
         {
@@ -90,7 +92,10 @@ public class GameManager : NetworkBehaviour
         }
 
         Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
+        Service.EventManager.AddListener(EventId.OnDeSpawnNetworkObject, OnDeSpawnNetworkObject);
         Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
+        Service.EventManager.AddListener(EventId.OnPlaySoundEffect, OnPlaySoundEffect);
+        Service.EventManager.AddListener(EventId.OnSpawnLocalGameObject, OnSpawnLocalGameObject);
         Service.UpdateManager.AddObserver(OnUpdate);
         Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
         GetGameMetadataServerRpc(NetworkManager.LocalClientId, startData.PlayerName);
@@ -346,6 +351,9 @@ public class GameManager : NetworkBehaviour
             Service.EventManager.RemoveListener(EventId.OnGameQuit, OnGameQuit);
             Service.EventManager.RemoveListener(EventId.NetworkActionTriggered, OnNetworkAction);
             Service.EventManager.RemoveListener(EventId.OnSnowballsSpawnedFromScript, OnSnowballsSpanwedFromScript);
+            Service.EventManager.RemoveListener(EventId.OnPlaySoundEffect, OnPlaySoundEffect);
+            Service.EventManager.RemoveListener(EventId.OnDeSpawnNetworkObject, OnDeSpawnNetworkObject);
+            Service.EventManager.RemoveListener(EventId.OnSpawnLocalGameObject, OnSpawnLocalGameObject);
             Service.NetworkActions.ClearNetworkActionsForCurrentLevel();
             Constants.ResetDefaultValues();
 
@@ -440,6 +448,7 @@ public class GameManager : NetworkBehaviour
 
         Debug.Log("Locally firing projectile!");
         GameObject projectileObj = Instantiate(Resources.Load<GameObject>("LocalSnowball"));
+        // GameObject projectileObj = Instantiate(Resources.Load<GameObject>("LocalSnowballTeleport"));
         projectileObj.transform.position = position;
         projectileObj.transform.eulerAngles = euler;
 
@@ -475,10 +484,12 @@ public class GameManager : NetworkBehaviour
             if (throwingPlayer.TeamName.Value == hitPlayer.TeamName.Value)
             {
                 hitData.Outcome = PlayerFrozenState.LocalPlayerFrozeTeammate;
+                Service.EventManager.SendEvent(EventId.OnPlaySoundEffect, "Audio/TeamkillSound");
             }
             else
             {
                 hitData.Outcome = PlayerFrozenState.LocalPlayerFrozeEnemy;
+                Service.EventManager.SendEvent(EventId.OnPlaySoundEffect, "Audio/Boink");
             }
         }
         else if (hitPlayer.TeamName.Value == LocalPlayer.TeamName.Value)
@@ -498,6 +509,21 @@ public class GameManager : NetworkBehaviour
         }
 
         Service.EventManager.SendEvent(EventId.PlayerHit, hitData);
+    }
+
+    private bool OnSpawnLocalGameObject(object cookie)
+    {
+        SpawnResourceEventData spawnData = (SpawnResourceEventData)cookie;
+        TransmitLocalGameObjectSpawnedRpc(spawnData.ResourcePath, spawnData.Position, spawnData.Rotation);
+        return true;
+    }
+
+    [Rpc(SendTo.Everyone)]
+    public void TransmitLocalGameObjectSpawnedRpc(string resourceName, Vector3 position, Vector3 euler)
+    {
+        GameObject instantiatedObj = Instantiate(Resources.Load<GameObject>(resourceName));
+        instantiatedObj.transform.position = position;
+        instantiatedObj.transform.eulerAngles = euler;
     }
 
     [Rpc(SendTo.Everyone)]
@@ -628,21 +654,39 @@ public class GameManager : NetworkBehaviour
         instantiatedWall.transform.position = position;
         instantiatedWall.transform.eulerAngles = euler;
         Rigidbody rigidBody = instantiatedWall.GetComponent<Rigidbody>();
-        rigidBody.position = position;
-        rigidBody.rotation = Quaternion.Euler(euler);
+        if (rigidBody != null)
+        {
+            rigidBody.position = position;
+            rigidBody.rotation = Quaternion.Euler(euler);
+        }
 
         GameObject toppleCollider = UnityUtils.FindGameObject(instantiatedWall, "ToppleDetection");
-        CollisionEventDispatcher collisionEvents = toppleCollider.GetComponent<CollisionEventDispatcher>();
-        collisionEvents.AddListenerCollisionStart(OnWallToppled);
-        walls.Add(toppleCollider, instantiatedWall);
+        if (toppleCollider != null)
+        {
+            CollisionEventDispatcher collisionEvents = toppleCollider.GetComponent<CollisionEventDispatcher>();
+            collisionEvents.AddListenerCollisionStart(OnWallToppled);
+            walls.Add(toppleCollider, instantiatedWall);
+        }
     }
 
     private void OnWallToppled(GameObject toppleDetector)
     {
         GameObject wallObject = walls[toppleDetector];
-        NetworkObject netObj = wallObject.GetComponent<NetworkObject>();
-        netObj.Despawn();
+        DeSpawnNetworkObjectFromScript(wallObject);
         walls.Remove(toppleDetector);
+    }
+
+    private bool OnDeSpawnNetworkObject(object cookie)
+    {
+        GameObject netGameObj = (GameObject)cookie;
+        DeSpawnNetworkObjectFromScript(netGameObj);
+        return true;
+    }
+
+    private void DeSpawnNetworkObjectFromScript(GameObject netGameObj)
+    {
+        NetworkObject netObj = netGameObj.GetComponent<NetworkObject>();
+        netObj.Despawn();
     }
 
     // SERVER CALLED ONLY
@@ -685,7 +729,7 @@ public class GameManager : NetworkBehaviour
         for (int i = 0, count = spawnPositions.Length; i < count; ++i)
         {
             Vector3 position = spawnPositions[i];
-            Debug.Log("Locally firing projectile!");
+            // Debug.Log("Locally firing projectile!");
             GameObject projectileObj = Instantiate(Resources.Load<GameObject>("LocalSnowball"));
             projectileObj.transform.position = position;
 
@@ -695,6 +739,14 @@ public class GameManager : NetworkBehaviour
             LocalProjectlie projComp = projectileObj.GetComponent<LocalProjectlie>();
             projComp.SetOwner(null, IsServer);
         }
+    }
+
+    private bool OnPlaySoundEffect(object cookie)
+    {
+        string soundResource = (string)cookie;
+        Debug.Log($"Play audio: {soundResource}");
+        soundEffectPlayer.PlayOneShot(Resources.Load<AudioClip>(soundResource));
+        return true;
     }
 
     private bool OnNetworkAction(object cookie)

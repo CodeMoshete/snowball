@@ -388,6 +388,14 @@ public class PlayerEntity : NetworkBehaviour
         return false;
     }
 
+    [Rpc(SendTo.Everyone)]
+    public void SetPlayerPositionFromScriptRpc(Vector3 newPosition)
+    {
+        GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+        transform.position = newPosition;
+        Debug.Log("[PlayerEntity] Set player position to " + newPosition.ToString());
+    }
+
     public void FreezePlayerFromScript()
     {
         if (!IsFrozen)

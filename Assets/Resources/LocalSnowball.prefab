@@ -96,6 +96,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f8b81b11ce5348989865117ecd66358, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  FreezePlayer: 1
+  LeaveSnowPile: 1
+  HitPlayerProvider: {fileID: 0}
+  ThrowingPlayerProvider: {fileID: 0}
+  HitTransformProvider: {fileID: 0}
+  OnHitPlayer: {fileID: 0}
+  OnHitObjective: {fileID: 0}
+  OnHitFloor: {fileID: 0}
 --- !u!114 &1763849751745074174
 MonoBehaviour:
   m_ObjectHideFlags: 0

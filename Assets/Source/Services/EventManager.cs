@@ -25,12 +25,15 @@ public enum EventId
     OnWallPlacementEnded,
     OnWallBuildingDisabled,
     OnWallBuildingEnabled,
+    OnDeSpawnNetworkObject,
     OnMenuUIButtonPressed,
     OnGameOver,
     DisplayMessage,
     HideMessage,
     OnLookInvertToggled,
-    NetworkActionTriggered
+    NetworkActionTriggered,
+    OnPlaySoundEffect,
+    OnSpawnLocalGameObject
 }
 
 public delegate bool EventCallback(object cookie);

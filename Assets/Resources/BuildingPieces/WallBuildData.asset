@@ -29,3 +29,7 @@ MonoBehaviour:
     GhostPrefabName: HalfWallGhost
     SpawnOffsetPos: {x: 0, y: 0.25, z: 2.5}
     SpawnOffsetEuler: {x: 0, y: 90, z: 0}
+  - PrefabName: LowerFloor
+    GhostPrefabName: LowerFloorGhost
+    SpawnOffsetPos: {x: 0, y: 0.1, z: 2}
+    SpawnOffsetEuler: {x: 0, y: 90, z: 0}

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 public class LocalProjectlie : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class LocalProjectlie : MonoBehaviour
     private const string FLOOR_TAG = "Floor";
     private const string CHASM_TAG = "Chasm";
     private const string OBJECTIVE_TAG = "ProjectileObjective";
+    private const string HEALTH_TAG = "HealthObject";
     private Rigidbody rigidBody;
     private Transform owner;
     private PlayerEntity ownerPlayer;
@@ -17,6 +19,17 @@ public class LocalProjectlie : MonoBehaviour
     private List<string> collisionTags;
     private bool isServer;
     private bool isMinorCollisionUsed;
+    
+    public bool FreezePlayer;
+    public bool LeaveSnowPile;
+
+    public ExplicitPlayerEntityProvider HitPlayerProvider;
+    public ExplicitPlayerEntityProvider ThrowingPlayerProvider;
+    public ExplicitTransformProvider HitTransformProvider;
+
+    public CustomAction OnHitPlayer;
+    public CustomAction OnHitObjective;
+    public CustomAction OnHitFloor;
 
     private void Start()
     {
@@ -25,7 +38,8 @@ public class LocalProjectlie : MonoBehaviour
             PLAYER_TAG,
             FLOOR_TAG,
             CHASM_TAG,
-            OBJECTIVE_TAG
+            OBJECTIVE_TAG,
+            HEALTH_TAG
         };
         rigidBody = GetComponent<Rigidbody>();
         gameManager = GameObject.Find(Constants.GAME_MANAGER_NAME).GetComponent<GameManager>();
@@ -53,25 +67,60 @@ public class LocalProjectlie : MonoBehaviour
         if (collisionTags.IndexOf(collision.transform.tag) >= 0)
         {
             ContactPoint contactPt = collision.GetContact(0);
+            if (HitTransformProvider != null)
+                HitTransformProvider.Position = contactPt.point;
+
             if (isServer)
             {
                 Debug.Log("Server collision with " + collision.transform.name);
+                
+                if (ThrowingPlayerProvider != null)
+                        ThrowingPlayerProvider.Player = ownerPlayer;
+
                 PlayerEntity otherPlayer = collision.gameObject.GetComponent<PlayerEntity>();
-                if (otherPlayer != null && !otherPlayer.IsFrozen && (otherPlayer.TeamName.Value != ownerTeamName || Constants.IS_FRIENDLY_FIRE_ON))
+                if (otherPlayer != null)
                 {
+                    if (HitPlayerProvider != null)
+                        HitPlayerProvider.Player = otherPlayer;
+
                     Debug.Log("Collide with player " + otherPlayer.name + "(" + otherPlayer.TeamName.Value + ")");
-                    long ownerClientId = ownerPlayer != null ? (long)ownerPlayer.OwnerClientId : -1;
-                    gameManager.TransmitProjectileHitClientRpc(ownerClientId, otherPlayer.OwnerClientId);
+                    if (!otherPlayer.IsFrozen &&
+                        (otherPlayer.TeamName.Value != ownerTeamName || Constants.IS_FRIENDLY_FIRE_ON) &&
+                        FreezePlayer)
+                    {
+                        long ownerClientId = ownerPlayer != null ? (long)ownerPlayer.OwnerClientId : -1;
+                        gameManager.TransmitProjectileHitClientRpc(ownerClientId, otherPlayer.OwnerClientId);
+                    }
+
+                    if (OnHitPlayer != null)
+                        OnHitPlayer.Initiate();
                 }
                 else if(collision.gameObject.tag == FLOOR_TAG)
                 {
-                    gameManager.ProjectileHitFloorServerRpc(contactPt.point);
+                    if (LeaveSnowPile)
+                        gameManager.ProjectileHitFloorServerRpc(contactPt.point);
+
+                    if (OnHitFloor != null)
+                    {
+                        OnHitFloor.Initiate();
+                    }
                 }
                 else if (collision.gameObject.tag == OBJECTIVE_TAG)
                 {
                     Debug.Log("Projectile hit an objective!");
                     long ownerClientId = ownerPlayer != null ? (long)ownerPlayer.OwnerClientId : -1;
                     gameManager.ProjectileHitObjectiveServerRpc(ownerClientId, collision.gameObject.name);
+
+                    if (OnHitObjective != null)
+                    {
+                        OnHitObjective.Initiate();
+                    }
+                }
+                else if (collision.gameObject.tag == HEALTH_TAG)
+                {
+                    Debug.Log($"Projectile hit a health object: {collision.gameObject.name}");
+                    ObjectHealthTrigger healthTrigger = UnityUtils.FindFirstComponentInParents<ObjectHealthTrigger>(collision.gameObject);
+                    healthTrigger.OnHit();
                 }
             }
             TriggerCollisionEffect(IMPACT_EFFECT_RESOURCE, contactPt);
