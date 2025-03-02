@@ -59,7 +59,7 @@ public class PlayerEntityControls
     public void Initialize(IControlScheme controlScheme)
     {
         currentControlScheme = controlScheme;
-        currentControlScheme.Initialize(UpdateLook, UpdateMovement, OnThrow, OnJump, OnSpawnWall, OnNextWall, OnPrevWall, OnEscape);
+        currentControlScheme.Initialize(UpdateLook, UpdateMovement, OnThrow, OnCycleSnowballAmmo, OnJump, OnSpawnWall, OnNextWall, OnPrevWall, OnEscape);
         CollisionEventDispatcher feet = UnityUtils.FindGameObject(player.gameObject, FEET_OBJECT_NAME).GetComponent<CollisionEventDispatcher>();
         feet.gameObject.SetActive(true);
         feet.AddListenerCollisionStart(OnFeetCollisionStart);
@@ -173,6 +173,11 @@ public class PlayerEntityControls
     private void OnPrevWall()
     {
         player.OnPrevWallPressed();
+    }
+
+    private void OnCycleSnowballAmmo()
+    {
+        player.OnCycleSnowballAmmoPressed();
     }
 
     private void OnEscape()

@@ -23,6 +23,7 @@ public class LocalProjectlie : MonoBehaviour
     public bool FreezePlayer;
     public bool LeaveSnowPile;
 
+    public SnowballType Type;
     public ExplicitPlayerEntityProvider HitPlayerProvider;
     public ExplicitPlayerEntityProvider ThrowingPlayerProvider;
     public ExplicitTransformProvider HitTransformProvider;
@@ -98,7 +99,7 @@ public class LocalProjectlie : MonoBehaviour
                 else if(collision.gameObject.tag == FLOOR_TAG)
                 {
                     if (LeaveSnowPile)
-                        gameManager.ProjectileHitFloorServerRpc(contactPt.point);
+                        gameManager.ProjectileHitFloorServerRpc(contactPt.point, Type);
 
                     if (OnHitFloor != null)
                     {

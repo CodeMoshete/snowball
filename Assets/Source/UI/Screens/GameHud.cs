@@ -8,19 +8,26 @@ public class GameHud : MonoBehaviour
     private readonly Color GREEN_HIT_NOTIFICATION = new Color(0.41f, 1f, 0.57f);
     private readonly Color RED_HIT_NOTIFICATION = new Color(1f, 0.76f, 0.78f);
     public TMP_Text AmmoCountField;
+    public TMP_Text AmmoNameField;
+    public TMP_Text AmmoDescriptionField;
     public GameObject TooltipObject;
     public TMP_Text TooltipText;
     public MobileHud MobileHud;
     public GameObject BuildingTooltipObj;
     public Image BuildingProgressBar;
+    public GameObject DesktopControlsPromptPanel;
+    public GameObject DesktopControlsPanel;
+    public Image CurrentAmmoIcon;
 
     private float totalBuildTime;
     private float currentBuildTime;
     private bool isBuilding;
+    private SnowballInventoryItem currentAmmo;
 
     private void Start()
     {
         Service.EventManager.AddListener(EventId.AmmoUpdated, OnAmmoUpdated);
+        Service.EventManager.AddListener(EventId.AmmoTypeCycled, OnAmmoTypeUpdated);
         Service.EventManager.AddListener(EventId.GameStateChanged, OnGameStateChanged);
         Service.EventManager.AddListener(EventId.DisplayMessage, OnDisplayMessage);
         Service.EventManager.AddListener(EventId.HideMessage, OnHideMessage);
@@ -29,10 +36,23 @@ public class GameHud : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    private bool OnAmmoTypeUpdated(object cookie)
+    {
+        currentAmmo = (SnowballInventoryItem)cookie;
+        CurrentAmmoIcon.sprite = Resources.Load<Sprite>(currentAmmo.ThrowableObject.IconName);
+        OnAmmoUpdated(currentAmmo);
+
+        AmmoNameField.text = currentAmmo.ThrowableObject.DisplayName;
+        AmmoDescriptionField.text = currentAmmo.ThrowableObject.Description;
+        // TODO: Play reveal / hide animation.
+
+        return false;
+    }
+
     private bool OnAmmoUpdated(object cookie)
     {
-        int newCount = (int)cookie;
-        AmmoCountField.text = newCount.ToString();
+        SnowballInventoryItem inventoryItem = (SnowballInventoryItem)cookie;
+        AmmoCountField.text = inventoryItem.Quantity.ToString();
         return true;
     }
 
@@ -136,6 +156,7 @@ public class GameHud : MonoBehaviour
     {
         isBuilding = false;
         Service.EventManager.RemoveListener(EventId.AmmoUpdated, OnAmmoUpdated);
+        Service.EventManager.RemoveListener(EventId.AmmoTypeCycled, OnAmmoTypeUpdated);
         Service.EventManager.RemoveListener(EventId.GameStateChanged, OnGameStateChanged);
         Service.EventManager.RemoveListener(EventId.DisplayMessage, OnDisplayMessage);
         Service.EventManager.RemoveListener(EventId.HideMessage, OnHideMessage);

@@ -11,6 +11,7 @@ public class MobileControlScheme : IControlScheme
     private Action<Vector2> updateLook;
     private Action<Vector2> updateMovement;
     private Action onThrow;
+    private Action onCycleAmmo;
     private Action onJump;
     private Action onSpawnWall;
     private Action onNextWall;
@@ -27,6 +28,7 @@ public class MobileControlScheme : IControlScheme
         Action<Vector2> onUpdateLook, 
         Action<Vector2> onUpdateMovement,
         Action onThrow, 
+        Action onCycleAmmo,
         Action onJump, 
         Action onSpawnWall, 
         Action onNextWall,
@@ -36,6 +38,7 @@ public class MobileControlScheme : IControlScheme
         updateLook = onUpdateLook;
         updateMovement = onUpdateMovement;
         this.onThrow = onThrow;
+        this.onCycleAmmo = onCycleAmmo;
         this.onJump = onJump;
         this.onSpawnWall = onSpawnWall;
         this.onNextWall = onNextWall;
@@ -44,6 +47,7 @@ public class MobileControlScheme : IControlScheme
 
         Service.UpdateManager.AddObserver(OnUpdate);
         Service.EventManager.AddListener(EventId.OnThrowUIButtonPressed, OnThrowPressed);
+        Service.EventManager.AddListener(EventId.OnCycleAmmoButtonPressed, OnCycleAmmoPressed);
         Service.EventManager.AddListener(EventId.OnJumpUIButtonPressed, OnJumpPressed);
         Service.EventManager.AddListener(EventId.OnWallUIButtonPressed, OnWallPressed);
         Service.EventManager.AddListener(EventId.OnNextWallUIButtonPressed, OnNextWallPressed);
@@ -55,6 +59,12 @@ public class MobileControlScheme : IControlScheme
     private bool OnThrowPressed(object cookie)
     {
         onThrow();
+        return true;
+    }
+
+    private bool OnCycleAmmoPressed(object cookie)
+    {
+        onCycleAmmo();
         return true;
     }
 

@@ -179,6 +179,7 @@ public class GameManager : NetworkBehaviour
         startData.TeamQueenPlayerId = player.OwnerClientId;
 
         ReceiveGameMetadataClientRpc(startData, RpcTarget.Single(clientId, RpcTargetUse.Temp));
+        player.SetPlayerSnowCountClientRpc(SnowballType.Basic, Constants.DEFAULT_START_AMMO);
     }
 
     // SERVER CALLED ONLY
@@ -429,25 +430,45 @@ public class GameManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    public void FireProjectileServerRpc(Vector3 position, Vector3 euler, Vector3 fwd, float verticalVel, ulong ownerId)
-    {
-        FireProjectileClientRpc(position, euler, fwd, verticalVel, ownerId);
-    }
-
-    [Rpc(SendTo.Everyone)]
-    public void FireProjectileClientRpc(Vector3 position, Vector3 euler, Vector3 fwd, float verticalVel, ulong ownerId)
+    public void FireProjectileServerRpc(Vector3 position, Vector3 euler, Vector3 fwd, float verticalVel, ulong ownerId, SnowballType type = SnowballType.Basic)
     {
         Transform owner = playerTransforms[ownerId];
         PlayerEntity player = owner.GetComponent<PlayerEntity>();
-        if (player.SnowCount.Value <= 0)
+        SnowballInventoryItem playerInventory = player.GetInventoryForType(type);
+        if (playerInventory.Quantity <= 0)
         {
             Debug.Log("Not enough ammo!");
             return;
         }
-        player.SetPlayerSnowCountServerRpc(player.SnowCount.Value - 1);
+        player.SetPlayerSnowCountClientRpc(type, playerInventory.Quantity - 1);
+
+        FireProjectileClientRpc(position, euler, fwd, verticalVel, ownerId, type);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    public void FireProjectileClientRpc(Vector3 position, Vector3 euler, Vector3 fwd, float verticalVel, ulong ownerId, SnowballType type = SnowballType.Basic)
+    {
+        Transform owner = playerTransforms[ownerId];
+        PlayerEntity player = owner.GetComponent<PlayerEntity>();
+        // if (player.SnowCount.Value <= 0)
+        // {
+        //     Debug.Log("Not enough ammo!");
+        //     return;
+        // }
+        // player.SetPlayerSnowCountServerRpc(player.SnowCount.Value - 1);
+
+        // SnowballInventoryItem playerInventory = player.GetInventoryForType(type);
+        // if (playerInventory.Quantity <= 0)
+        // {
+        //     Debug.Log("Not enough ammo!");
+        //     return;
+        // }
+        // player.SetPlayerSnowCountClientRpc(type, playerInventory.Quantity - 1);
+        // playerInventory.Quantity--;
 
         Debug.Log("Locally firing projectile!");
-        GameObject projectileObj = Instantiate(Resources.Load<GameObject>("LocalSnowball"));
+        ThrowableObject thrownSnowball = Constants.SnowballTypes.ThrowableObjects.Find(item => item.Type == type);
+        GameObject projectileObj = Instantiate(Resources.Load<GameObject>(thrownSnowball.PrefabName));
         // GameObject projectileObj = Instantiate(Resources.Load<GameObject>("LocalSnowballTeleport"));
         projectileObj.transform.position = position;
         projectileObj.transform.eulerAngles = euler;
@@ -537,9 +558,10 @@ public class GameManager : NetworkBehaviour
 
     // SERVER CALLED ONLY
     [Rpc(SendTo.Server)]
-    public void ProjectileHitFloorServerRpc(Vector3 position)
+    public void ProjectileHitFloorServerRpc(Vector3 position, SnowballType type)
     {
-        GameObject instantiatedPile = Instantiate(Resources.Load<GameObject>(SNOW_PILE_RESOURCE));
+        ThrowableObject snowball = Constants.SnowballTypes.ThrowableObjects.Find(item => item.Type == type);
+        GameObject instantiatedPile = Instantiate(Resources.Load<GameObject>(snowball.PickupPrefabName));
         NetworkObject netObj = instantiatedPile.GetComponent<NetworkObject>();
         instantiatedPile.transform.position = position;
         instantiatedPile.transform.eulerAngles = new Vector3(-90f, Random.Range(0f, 360f), 0f);
@@ -641,12 +663,20 @@ public class GameManager : NetworkBehaviour
     {
         Transform playerTransform = playerTransforms[ownerId];
         PlayerEntity player = playerTransform.GetComponent<PlayerEntity>();
-        if (player.SnowCount.Value < Constants.WallCost)
+        // if (player.SnowCount.Value < Constants.WallCost)
+        // {
+        //     Debug.Log($"Player {ownerId}: Not enough Snowballs to make a wall!");
+        //     return;
+        // }
+        // player.SetPlayerSnowCountServerRpc(player.SnowCount.Value - Constants.WallCost);
+
+        SnowballInventoryItem playerInventory = player.GetInventoryForType(SnowballType.Basic);
+        if (playerInventory.Quantity < Constants.WallCost)
         {
             Debug.Log($"Player {ownerId}: Not enough Snowballs to make a wall!");
             return;
         }
-        player.SetPlayerSnowCountServerRpc(player.SnowCount.Value - Constants.WallCost);
+        player.SetPlayerSnowCountClientRpc(SnowballType.Basic, playerInventory.Quantity - Constants.WallCost);
 
         GameObject instantiatedWall = Instantiate(Resources.Load<GameObject>(resourceName));
         NetworkObject netObj = instantiatedWall.GetComponent<NetworkObject>();
@@ -692,7 +722,9 @@ public class GameManager : NetworkBehaviour
     // SERVER CALLED ONLY
     private void OnSnowPickedUp(Transform pickup, PlayerEntity player)
     {
-        player.SetPlayerSnowCountServerRpc(player.SnowCount.Value + 1);
+        // player.SetPlayerSnowCountServerRpc(player.SnowCount.Value + 1);
+        SnowPile pileData = pickup.GetComponent<SnowPile>();
+        player.SetPlayerSnowCountClientRpc(pileData.Type, player.GetInventoryForType(pileData.Type).Quantity + 1);
         pickupSystem.UnregisterPickup(pickup);
         Destroy(pickup.gameObject);
     }
@@ -730,7 +762,7 @@ public class GameManager : NetworkBehaviour
         {
             Vector3 position = spawnPositions[i];
             // Debug.Log("Locally firing projectile!");
-            GameObject projectileObj = Instantiate(Resources.Load<GameObject>("LocalSnowball"));
+            GameObject projectileObj = Instantiate(Resources.Load<GameObject>(Constants.LOCAL_SNOWBALL_PREFAB_NAME));
             projectileObj.transform.position = position;
 
             Rigidbody rb = projectileObj.GetComponent<Rigidbody>();

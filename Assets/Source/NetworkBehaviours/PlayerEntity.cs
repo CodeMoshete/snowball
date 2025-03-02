@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -23,6 +24,7 @@ public class PlayerEntity : NetworkBehaviour
     public const string CROWN_REFERENCE_POS_NAME = "CrownOrigin";
     private const string CAMERA_NAME = "Main Camera";
     private const string BUILDABLES_RESOURCE = "BuildingPieces/WallBuildData";
+    private const string THROWABLES_RESOURCE = "ThrowableObjects/Throwables";
     public float Speed = 5;
     public float RotationSpeed = 40f;
     public Transform ProjectileOriginReference;
@@ -30,7 +32,7 @@ public class PlayerEntity : NetworkBehaviour
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>(Constants.TEAM_UNASSIGNED);
     public NetworkVariable<FixedString64Bytes> PlayerName = new NetworkVariable<FixedString64Bytes>(Constants.PLAYER_NAME_DEFAULT);
     public NetworkVariable<PlayerClass> CurrentPlayerClass = new NetworkVariable<PlayerClass>(global::PlayerClass.Soldier);
-    public NetworkVariable<int> SnowCount = new NetworkVariable<int>(3);
+    // public NetworkVariable<int> SnowCount = new NetworkVariable<int>(3);
 
     public bool IsFrozen { get; private set; }
     public bool IsControlDisabled { 
@@ -47,6 +49,9 @@ public class PlayerEntity : NetworkBehaviour
     private Buildables wallOptions;
     private int currentWallOptionIndex;
 
+    private List<SnowballInventoryItem> snowballInventory;
+    private int currentSnowballTypeIndex;
+
     private PlayerEntityControls controls;
 
     private GameManager gameManager;
@@ -59,8 +64,21 @@ public class PlayerEntity : NetworkBehaviour
         TeamName.OnValueChanged += OnTeamNameChanged;
         PlayerName.OnValueChanged += OnPlayerNameChanged;
         CurrentPlayerClass.OnValueChanged += OnPlayerClassChanged;
-        SnowCount.OnValueChanged += OnSnowResourceChanged;
+        // SnowCount.OnValueChanged += OnSnowResourceChanged;
         wallOptions = Resources.Load<Buildables>(BUILDABLES_RESOURCE);
+        
+        Constants.SnowballTypes = Resources.Load<Throwables>(THROWABLES_RESOURCE);
+        snowballInventory = new List<SnowballInventoryItem>();
+        // Pre-fill each ammo type with 0 quantity.
+        for (int i = 0; i < Constants.SnowballTypes.ThrowableObjects.Count; i++)
+        {
+            snowballInventory.Add(new SnowballInventoryItem
+            {
+                ThrowableObject = Constants.SnowballTypes.ThrowableObjects[i],
+                Quantity = 0
+            });
+        }
+
         gameManager = GameObject.Find(Constants.GAME_MANAGER_NAME).GetComponent<GameManager>();
         gameManager.RegisterPlayerTransform(this);
         if (IsOwner)
@@ -188,20 +206,38 @@ public class PlayerEntity : NetworkBehaviour
         }
     }
 
-    [Rpc(SendTo.Server)]
-    public void SetPlayerSnowCountServerRpc(int newValue)
-    {
-        SnowCount.Value = newValue;
-    }
+    // [Rpc(SendTo.Server)]
+    // public void SetPlayerSnowCountServerRpc(int newValue)
+    // {
+    //     SnowCount.Value = newValue;
+    // }
 
-    private void OnSnowResourceChanged(int oldValue, int newValue)
+    [Rpc(SendTo.Everyone)]
+    public void SetPlayerSnowCountClientRpc(SnowballType type, int newAmount)
     {
-        Debug.Log($"Snow count for player {OwnerClientId} changed to {newValue} : {IsOwner}");
+        SnowballInventoryItem inventoryItem = GetInventoryForType(type);
+        inventoryItem.Quantity = newAmount;
+
+        Debug.Log($"Snow count {type} for player {OwnerClientId} changed to {newAmount} : {IsOwner}");
         if (IsOwner)
         {
-            Service.EventManager.SendEvent(EventId.AmmoUpdated, newValue);
+            Service.EventManager.SendEvent(EventId.AmmoUpdated, inventoryItem);
         }
     }
+
+    public SnowballInventoryItem GetInventoryForType(SnowballType type)
+    {
+        return snowballInventory.Find(item => item.ThrowableObject.Type == type);
+    }
+
+    // private void OnSnowResourceChanged(int oldValue, int newValue)
+    // {
+    //     Debug.Log($"Snow count for player {OwnerClientId} changed to {newValue} : {IsOwner}");
+    //     if (IsOwner)
+    //     {
+    //         Service.EventManager.SendEvent(EventId.AmmoUpdated, newValue);
+    //     }
+    // }
 
     private void PlacePlayerAtSpawn(GameStartData startData)
     {
@@ -280,6 +316,19 @@ public class PlayerEntity : NetworkBehaviour
         }
     }
 
+    public void OnCycleSnowballAmmoPressed()
+    {
+        if (currentSnowballTypeIndex >= snowballInventory.Count - 1)
+        {
+            currentSnowballTypeIndex = 0;
+        }
+        else
+        {
+            currentSnowballTypeIndex++;
+        }
+        Service.EventManager.SendEvent(EventId.AmmoTypeCycled, snowballInventory[currentSnowballTypeIndex]);
+    }
+
     public void OnThrowPressed()
     {
         if (IsClient && !isPlacingWall)
@@ -291,7 +340,8 @@ public class PlayerEntity : NetworkBehaviour
                 ProjectileOriginReference.eulerAngles,
                 ProjectileOriginReference.forward,
                 loftPct,
-                OwnerClientId
+                OwnerClientId,
+                snowballInventory[currentSnowballTypeIndex].ThrowableObject.Type
             );
         }
     }
@@ -364,7 +414,7 @@ public class PlayerEntity : NetworkBehaviour
 
     private void StartPlacingWall()
     {
-        if (SnowCount.Value < Constants.WallCost)
+        if (GetInventoryForType(SnowballType.Basic).Quantity < Constants.WallCost)
         {
             return;
         }
@@ -439,6 +489,6 @@ public class PlayerEntity : NetworkBehaviour
         TeamName.OnValueChanged -= OnTeamNameChanged;
         PlayerName.OnValueChanged -= OnPlayerNameChanged;
         CurrentPlayerClass.OnValueChanged -= OnPlayerClassChanged;
-        SnowCount.OnValueChanged -= OnSnowResourceChanged;
+        // SnowCount.OnValueChanged -= OnSnowResourceChanged;
     }
 }

@@ -10,6 +10,7 @@ public class KeyboardMouseControlScheme : IControlScheme
     private Action<Vector2> updateLook;
     private Action<Vector2> updateMovement;
     private Action onThrow;
+    private Action onCycleAmmo;
     private Action onJump;
     private Action onSpawnWall;
     private Action onNextWall;
@@ -21,6 +22,7 @@ public class KeyboardMouseControlScheme : IControlScheme
         Action<Vector2> onUpdateLook, 
         Action<Vector2> onUpdateMovement, 
         Action onThrow, 
+        Action onCycleAmmo,
         Action onJump, 
         Action onSpawnWall,
         Action onNextWall,
@@ -30,6 +32,7 @@ public class KeyboardMouseControlScheme : IControlScheme
         updateLook = onUpdateLook;
         updateMovement = onUpdateMovement;
         this.onThrow = onThrow;
+        this.onCycleAmmo = onCycleAmmo;
         this.onJump = onJump;
         this.onSpawnWall = onSpawnWall;
         this.onNextWall = onNextWall;
@@ -83,6 +86,11 @@ public class KeyboardMouseControlScheme : IControlScheme
         if (Input.GetMouseButtonDown(0))
         {
             onThrow();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            onCycleAmmo();
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
