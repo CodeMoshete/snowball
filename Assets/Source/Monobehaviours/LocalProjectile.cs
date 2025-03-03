@@ -21,7 +21,7 @@ public class LocalProjectlie : MonoBehaviour
     private bool isMinorCollisionUsed;
     
     public bool FreezePlayer;
-    public bool LeaveSnowPile;
+    public bool LeaveSnowPileOnThrow;
 
     public SnowballType Type;
     public ExplicitPlayerEntityProvider HitPlayerProvider;
@@ -98,7 +98,7 @@ public class LocalProjectlie : MonoBehaviour
                 }
                 else if(collision.gameObject.tag == FLOOR_TAG)
                 {
-                    if (LeaveSnowPile)
+                    if (LeaveSnowPileOnThrow || ownerPlayer == null)
                         gameManager.ProjectileHitFloorServerRpc(contactPt.point, Type);
 
                     if (OnHitFloor != null)

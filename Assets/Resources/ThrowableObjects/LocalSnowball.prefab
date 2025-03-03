@@ -97,7 +97,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FreezePlayer: 1
-  LeaveSnowPile: 1
+  LeaveSnowPileOnThrow: 1
+  Type: 0
   HitPlayerProvider: {fileID: 0}
   ThrowingPlayerProvider: {fileID: 0}
   HitTransformProvider: {fileID: 0}

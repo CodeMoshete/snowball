@@ -320,7 +320,7 @@ public class GameManager : NetworkBehaviour
         // Populate snowball spawn volumes
         GameObject spawnVolumesContaier = UnityUtils.FindGameObject(levelPrefab, "SnowballSpawnVolumes");
         spawnVolumes = UnityUtils.FindAllComponentsInChildren<BoxCollider>(spawnVolumesContaier);
-        SpawnSnowballs(5);
+        // SpawnSnowballs(5);
         BroadcastGameStartRpc();
         return true;
     }
@@ -329,15 +329,14 @@ public class GameManager : NetworkBehaviour
     private void BroadcastGameStartRpc()
     {
         CurrentGameState = GameState.Gameplay;
-        Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
-        Service.EventManager.AddListener(EventId.OnGamePause, OnGamePaused);
-        Service.EventManager.AddListener(EventId.OnGameResume, OnGameResumed);
-        Service.EventManager.AddListener(EventId.OnGameQuit, OnGameQuit);
-        
         if (IsServer)
         {
             Service.EventManager.AddListener(EventId.OnSnowballsSpawnedFromScript, OnSnowballsSpanwedFromScript);
         }
+        Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
+        Service.EventManager.AddListener(EventId.OnGamePause, OnGamePaused);
+        Service.EventManager.AddListener(EventId.OnGameResume, OnGameResumed);
+        Service.EventManager.AddListener(EventId.OnGameQuit, OnGameQuit);
     }
 
     private void OnClientDisconnected(ulong clientId)
@@ -418,15 +417,15 @@ public class GameManager : NetworkBehaviour
 
     private void OnUpdate(float dt)
     {
-        if (CurrentGameState == GameState.Gameplay || CurrentGameState == GameState.GameplayPaused)
-        {
-            blizzardCountdown -= dt;
-            if (blizzardCountdown <= 0f)
-            {
-                SpawnSnowballs(5);
-                blizzardCountdown = Constants.BLIZZARD_TIMEOUT;
-            }
-        }
+        // if (CurrentGameState == GameState.Gameplay || CurrentGameState == GameState.GameplayPaused)
+        // {
+        //     blizzardCountdown -= dt;
+        //     if (blizzardCountdown <= 0f)
+        //     {
+        //         SpawnSnowballs(5);
+        //         blizzardCountdown = Constants.BLIZZARD_TIMEOUT;
+        //     }
+        // }
     }
 
     [Rpc(SendTo.Server)]
@@ -750,19 +749,25 @@ public class GameManager : NetworkBehaviour
 
     private bool OnSnowballsSpanwedFromScript(object cookie)
     {
-        Vector3[] spawnPositions = (Vector3[])cookie;
-        SpawnSnowballsClientRpc(spawnPositions);
+        List<SnowballSpawnData> spawnData = (List<SnowballSpawnData>)cookie;
+        for (int i = 0, count = spawnData.Count; i < count; ++i)
+        {
+            SnowballSpawnData data = spawnData[i];
+            Vector3[] spawnPositions = data.SpawnPositions.ToArray();
+            SpawnSnowballsClientRpc(spawnPositions, data.Type);
+        }
         return false;
     }
 
     [Rpc(SendTo.Everyone)]
-    public void SpawnSnowballsClientRpc(Vector3[] spawnPositions)
+    public void SpawnSnowballsClientRpc(Vector3[] spawnPositions, SnowballType type = SnowballType.Basic)
     {
         for (int i = 0, count = spawnPositions.Length; i < count; ++i)
         {
             Vector3 position = spawnPositions[i];
             // Debug.Log("Locally firing projectile!");
-            GameObject projectileObj = Instantiate(Resources.Load<GameObject>(Constants.LOCAL_SNOWBALL_PREFAB_NAME));
+            ThrowableObject spawnType = Constants.SnowballTypes.ThrowableObjects.Find(item => item.Type == type);
+            GameObject projectileObj = Instantiate(Resources.Load<GameObject>(spawnType.PrefabName));
             projectileObj.transform.position = position;
 
             Rigidbody rb = projectileObj.GetComponent<Rigidbody>();

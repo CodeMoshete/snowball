@@ -20,7 +20,7 @@ MonoBehaviour:
     DisplayName: Basic Snowball
     Description: Freeze your opponents and topple their defenses!
   - Type: 1
-    PrefabName: ThrowableObjects/SnowballTeleport
+    PrefabName: ThrowableObjects/LocalSnowballTeleport
     PickupPrefabName: ThrowableObjects/SnowPileTeleport
     IconName: ThrowableObjects/Icons/TeleportSnowball
     DisplayName: Teleportation Snowball

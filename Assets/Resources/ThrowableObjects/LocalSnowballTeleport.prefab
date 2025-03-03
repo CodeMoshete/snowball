@@ -5260,7 +5260,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FreezePlayer: 0
-  LeaveSnowPile: 0
+  LeaveSnowPileOnThrow: 0
+  Type: 1
   HitPlayerProvider: {fileID: 6183593388046926006}
   ThrowingPlayerProvider: {fileID: 4780658047567930048}
   HitTransformProvider: {fileID: 3161300606913251863}

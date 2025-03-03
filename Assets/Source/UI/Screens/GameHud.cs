@@ -52,7 +52,17 @@ public class GameHud : MonoBehaviour
     private bool OnAmmoUpdated(object cookie)
     {
         SnowballInventoryItem inventoryItem = (SnowballInventoryItem)cookie;
-        AmmoCountField.text = inventoryItem.Quantity.ToString();
+
+        // Set initial state.
+        if (currentAmmo == null)
+        {
+            OnAmmoTypeUpdated(inventoryItem);
+        }
+
+        if (inventoryItem.ThrowableObject.Type == currentAmmo.ThrowableObject.Type)
+        {
+            AmmoCountField.text = inventoryItem.Quantity.ToString();
+        }
         return true;
     }
 

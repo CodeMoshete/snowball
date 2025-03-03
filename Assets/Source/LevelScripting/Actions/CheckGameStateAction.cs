@@ -11,7 +11,7 @@ public class CheckGameStateAction : CustomAction
     {
         if (NetworkManager.Singleton.IsServer)
         {
-            GameObject gameManagerObj = GameObject.Find("GameManager (Clone)");
+            GameObject gameManagerObj = GameObject.Find("GameManager(Clone)");
             if (gameManagerObj == null)
             {
                 Debug.LogError("[CheckGameStateAction] GameManager not found!");
