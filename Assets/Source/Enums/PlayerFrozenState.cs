@@ -2,6 +2,7 @@ using UnityEngine;
 
 public enum PlayerFrozenState
 {
+    NotFrozen,
     AllyFrozen,
     EnemyFrozen,
     LocalPlayerFrozen,

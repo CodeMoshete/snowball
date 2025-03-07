@@ -7,6 +7,7 @@ public class Constants
     public const string SNOWBALL_PREFAB_NAME = "Snowball";
     public const string LOCAL_SNOWBALL_PREFAB_NAME = "ThrowableObjects/LocalSnowball";
     public const bool IS_FRIENDLY_FIRE_ON = true;
+    public static float DamageMultiplier = 1f;
     public const int DEFAULT_START_AMMO = 3;
     public const int DEFAULT_WALL_COST = 0;
     public static int WallCost = DEFAULT_WALL_COST;
@@ -14,6 +15,8 @@ public class Constants
     public static float WallBuildTime = DEFAULT_WALL_BUILD_TIME;
     public const bool DEFAULT_BUILDING_ENABLED = true;
     public static bool IsWallBuildingEnabled = DEFAULT_BUILDING_ENABLED;
+    public const float MAX_HEALTH = 100f;
+    public const float HEALTH_RECHARGE_RATE_PER_SEC = 15f;
     public const string TEAM_UNASSIGNED = "Unassigned";
     public const string PLAYER_NAME_DEFAULT = "Cahill";
     public const string ENVIRONMENT_NAME = "The Storm";

@@ -11,11 +11,11 @@ public class OnPlayerFrozenTrigger : PlayerEntityProvider
     {
         if (NetworkManager.Singleton.IsServer)
         {
-            Service.EventManager.AddListener(EventId.PlayerHit, OnPlayerHit);
+            Service.EventManager.AddListener(EventId.PlayerFrozen, OnPlayerFrozen);
         }
     }
 
-    private bool OnPlayerHit(object cookie)
+    private bool OnPlayerFrozen(object cookie)
     {
         PlayerHitData hitData = (PlayerHitData)cookie;
         HitPlayer = hitData.HitPlayer;
@@ -23,7 +23,7 @@ public class OnPlayerFrozenTrigger : PlayerEntityProvider
 
         if (DisableAfterUse)
         {
-            Service.EventManager.RemoveListener(EventId.PlayerHit, OnPlayerHit);
+            Service.EventManager.RemoveListener(EventId.PlayerFrozen, OnPlayerFrozen);
         }
 
         if (OnHit != null)
@@ -35,7 +35,7 @@ public class OnPlayerFrozenTrigger : PlayerEntityProvider
 
     private void OnDestroy()
     {
-        Service.EventManager.RemoveListener(EventId.PlayerHit, OnPlayerHit);
+        Service.EventManager.RemoveListener(EventId.PlayerFrozen, OnPlayerFrozen);
     }
 
     public override PlayerEntity GetPlayerEntity()

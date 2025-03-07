@@ -4,6 +4,7 @@ public enum EventId
 {
     LevelLoadCompleted,
     PlayerHit,
+    PlayerFrozen,
     ObjectiveHit,
     AmmoUpdated,
     AmmoTypeCycled,

@@ -4,10 +4,10 @@ using Utils;
 
 public class PlayerEntityControls
 {
+    private const float MIN_SLOWED_SPEED = 0.5f;
     private string FEET_OBJECT_NAME = "FeetCollision";
     private const string CAMERA_NAME = "Main Camera";
     private string CAMERA_ORIGIN = "CameraOrigin";
-    private string CAMERA_ARMATURE = "CameraArmature";
     private string CAMERA_CENTERPOINT = "CameraCenterpoint";
     private readonly LayerMask CAMERA_COLLISION_LAYERS = LayerMask.GetMask("Default", "Floor", "Buildable");
     private const float MAX_PITCH = 45f;
@@ -32,7 +32,6 @@ public class PlayerEntityControls
     }
 
     private PlayerEntity player;
-    private Transform cameraArmature;
     private Transform cameraOrigin;
     private Transform cameraCenterpoint;
     private Transform cameraTransform;
@@ -47,7 +46,6 @@ public class PlayerEntityControls
     public PlayerEntityControls(PlayerEntity player)
     {
         this.player = player;
-        cameraArmature = UnityUtils.FindGameObject(player.gameObject, CAMERA_ARMATURE).transform;
         cameraCenterpoint = UnityUtils.FindGameObject(player.gameObject, CAMERA_CENTERPOINT).transform;
         cameraOrigin = UnityUtils.FindGameObject(player.gameObject, CAMERA_ORIGIN).transform;
         cameraTransform = GameObject.Find(CAMERA_NAME).transform;
@@ -135,8 +133,11 @@ public class PlayerEntityControls
             return;
 
         Vector3 newPos = player.transform.position;
-        newPos += value.x * player.transform.right;
-        newPos += value.y * player.transform.forward;
+        float healthMovementModifier = Mathf.Lerp(MIN_SLOWED_SPEED, 1f, player.Health / Constants.MAX_HEALTH);
+        float xComponent = value.x * healthMovementModifier;
+        float yComponent = value.y * healthMovementModifier;
+        newPos += xComponent * player.transform.right;
+        newPos += yComponent * player.transform.forward;
         player.transform.position = newPos;
     }
 
@@ -191,7 +192,6 @@ public class PlayerEntityControls
         Service.EventManager.RemoveListener(EventId.OnLookInvertToggled, OnLookInverted);
         currentControlScheme.Dispose();
         player = null;
-        cameraArmature = null;
         currentControlScheme = null;
         feetColliders = null;
     }

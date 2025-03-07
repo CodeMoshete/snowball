@@ -19,7 +19,7 @@ public class GameManager : NetworkBehaviour
     public float MinThrowAngle = Constants.MIN_THROW_ANGLE;
     public float MaxThrowAngle = Constants.MAX_THROW_ANGLE;
     public GameState CurrentGameState { get; private set; }
-    public PlayerEntity LocalPlayer 
+    public PlayerEntity LocalPlayer
     {
         get
         {
@@ -96,7 +96,6 @@ public class GameManager : NetworkBehaviour
         Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
         Service.EventManager.AddListener(EventId.OnPlaySoundEffect, OnPlaySoundEffect);
         Service.EventManager.AddListener(EventId.OnSpawnLocalGameObject, OnSpawnLocalGameObject);
-        Service.UpdateManager.AddObserver(OnUpdate);
         Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
         GetGameMetadataServerRpc(NetworkManager.LocalClientId, startData.PlayerName);
     }
@@ -174,16 +173,16 @@ public class GameManager : NetworkBehaviour
         AssignPlayerClass(startData.PlayerTeamName, clientId);
 
         Transform queenTransform = GetQueenForTeam(startData.PlayerTeamName);
-        PlayerEntity player = queenTransform.GetComponent<PlayerEntity>();
-        
-        startData.TeamQueenPlayerId = player.OwnerClientId;
+        PlayerEntity queenPlayer = queenTransform.GetComponent<PlayerEntity>();
+
+        startData.TeamQueenPlayerId = queenPlayer.OwnerClientId;
 
         ReceiveGameMetadataClientRpc(startData, RpcTarget.Single(clientId, RpcTargetUse.Temp));
-        player.SetPlayerSnowCountClientRpc(SnowballType.Basic, Constants.DEFAULT_START_AMMO);
+        // player.SetPlayerSnowCountClientRpc(SnowballType.Basic, Constants.DEFAULT_START_AMMO);
     }
 
     // SERVER CALLED ONLY
-    private void SpawnPlayer(ulong clientId, string clientName, SpawnInfo spawnInfo)
+    private PlayerEntity SpawnPlayer(ulong clientId, string clientName, SpawnInfo spawnInfo)
     {
         GameObject instantiatedPlayer = Instantiate(Resources.Load<GameObject>(PLAYER_RESOURCE));
         PlayerEntity entity = instantiatedPlayer.GetComponent<PlayerEntity>();
@@ -191,9 +190,11 @@ public class GameManager : NetworkBehaviour
         NetworkObject netObj = instantiatedPlayer.GetComponent<NetworkObject>();
         netObj.SpawnWithOwnership(clientId, true);
         teamRosters[spawnInfo.TeamName].Add(clientId);
+        entity.SetPlayerSnowCountClientRpc(SnowballType.Basic, Constants.DEFAULT_START_AMMO);
         Debug.Log($"Added player {clientId} to team {spawnInfo.TeamName}");
+        return entity;
     }
-    
+
     // Called on server only
     private void AssignPlayerClass(string teamName, ulong clientId)
     {
@@ -241,7 +242,7 @@ public class GameManager : NetworkBehaviour
         startData.PlayerClass = serverStartData.PlayerClass;
         startData.TeamQueenPlayerId = serverStartData.TeamQueenPlayerId;
         startData.StartActions = serverStartData.StartActions;
-        
+
         startData.CurrentGameState = serverStartData.CurrentGameState;
         CurrentGameState = startData.CurrentGameState;
         if (CurrentGameState != GameState.PreGameLobby)
@@ -277,7 +278,7 @@ public class GameManager : NetworkBehaviour
         if (!IsServer)
         {
             levelPrefab = Instantiate(levelObject);
-            
+
             Service.NetworkActions.RegisterNetworkActionsForLevel(levelPrefab);
             Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
             Service.NetworkActions.SyncActionsForLateJoiningUser(startData.StartActions);
@@ -289,7 +290,7 @@ public class GameManager : NetworkBehaviour
                 string teamName = teamSpawnPoints[i].name;
                 List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
                 spawnPoints.Add(teamName, spawnPointsTransforms);
-                
+
                 if (!teamRosters.ContainsKey(teamName))
                     teamRosters.Add(teamName, new List<ulong>());
 
@@ -311,7 +312,7 @@ public class GameManager : NetworkBehaviour
     {
         Debug.LogError("Level load failed.");
     }
-    
+
     // Triggered when the host presses the "Start Game" button.
     private bool OnStartGameplayPressed(object cookie)
     {
@@ -345,7 +346,6 @@ public class GameManager : NetworkBehaviour
         {
             Debug.Log("Client successfully disconnected from the server.");
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
-            Service.UpdateManager.RemoveObserver(OnUpdate);
             Service.EventManager.RemoveListener(EventId.OnGamePause, OnGamePaused);
             Service.EventManager.RemoveListener(EventId.OnGameResume, OnGameResumed);
             Service.EventManager.RemoveListener(EventId.OnGameQuit, OnGameQuit);
@@ -415,19 +415,6 @@ public class GameManager : NetworkBehaviour
         NetworkManager.Singleton.DisconnectClient(clientId);
     }
 
-    private void OnUpdate(float dt)
-    {
-        // if (CurrentGameState == GameState.Gameplay || CurrentGameState == GameState.GameplayPaused)
-        // {
-        //     blizzardCountdown -= dt;
-        //     if (blizzardCountdown <= 0f)
-        //     {
-        //         SpawnSnowballs(5);
-        //         blizzardCountdown = Constants.BLIZZARD_TIMEOUT;
-        //     }
-        // }
-    }
-
     [Rpc(SendTo.Server)]
     public void FireProjectileServerRpc(Vector3 position, Vector3 euler, Vector3 fwd, float verticalVel, ulong ownerId, SnowballType type = SnowballType.Basic)
     {
@@ -449,21 +436,6 @@ public class GameManager : NetworkBehaviour
     {
         Transform owner = playerTransforms[ownerId];
         PlayerEntity player = owner.GetComponent<PlayerEntity>();
-        // if (player.SnowCount.Value <= 0)
-        // {
-        //     Debug.Log("Not enough ammo!");
-        //     return;
-        // }
-        // player.SetPlayerSnowCountServerRpc(player.SnowCount.Value - 1);
-
-        // SnowballInventoryItem playerInventory = player.GetInventoryForType(type);
-        // if (playerInventory.Quantity <= 0)
-        // {
-        //     Debug.Log("Not enough ammo!");
-        //     return;
-        // }
-        // player.SetPlayerSnowCountClientRpc(type, playerInventory.Quantity - 1);
-        // playerInventory.Quantity--;
 
         Debug.Log("Locally firing projectile!");
         ThrowableObject thrownSnowball = Constants.SnowballTypes.ThrowableObjects.Find(item => item.Type == type);
@@ -485,47 +457,57 @@ public class GameManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Everyone)]
-    public void TransmitProjectileHitClientRpc(long thrownPlayerId, ulong hitPlayerId)
+    public void TransmitProjectileHitClientRpc(long thrownPlayerId, ulong hitPlayerId, float damage)
     {
         PlayerEntity hitPlayer = playerTransforms[hitPlayerId].GetComponent<PlayerEntity>();
         PlayerEntity throwingPlayer = thrownPlayerId >= 0 ? playerTransforms[(ulong)thrownPlayerId].GetComponent<PlayerEntity>() : null;
-        hitPlayer.OnPlayerFrozen();
+        bool isFrozen = hitPlayer.OnPlayerHit(damage);
 
         PlayerHitData hitData = new PlayerHitData();
         hitData.ThrowingPlayer = throwingPlayer;
         hitData.HitPlayer = hitPlayer;
-        
-        if (hitPlayerId == LocalPlayer.OwnerClientId)
+        hitData.DamageAmount = damage;
+
+        if (isFrozen)
         {
-            hitData.Outcome = PlayerFrozenState.LocalPlayerFrozen;
-        }
-        else if (throwingPlayer != null && throwingPlayer.OwnerClientId == LocalPlayer.OwnerClientId)
-        {
-            if (throwingPlayer.TeamName.Value == hitPlayer.TeamName.Value)
+            if (hitPlayerId == LocalPlayer.OwnerClientId)
             {
-                hitData.Outcome = PlayerFrozenState.LocalPlayerFrozeTeammate;
-                Service.EventManager.SendEvent(EventId.OnPlaySoundEffect, "Audio/TeamkillSound");
+                hitData.Outcome = PlayerFrozenState.LocalPlayerFrozen;
+            }
+            else if (throwingPlayer != null && throwingPlayer.OwnerClientId == LocalPlayer.OwnerClientId)
+            {
+                if (throwingPlayer.TeamName.Value == hitPlayer.TeamName.Value)
+                {
+                    hitData.Outcome = PlayerFrozenState.LocalPlayerFrozeTeammate;
+                    Service.EventManager.SendEvent(EventId.OnPlaySoundEffect, "Audio/TeamkillSound");
+                }
+                else
+                {
+                    hitData.Outcome = PlayerFrozenState.LocalPlayerFrozeEnemy;
+                    Service.EventManager.SendEvent(EventId.OnPlaySoundEffect, "Audio/Boink");
+                }
+            }
+            else if (hitPlayer.TeamName.Value == LocalPlayer.TeamName.Value)
+            {
+                if (hitPlayer.CurrentPlayerClass.Value == PlayerClass.Queen)
+                {
+                    hitData.Outcome = PlayerFrozenState.AllyQueenFrozen;
+                }
+                else
+                {
+                    hitData.Outcome = PlayerFrozenState.AllyFrozen;
+                }
             }
             else
             {
-                hitData.Outcome = PlayerFrozenState.LocalPlayerFrozeEnemy;
-                Service.EventManager.SendEvent(EventId.OnPlaySoundEffect, "Audio/Boink");
+                hitData.Outcome = PlayerFrozenState.EnemyFrozen;
             }
-        }
-        else if (hitPlayer.TeamName.Value == LocalPlayer.TeamName.Value)
-        {
-            if (hitPlayer.CurrentPlayerClass.Value == PlayerClass.Queen)
-            {
-                hitData.Outcome = PlayerFrozenState.AllyQueenFrozen;
-            }
-            else
-            {
-                hitData.Outcome = PlayerFrozenState.AllyFrozen;
-            }
+
+            Service.EventManager.SendEvent(EventId.PlayerFrozen, hitData);
         }
         else
         {
-            hitData.Outcome = PlayerFrozenState.EnemyFrozen;
+            hitData.Outcome = PlayerFrozenState.NotFrozen;
         }
 
         Service.EventManager.SendEvent(EventId.PlayerHit, hitData);
@@ -550,7 +532,6 @@ public class GameManager : NetworkBehaviour
     public void TransmitGameOverRpc(string winningTeam)
     {
         CurrentGameState = GameState.PostGame;
-        Service.UpdateManager.RemoveObserver(OnUpdate);
         Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
         Service.EventManager.SendEvent(EventId.OnGameOver, winningTeam);
     }
@@ -587,7 +568,7 @@ public class GameManager : NetworkBehaviour
         teamRosters[teamName].Remove(playerId);
         Debug.Log($"Removed player {player.OwnerClientId} from team {teamName}");
         Debug.Log($"Deregistered player {playerId} - team size {teamRosters[teamName].Count}");
-        
+
         if (IsServer && !player.IsOwner && player.CurrentPlayerClass.Value == PlayerClass.Queen && !player.IsFrozen)
         {
             // ReassignQueenRpc(teamName);
@@ -612,7 +593,7 @@ public class GameManager : NetworkBehaviour
             Transform playerTransform = pair.Value;
             PlayerEntity player = playerTransform.GetComponent<PlayerEntity>();
             string playerTeam = player.TeamName.Value.ToString();
-            
+
             if (!roster.ContainsKey(playerTeam))
                 roster.Add(playerTeam, new List<string>());
 

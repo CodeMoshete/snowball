@@ -99,6 +99,7 @@ MonoBehaviour:
   FreezePlayer: 1
   LeaveSnowPileOnThrow: 1
   Type: 0
+  DamageAmount: 90
   HitPlayerProvider: {fileID: 0}
   ThrowingPlayerProvider: {fileID: 0}
   HitTransformProvider: {fileID: 0}

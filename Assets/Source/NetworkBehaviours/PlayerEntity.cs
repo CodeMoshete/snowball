@@ -32,7 +32,6 @@ public class PlayerEntity : NetworkBehaviour
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>(Constants.TEAM_UNASSIGNED);
     public NetworkVariable<FixedString64Bytes> PlayerName = new NetworkVariable<FixedString64Bytes>(Constants.PLAYER_NAME_DEFAULT);
     public NetworkVariable<PlayerClass> CurrentPlayerClass = new NetworkVariable<PlayerClass>(global::PlayerClass.Soldier);
-    // public NetworkVariable<int> SnowCount = new NetworkVariable<int>(3);
 
     public bool IsFrozen { get; private set; }
     public bool IsControlDisabled { 
@@ -43,6 +42,7 @@ public class PlayerEntity : NetworkBehaviour
     private Transform iceCube;
     private Renderer iceCubeRenderer;
     private float frozenTimer;
+    public float Health { get; private set; } = Constants.MAX_HEALTH;
     
     private bool isPlacingWall;
     private Transform ghostWall;
@@ -64,7 +64,6 @@ public class PlayerEntity : NetworkBehaviour
         TeamName.OnValueChanged += OnTeamNameChanged;
         PlayerName.OnValueChanged += OnPlayerNameChanged;
         CurrentPlayerClass.OnValueChanged += OnPlayerClassChanged;
-        // SnowCount.OnValueChanged += OnSnowResourceChanged;
         wallOptions = Resources.Load<Buildables>(BUILDABLES_RESOURCE);
         
         Constants.SnowballTypes = Resources.Load<Throwables>(THROWABLES_RESOURCE);
@@ -86,6 +85,7 @@ public class PlayerEntity : NetworkBehaviour
             Debug.Log("Player OnNetworkSpawn - Setting up new player!");
             Service.EventManager.AddListener(EventId.LevelLoadCompleted, OnLevelLoadComplete);
             Service.EventManager.AddListener(EventId.OnWallBuildingDisabled, OnWallBuildingDisabled);
+            Service.DataStreamManager.UpdateFloatDataStream(FloatDataStream.PlayerHealth, Health);
             SetUpCamera();
         }
     }
@@ -206,12 +206,6 @@ public class PlayerEntity : NetworkBehaviour
         }
     }
 
-    // [Rpc(SendTo.Server)]
-    // public void SetPlayerSnowCountServerRpc(int newValue)
-    // {
-    //     SnowCount.Value = newValue;
-    // }
-
     [Rpc(SendTo.Everyone)]
     public void SetPlayerSnowCountClientRpc(SnowballType type, int newAmount)
     {
@@ -229,15 +223,6 @@ public class PlayerEntity : NetworkBehaviour
     {
         return snowballInventory.Find(item => item.ThrowableObject.Type == type);
     }
-
-    // private void OnSnowResourceChanged(int oldValue, int newValue)
-    // {
-    //     Debug.Log($"Snow count for player {OwnerClientId} changed to {newValue} : {IsOwner}");
-    //     if (IsOwner)
-    //     {
-    //         Service.EventManager.SendEvent(EventId.AmmoUpdated, newValue);
-    //     }
-    // }
 
     private void PlacePlayerAtSpawn(GameStartData startData)
     {
@@ -281,6 +266,16 @@ public class PlayerEntity : NetworkBehaviour
             else if (DefrostRangeFX.activeSelf)
             {
                 DefrostRangeFX.SetActive(false);
+            }
+        }
+        else if (Health < Constants.MAX_HEALTH)
+        {
+            Health += Constants.HEALTH_RECHARGE_RATE_PER_SEC * dt;
+            Health = Mathf.Min(Health, Constants.MAX_HEALTH);
+
+            if (IsOwner)
+            {
+                Service.DataStreamManager.UpdateFloatDataStream(FloatDataStream.PlayerHealth, Health);
             }
         }
 
@@ -450,7 +445,35 @@ public class PlayerEntity : NetworkBehaviour
     {
         if (!IsFrozen)
         {
-            gameManager.TransmitProjectileHitClientRpc(-1, OwnerClientId);
+            gameManager.TransmitProjectileHitClientRpc(-1, OwnerClientId, Constants.MAX_HEALTH);
+        }
+    }
+
+    public bool OnPlayerHit(float damage)
+    {
+        if (IsFrozen)
+            return false;
+
+        Health -= damage;
+        if (Health <= 0f)
+        {
+            Health = 0f;
+            OnPlayerFrozen();
+        }
+
+        if (IsOwner)
+        {
+            Service.DataStreamManager.UpdateFloatDataStream(FloatDataStream.PlayerHealth, Health);
+        }
+
+        return Health <= 0;
+    }
+
+    public void DamagePlayerFromScript(float damage, long throwingPlayerId)
+    {
+        if (!IsFrozen)
+        {
+            gameManager.TransmitProjectileHitClientRpc(throwingPlayerId, OwnerClientId, damage);
         }
     }
 
@@ -478,6 +501,11 @@ public class PlayerEntity : NetworkBehaviour
     {
         iceCubeRenderer = null;
         Destroy(iceCube.gameObject);
+        Health = Constants.MAX_HEALTH;
+        if (IsOwner)
+        {
+            Service.DataStreamManager.UpdateFloatDataStream(FloatDataStream.PlayerHealth, Health);
+        }
         IsFrozen = false;
         DefrostRangeFX.SetActive(false);
     }
@@ -489,6 +517,5 @@ public class PlayerEntity : NetworkBehaviour
         TeamName.OnValueChanged -= OnTeamNameChanged;
         PlayerName.OnValueChanged -= OnPlayerNameChanged;
         CurrentPlayerClass.OnValueChanged -= OnPlayerClassChanged;
-        // SnowCount.OnValueChanged -= OnSnowResourceChanged;
     }
 }

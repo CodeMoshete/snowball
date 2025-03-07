@@ -18,6 +18,7 @@ public class GameHud : MonoBehaviour
     public GameObject DesktopControlsPromptPanel;
     public GameObject DesktopControlsPanel;
     public Image CurrentAmmoIcon;
+    public Image IcyScreenImage;
 
     private float totalBuildTime;
     private float currentBuildTime;
@@ -32,7 +33,8 @@ public class GameHud : MonoBehaviour
         Service.EventManager.AddListener(EventId.DisplayMessage, OnDisplayMessage);
         Service.EventManager.AddListener(EventId.HideMessage, OnHideMessage);
         Service.EventManager.AddListener(EventId.OnWallBuildStageStarted, OnWallBuilding);
-        Service.EventManager.AddListener(EventId.PlayerHit, OnPlayerHit);
+        Service.EventManager.AddListener(EventId.PlayerFrozen, OnPlayerFrozen);
+        Service.DataStreamManager.AddFloatDataStreamListener(FloatDataStream.PlayerHealth, OnPlayerHealthUpdated);
         gameObject.SetActive(false);
     }
 
@@ -91,7 +93,17 @@ public class GameHud : MonoBehaviour
         return false;
     }
 
-    private bool OnPlayerHit(object cookie)
+    private void OnPlayerHealthUpdated(float health)
+    {
+        // Modify the float value _ThresholdBase on the material assigned to IcyScreenImage.
+        float halfMaxHealth = Constants.MAX_HEALTH / 2f;
+        float baseValue = 1f - Mathf.Min(health / halfMaxHealth, 1f);
+        float opacityValue = 1f - Mathf.Max((health - halfMaxHealth) / halfMaxHealth, 0f);
+        IcyScreenImage.material.SetFloat("_ThresholdBase", baseValue);
+        IcyScreenImage.material.SetFloat("_ThresholdOpacity", opacityValue);
+    }
+
+    private bool OnPlayerFrozen(object cookie)
     {
         PlayerHitData hitData = (PlayerHitData)cookie;
         PlayerEntity throwingPlayer = hitData.ThrowingPlayer;
@@ -171,6 +183,7 @@ public class GameHud : MonoBehaviour
         Service.EventManager.RemoveListener(EventId.DisplayMessage, OnDisplayMessage);
         Service.EventManager.RemoveListener(EventId.HideMessage, OnHideMessage);
         Service.EventManager.RemoveListener(EventId.OnWallBuildStageStarted, OnWallBuilding);
-        Service.EventManager.RemoveListener(EventId.PlayerHit, OnPlayerHit);
+        Service.EventManager.RemoveListener(EventId.PlayerFrozen, OnPlayerFrozen);
+        Service.DataStreamManager.RemoveFloatDataStreamListener(FloatDataStream.PlayerHealth, OnPlayerHealthUpdated);
     }
 }

@@ -24,6 +24,7 @@ public class LocalProjectlie : MonoBehaviour
     public bool LeaveSnowPileOnThrow;
 
     public SnowballType Type;
+    public float DamageAmount;
     public ExplicitPlayerEntityProvider HitPlayerProvider;
     public ExplicitPlayerEntityProvider ThrowingPlayerProvider;
     public ExplicitTransformProvider HitTransformProvider;
@@ -90,7 +91,8 @@ public class LocalProjectlie : MonoBehaviour
                         FreezePlayer)
                     {
                         long ownerClientId = ownerPlayer != null ? (long)ownerPlayer.OwnerClientId : -1;
-                        gameManager.TransmitProjectileHitClientRpc(ownerClientId, otherPlayer.OwnerClientId);
+                        float damage = DamageAmount * Constants.DamageMultiplier;
+                        gameManager.TransmitProjectileHitClientRpc(ownerClientId, otherPlayer.OwnerClientId, damage);
                     }
 
                     if (OnHitPlayer != null)

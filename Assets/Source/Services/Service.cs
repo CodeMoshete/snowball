@@ -14,6 +14,20 @@
         }
     }
 
+    private static DataStreamManager dataStreamManager;
+    public static DataStreamManager DataStreamManager
+    {
+        get
+        {
+            if (dataStreamManager == null)
+            {
+                dataStreamManager = new DataStreamManager();
+            }
+
+            return dataStreamManager;
+        }
+    }
+
     private static TimerManager timerMananager;
     public static TimerManager TimerManager
     {
