@@ -94,7 +94,7 @@ public class GameManager : NetworkBehaviour
         Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
         Service.EventManager.AddListener(EventId.OnDeSpawnNetworkObject, OnDeSpawnNetworkObject);
         Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
-        Service.EventManager.AddListener(EventId.OnPlaySoundEffect, OnPlaySoundEffect);
+        // Service.EventManager.AddListener(EventId.OnPlaySoundEffect, OnPlaySoundEffect);
         Service.EventManager.AddListener(EventId.OnSpawnLocalGameObject, OnSpawnLocalGameObject);
         Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
         GetGameMetadataServerRpc(NetworkManager.LocalClientId, startData.PlayerName);
@@ -338,6 +338,7 @@ public class GameManager : NetworkBehaviour
         Service.EventManager.AddListener(EventId.OnGamePause, OnGamePaused);
         Service.EventManager.AddListener(EventId.OnGameResume, OnGameResumed);
         Service.EventManager.AddListener(EventId.OnGameQuit, OnGameQuit);
+        Service.EventManager.AddListener(EventId.OnPlaySoundEffect, OnPlaySoundEffect);
     }
 
     private void OnClientDisconnected(ulong clientId)
