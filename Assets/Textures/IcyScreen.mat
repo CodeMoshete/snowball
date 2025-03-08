@@ -123,8 +123,8 @@ Material:
     - _Surface: 0
     - _ThresholOpacity: 0
     - _Threshold: 0
-    - _ThresholdBase: 1
-    - _ThresholdOpacity: 1
+    - _ThresholdBase: 0
+    - _ThresholdOpacity: 0
     - _UseUIAlphaClip: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
