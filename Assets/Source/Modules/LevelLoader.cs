@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using Utils;
 
 public enum DownloadSource
 {
@@ -164,9 +166,28 @@ public class LevelLoader : MonoBehaviour
             return;
         }
 
+        ReconnectShaders(prefab);
+
         Debug.Log("Level loaded successfully!");
         onDownloadSuccess(prefab);
     }
+
+
+
+    void ReconnectShaders(GameObject levelObject)
+    {
+        List<GameObject> allSceneRendererObjects = UnityUtils.FindAllGameObjectContains<Renderer>(levelObject);
+
+        for (int i = 0; i < allSceneRendererObjects.Count; i++)
+        {
+            Renderer renderer = allSceneRendererObjects[i].GetComponent<Renderer>();
+            
+            //Re-apply the same shader onto the material to fix the AssetBundle shader settings issue
+            foreach (Material mat in renderer.sharedMaterials)
+                mat.shader = Shader.Find(mat.shader.name);
+        }
+    }
+
 
     private void OnDestroy()
     {

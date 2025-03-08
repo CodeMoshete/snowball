@@ -17,8 +17,8 @@ public class LevelLightingData : MonoBehaviour
     public float FogDensity;
     public Material SkyboxMaterial;
     public LightmapDataContainer lightmapData;
-    public LightingSettings lightingSettings;
-    public LightingDataAsset lightingDataAsset;
+    // public LightingSettings lightingSettings;
+    // public LightingDataAsset lightingDataAsset;
     private void Start()
     {
         if (IsMainDirectionalLightDisabled)
@@ -40,15 +40,15 @@ public class LevelLightingData : MonoBehaviour
         RenderSettings.fogDensity = FogDensity;
         RenderSettings.skybox = SkyboxMaterial;
 
-        if (lightingSettings != null)
-        {
-            Lightmapping.lightingSettings = lightingSettings;
-        }
+        // if (lightingSettings != null)
+        // {
+        //     Lightmapping.lightingSettings = lightingSettings;
+        // }
 
-        if (lightingDataAsset != null)
-        {
-            Lightmapping.lightingDataAsset = lightingDataAsset;
-        }
+        // if (lightingDataAsset != null)
+        // {
+        //     Lightmapping.lightingDataAsset = lightingDataAsset;
+        // }
 
         if (lightmapData != null && lightmapData.lightmapColor.Length > 0)
         {

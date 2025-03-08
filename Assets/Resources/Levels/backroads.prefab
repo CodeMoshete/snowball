@@ -5615,8 +5615,10 @@ MonoBehaviour:
   - {fileID: 539946950458404175}
   - {fileID: 3864923963435243702}
   SnowballSpawnData:
-  - Type: 1
+  - Type: 0
     SnowballsPerArea: 5
+  - Type: 1
+    SnowballsPerArea: 1
   NextAction: {fileID: 4836080812411992269}
 --- !u!1 &2785601102743359487
 GameObject:
@@ -11337,8 +11339,6 @@ MonoBehaviour:
     - {fileID: 2800000, guid: a55da78f1526c44549a3adf97666b17d, type: 3}
     - {fileID: 2800000, guid: 833bad6843ef448299cce49f372798e4, type: 3}
     shadowMask: []
-  lightingSettings: {fileID: 4890085278179872738, guid: 0957997e989744c6e91eea8376c2677c, type: 2}
-  lightingDataAsset: {fileID: 112000000, guid: a9293c9f692dd44379b3b9984333a24f, type: 2}
 --- !u!1 &5362118307010792676
 GameObject:
   m_ObjectHideFlags: 0
