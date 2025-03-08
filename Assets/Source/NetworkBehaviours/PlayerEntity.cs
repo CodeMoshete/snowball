@@ -42,6 +42,7 @@ public class PlayerEntity : NetworkBehaviour
     private Transform iceCube;
     private Renderer iceCubeRenderer;
     private float frozenTimer;
+    private List<ThawSource> thawSourcesInRange = new List<ThawSource>();
     public float Health { get; private set; } = Constants.MAX_HEALTH;
     
     private bool isPlacingWall;
@@ -239,34 +240,8 @@ public class PlayerEntity : NetworkBehaviour
         float dt = Time.deltaTime;
         if (IsFrozen)
         {
-            Transform teamQueen = gameManager.GetQueenForTeam(TeamName.Value.ToString());
-            if (teamQueen != null)
-            {
-                PlayerEntity queenEntity = teamQueen.GetComponent<PlayerEntity>();
-                if (!queenEntity.IsFrozen && Vector3.SqrMagnitude(transform.position - teamQueen.position) < UNFREEZE_DIST_THRESHOLD)
-                {
-                    if (!DefrostRangeFX.activeSelf)
-                        DefrostRangeFX.SetActive(true);
-
-                    frozenTimer -= dt;
-                    float pct = 1f - (frozenTimer / UNFREEZE_SECONDS);
-                    Color unfreezeColor = Color.Lerp(FROZEN_COLOR, UNFROZEN_COLOR, pct);
-                    iceCubeRenderer.material.SetColor("_BaseColor", unfreezeColor);
-                    if (IsServer && frozenTimer <= 0f)
-                    {
-                        DefrostRangeFX.SetActive(false);
-                        OnPlayerUnfrozenClientRpc();
-                    }
-                }
-                else if (DefrostRangeFX.activeSelf)
-                {
-                    DefrostRangeFX.SetActive(false);
-                }
-            }
-            else if (DefrostRangeFX.activeSelf)
-            {
-                DefrostRangeFX.SetActive(false);
-            }
+            TestQueenInRange(dt);
+            TestThawSourceInRange(dt);
         }
         else if (Health < Constants.MAX_HEALTH)
         {
@@ -291,6 +266,69 @@ public class PlayerEntity : NetworkBehaviour
             Destroy(ghostWall.gameObject);
             ghostWall = null;
         }
+    }
+
+    private void TestQueenInRange(float dt)
+    {
+        Transform teamQueen = gameManager.GetQueenForTeam(TeamName.Value.ToString());
+        if (teamQueen != null)
+        {
+            PlayerEntity queenEntity = teamQueen.GetComponent<PlayerEntity>();
+            if (!queenEntity.IsFrozen && Vector3.SqrMagnitude(transform.position - teamQueen.position) < UNFREEZE_DIST_THRESHOLD)
+            {
+                if (!DefrostRangeFX.activeSelf)
+                    DefrostRangeFX.SetActive(true);
+
+                frozenTimer -= dt;
+                UpdateUnfreezeVisuals();
+                if (IsServer && frozenTimer <= 0f)
+                {
+                    DefrostRangeFX.SetActive(false);
+                    OnPlayerUnfrozenClientRpc();
+                }
+            }
+            else if (DefrostRangeFX.activeSelf)
+            {
+                DefrostRangeFX.SetActive(false);
+            }
+        }
+        else if (DefrostRangeFX.activeSelf)
+        {
+            DefrostRangeFX.SetActive(false);
+        }
+    }
+
+    private void TestThawSourceInRange(float dt)
+    {
+        for (int i = 0, count = thawSourcesInRange.Count; i < count; i++)
+        {
+            frozenTimer -= dt;
+            UpdateUnfreezeVisuals();
+            if (IsServer && frozenTimer <= 0f)
+            {
+                OnPlayerUnfrozenClientRpc();
+            }
+            break;
+        }
+    }
+
+    private void UpdateUnfreezeVisuals()
+    {
+        float pct = 1f - (frozenTimer / UNFREEZE_SECONDS);
+        Color unfreezeColor = Color.Lerp(FROZEN_COLOR, UNFROZEN_COLOR, pct);
+        iceCubeRenderer.material.SetColor("_BaseColor", unfreezeColor);
+    }
+
+    public void SetThawSourceInRange(ThawSource source)
+    {
+        Debug.Log($"Player {name} is in range of thaw source {source.name}");
+        thawSourcesInRange.Add(source);
+    }
+
+    public void RemoveThawSourceInRange(ThawSource source)
+    {
+        Debug.Log($"Player {name} is NOT in range of thaw source {source.name}");
+        thawSourcesInRange.Remove(source);
     }
 
     public void OnEscapePressed()

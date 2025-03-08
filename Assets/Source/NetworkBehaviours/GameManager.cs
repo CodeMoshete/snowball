@@ -32,18 +32,27 @@ public class GameManager : NetworkBehaviour
             return localPlayer;
         }
     }
+
     private PlayerEntity localPlayer;
     private GameStartData startData;
     private GameObject levelPrefab;
     private Dictionary<string, List<Transform>> spawnPoints = new Dictionary<string, List<Transform>>();
     private Dictionary<string, List<ulong>> teamRosters = new Dictionary<string, List<ulong>>();
     private Dictionary<ulong, Transform> playerTransforms = new Dictionary<ulong, Transform>();
+    private Dictionary<string, List<PlayerEntity>> teams = new Dictionary<string,List<PlayerEntity>>();
+    public Dictionary<string, List<PlayerEntity>> Teams
+    {
+        get
+        {
+            return teams;
+        }
+    }
     private Dictionary<string, Transform> teamQueens = new Dictionary<string, Transform>();
     private Dictionary<GameObject, GameObject> walls = new Dictionary<GameObject, GameObject>();
     private PickupSystem pickupSystem;
     private List<BoxCollider> spawnVolumes;
     private AudioSource soundEffectPlayer;
-    private float blizzardCountdown = Constants.BLIZZARD_TIMEOUT;
+    // private float blizzardCountdown = Constants.BLIZZARD_TIMEOUT;
     private bool didInitQuit;
 
     // 1. Entry point for newly loaded player.
@@ -565,6 +574,7 @@ public class GameManager : NetworkBehaviour
     {
         ulong playerId = player.OwnerClientId;
         playerTransforms.Remove(playerId);
+        teams[player.TeamName.Value.ToString()].Remove(player);
         string teamName = player.TeamName.Value.ToString();
         teamRosters[teamName].Remove(playerId);
         Debug.Log($"Removed player {player.OwnerClientId} from team {teamName}");
@@ -588,6 +598,7 @@ public class GameManager : NetworkBehaviour
     public void BroadcastRosterUpdate()
     {
         Dictionary<string, List<string>> roster = new Dictionary<string, List<string>>();
+        teams = new Dictionary<string, List<PlayerEntity>>();
 
         foreach (KeyValuePair<ulong, Transform> pair in playerTransforms)
         {
@@ -599,6 +610,11 @@ public class GameManager : NetworkBehaviour
                 roster.Add(playerTeam, new List<string>());
 
             roster[playerTeam].Add(player.name);
+
+            if (!teams.ContainsKey(playerTeam))
+                teams.Add(playerTeam, new List<PlayerEntity>());
+
+            teams[playerTeam].Add(player);
         }
 
         Service.EventManager.SendEvent(EventId.PlayerRosterUpdated, roster);
