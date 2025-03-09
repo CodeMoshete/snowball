@@ -87,6 +87,7 @@ public class GameManager : NetworkBehaviour
     private void OnServerLevelPrefabLoaded(GameObject prefab)
     {
         levelPrefab = Instantiate(prefab);
+        // levelPrefab = prefab;
         Service.NetworkActions.RegisterNetworkActionsForLevel(levelPrefab);
 
         // Populate team spawn points

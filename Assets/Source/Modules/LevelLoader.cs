@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using Utils;
 
 public enum DownloadSource
@@ -93,21 +95,26 @@ public class LevelLoader : MonoBehaviour
         // Load the asset bundle
         if (DownloadSource == DownloadSource.DebugResourcesLocal)
         {
+            // Scene levelScene = Resources.Load<Scene>($"Levels/{this.levelName}");
+            // SceneManager.LoadScene($"Resources/Levels/{this.levelName}", LoadSceneMode.Additive);
+            // GameObject levelResource = GameObject.Find("Level");
+
             GameObject levelResource = Resources.Load<GameObject>($"Levels/{this.levelName}");
             if (levelResource == null)
             {
-                Debug.LogError($"Level {this.levelName} not found in Resources.");
+                Debug.LogError($"Level {this.levelName} not found in Scene.");
                 onDownloadFailure();
             }
             else
             {
-                Debug.Log($"Loaded level {this.levelName} from Resources.");
+                Debug.Log($"Loaded level {this.levelName} from Scene.");
                 onDownloadSuccess(levelResource);
             }
         }
         else
         {
             StartCoroutine(GetAssetBundle(this.levelName, OnBundleDownloadComplete, onDownloadFailure));
+            // StartCoroutine(GetAssetBundle(this.levelName, OnSceneBundleDownloadComplete, onDownloadFailure));
         }
     }
 
@@ -132,6 +139,32 @@ public class LevelLoader : MonoBehaviour
             AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(www);
             onComplete(bundle);
         }
+    }
+
+    private void OnSceneBundleDownloadComplete(AssetBundle bundle)
+    {
+        Debug.Log("Level AssetBundle downloaded successfully!");
+
+        // Load the scene
+        string[] scenePaths = bundle.GetAllScenePaths();
+        if (scenePaths.Length == 0)
+        {
+            Debug.LogError($"No scenes found in level asset bundle for {levelName}");
+            return;
+        }
+
+        SceneManager.LoadScene(scenePaths[0], LoadSceneMode.Additive);
+        bundle.Unload(false);
+
+        Service.TimerManager.CreateTimer(0.5f, OnSceneLoadCompleted, null);
+    }
+
+    private void OnSceneLoadCompleted(object cookie)
+    {
+        // SceneManager.SetActiveScene(SceneManager.GetSceneByName(levelName));
+        GameObject levelPrefab = GameObject.Find("Level");
+        onDownloadSuccess(levelPrefab);
+        Debug.Log("Level loaded successfully!");
     }
 
     private void OnBundleDownloadComplete(AssetBundle bundle)
@@ -171,8 +204,6 @@ public class LevelLoader : MonoBehaviour
         Debug.Log("Level loaded successfully!");
         onDownloadSuccess(prefab);
     }
-
-
 
     void ReconnectShaders(GameObject levelObject)
     {

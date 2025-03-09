@@ -81,6 +81,17 @@ public class JsonDownloader : EditorWindow
                 // Copy prefab file to destination path.
                 File.Copy(prefabPath, destinationPath, true);
             }
+
+            string[] sceneFiles = Directory.GetFiles(levelFolder, "*.unity");
+            if (sceneFiles.Length == 1)
+            {
+                // Copy the prefab into Resources/Levels
+                string scenePath = Path.Combine(levelFolderPath, sceneFiles[0]);
+                string destinationPath = Path.Combine(Application.dataPath, "Resources", "Levels", $"{levelFolderName.ToLower()}.unity");
+
+                // Copy prefab file to destination path.
+                File.Copy(scenePath, destinationPath, true);
+            }
         }
         AssetDatabase.Refresh();
     }
