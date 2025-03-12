@@ -10,6 +10,7 @@ public class MobileHud : MonoBehaviour
     public GameObject WallTypeContainer;
     public Button NextWallButton;
     public Button PrevWallButton;
+    public Button CycleAmmoButton;
 
     private void Start()
     {
@@ -22,6 +23,7 @@ public class MobileHud : MonoBehaviour
         Service.EventManager.AddListener(EventId.OnWallPlacementStarted, ShowWallTypeContainer);
         Service.EventManager.AddListener(EventId.OnWallPlacementEnded, HideWallTypeContainer);
         WallTypeContainer.SetActive(false);
+        CycleAmmoButton.onClick.AddListener(OnCycleAmmo);
         gameObject.SetActive(false);
     }
 
@@ -48,6 +50,11 @@ public class MobileHud : MonoBehaviour
     private void OnPrevWallPressed()
     {
         Service.EventManager.SendEvent(EventId.OnPrevWallUIButtonPressed, null);
+    }
+
+    private void OnCycleAmmo()
+    {
+        Service.EventManager.SendEvent(EventId.OnCycleAmmoButtonPressed, null);
     }
 
     private bool HideWallTypeContainer(object cookie)

@@ -2797,6 +2797,7 @@ MonoBehaviour:
   WallTypeContainer: {fileID: 13295555}
   NextWallButton: {fileID: 195155030}
   PrevWallButton: {fileID: 1318906821}
+  CycleAmmoButton: {fileID: 1340543142}
 --- !u!1 &489989560
 GameObject:
   m_ObjectHideFlags: 0

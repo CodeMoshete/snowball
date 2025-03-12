@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
+// Credit Ayfel: https://github.com/Ayfel/PrefabLightmapping
+
 [ExecuteAlways]
 public class PrefabLightmapData : MonoBehaviour
 {
