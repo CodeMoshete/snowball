@@ -3,6 +3,7 @@ using UnityEngine;
 public class OnStartGameplayTrigger : MonoBehaviour
 {
     public CustomAction OnTriggered;
+    private bool hasBeenTriggered;
     private void Start()
     {
         Service.EventManager.AddListener(EventId.GameStateChanged, OnGameStateChanged);
@@ -10,11 +11,14 @@ public class OnStartGameplayTrigger : MonoBehaviour
 
     private bool OnGameStateChanged(object cookie)
     {
+        if (hasBeenTriggered)
+            return false;
+
         Debug.Log($"Game state changed to {(GameState)cookie}");
         if (OnTriggered != null && (GameState)cookie == GameState.Gameplay)
         {
-            Service.EventManager.RemoveListener(EventId.GameStateChanged, OnGameStateChanged);
             OnTriggered.Initiate();
+            hasBeenTriggered = true;
         }
         return false;
     }

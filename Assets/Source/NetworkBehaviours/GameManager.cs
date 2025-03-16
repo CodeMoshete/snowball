@@ -47,6 +47,7 @@ public class GameManager : NetworkBehaviour
             return teams;
         }
     }
+    private Dictionary<string, Color> teamColors = new Dictionary<string, Color>();
     private Dictionary<string, Transform> teamQueens = new Dictionary<string, Transform>();
     private Dictionary<GameObject, GameObject> walls = new Dictionary<GameObject, GameObject>();
     private PickupSystem pickupSystem;
@@ -99,6 +100,15 @@ public class GameManager : NetworkBehaviour
             List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
             spawnPoints.Add(teamName, spawnPointsTransforms);
             teamRosters.Add(teamName, new List<ulong>());
+        }
+
+        int teamNum = 0;
+        foreach (KeyValuePair<string, List<Transform>> teamSpawns in spawnPoints)
+        {
+            string teamName = teamSpawns.Key;
+            Color teamColor = Constants.TEAM_COLORS[teamNum];
+            teamColors.Add(teamName, teamColor);
+            ++teamNum;
         }
 
         Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
@@ -201,6 +211,7 @@ public class GameManager : NetworkBehaviour
         netObj.SpawnWithOwnership(clientId, true);
         teamRosters[spawnInfo.TeamName].Add(clientId);
         entity.SetPlayerSnowCountClientRpc(SnowballType.Basic, Constants.DEFAULT_START_AMMO);
+        entity.SetPlayerColorRpc(teamColors[spawnInfo.TeamName]);
         Debug.Log($"Added player {clientId} to team {spawnInfo.TeamName}");
         return entity;
     }

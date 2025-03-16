@@ -18,6 +18,7 @@ public class Constants
     public const float MAX_HEALTH = 100f;
     public const float HEALTH_RECHARGE_RATE_PER_SEC = 15f;
     public const string TEAM_UNASSIGNED = "Unassigned";
+    public static readonly Color[] TEAM_COLORS = {Color.cyan, Color.red, Color.green, Color.yellow, Color.blue, Color.white};
     public const string PLAYER_NAME_DEFAULT = "Cahill";
     public const string ENVIRONMENT_NAME = "The Storm";
     public const float DEFAULT_MOVE_SPEED = 5f;

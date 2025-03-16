@@ -11,7 +11,7 @@ public class PlayerEntityControls
     private string CAMERA_CENTERPOINT = "CameraCenterpoint";
     private readonly LayerMask CAMERA_COLLISION_LAYERS = LayerMask.GetMask("Default", "Floor", "Buildable");
     private const float MAX_PITCH = 45f;
-    private const float JUMP_FORCE = 150f;
+    private const float JUMP_FORCE = 250f;
     private float fullPitchRange = 2f * MAX_PITCH;
 
     public float CameraPitchPct

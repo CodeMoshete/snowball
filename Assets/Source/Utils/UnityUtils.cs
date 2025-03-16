@@ -290,12 +290,14 @@ namespace Utils
                 return parentComponent as T;
             }
 
-            GameObject parent = baseObject.transform.parent.gameObject;
+            Transform parent = baseObject.transform.parent;
             if (parent != null)
             {
-                return FindFirstComponentInParents<T>(parent);
+                GameObject parentObj = parent.gameObject;
+                return FindFirstComponentInParents<T>(parentObj);
             }
 
+            Debug.LogWarning("[UnityUtils.FindFirstComponentInParents]: No parent found with desired component!");
             return null;
         }
 

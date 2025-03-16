@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 4368019027261200783}
   - component: {fileID: 5079938644252389437}
   - component: {fileID: 986408579517242424}
-  - component: {fileID: 371318538504521918}
   - component: {fileID: 2421989631892871186}
   - component: {fileID: 790956287869785478}
   - component: {fileID: -8704473318394825924}
@@ -131,7 +130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3422404129
+  GlobalObjectIdHash: 1432166684
   InScenePlacedSourceGlobalObjectIdHash: 1432166684
   DeferredDespawnTick: 0
   Ownership: 1
@@ -180,19 +179,6 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
---- !u!114 &371318538504521918
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 518486916869508170}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac35373b42abe46ea8f7cab1a1c353f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &2421989631892871186
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -350,8 +336,6 @@ MonoBehaviour:
         byte0061: 0
   CurrentPlayerClass:
     m_InternalValue: 1
-  SnowCount:
-    m_InternalValue: 3
 --- !u!54 &790956287869785478
 Rigidbody:
   m_ObjectHideFlags: 0

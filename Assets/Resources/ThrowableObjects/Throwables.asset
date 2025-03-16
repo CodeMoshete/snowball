@@ -26,3 +26,9 @@ MonoBehaviour:
     DisplayName: Teleportation Snowball
     Description: Hit a teammate to teleport them to your location. Throw on the ground
       to teleport yourself there. Freezes opponents.
+  - Type: 2
+    PrefabName: ThrowableObjects/LocalSnowballDemolition
+    PickupPrefabName: ThrowableObjects/SnowPileDemolition
+    IconName: ThrowableObjects/Icons/DemolitionSnowball
+    DisplayName: Demolition Snowball
+    Description: Cause mass destruction of structures and damage opponents in range!

@@ -220,6 +220,12 @@ public class PlayerEntity : NetworkBehaviour
         }
     }
 
+    [Rpc(SendTo.Everyone)]
+    public void SetPlayerColorRpc(Color newColor)
+    {
+        GetComponent<Renderer>().material.color = newColor;
+    }
+
     public SnowballInventoryItem GetInventoryForType(SnowballType type)
     {
         return snowballInventory.Find(item => item.ThrowableObject.Type == type);

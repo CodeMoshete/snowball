@@ -3,5 +3,6 @@ using UnityEngine;
 public enum SnowballType
 {
     Basic,
-    Teleport
+    Teleport,
+    Demolition
 }
