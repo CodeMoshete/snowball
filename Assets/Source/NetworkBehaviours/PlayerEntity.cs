@@ -485,6 +485,19 @@ public class PlayerEntity : NetworkBehaviour
         Debug.Log("[PlayerEntity] Set player position to " + newPosition.ToString());
     }
 
+    [Rpc(SendTo.SpecifiedInParams)]
+    public void DisplayMessageToPlayerRpc(string message, float duration, RpcParams clientRpcParams = default)
+    {
+        Debug.Log($"Displaying message to player {OwnerClientId}: {message}");
+        Service.EventManager.SendEvent(EventId.DisplayMessage, message);
+        Service.TimerManager.CreateTimer(duration, DisplayTimeExpired, null);
+    }
+
+    private void DisplayTimeExpired(object cookie)
+    {
+        Service.EventManager.SendEvent(EventId.HideMessage, null);
+    }
+
     public void FreezePlayerFromScript()
     {
         if (!IsFrozen)

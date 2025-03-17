@@ -17,11 +17,20 @@ public class DisplayMessageAction : CustomNetworkAction
     public override void InitiateFromNetwork()
     {
         Debug.Log($"Display message: {Message}");
-        if (TargetPlayer == null || 
-            NetworkManager.Singleton.LocalClientId == TargetPlayer.GetPlayerEntity().OwnerClientId)
+        if (TargetPlayer == null)
         {
             Service.EventManager.SendEvent(EventId.DisplayMessage, Message);
             Service.TimerManager.CreateTimer(DisplayTime, DisplayTimeExpired, null);
+        }
+        else
+        {
+            PlayerEntity playerEntity = TargetPlayer.GetPlayerEntity();
+            if (playerEntity != null)
+            {
+                ulong clientId = playerEntity.OwnerClientId;
+                BaseRpcTarget rpcParams = NetworkManager.Singleton.RpcTarget.Single(clientId, RpcTargetUse.Temp);
+                playerEntity.DisplayMessageToPlayerRpc(Message, DisplayTime, rpcParams);
+            }
         }
             
         if (OnComplete != null)
