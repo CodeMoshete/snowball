@@ -13,6 +13,10 @@ public class LevelLightingData : MonoBehaviour
 {
     public bool IsMainDirectionalLightDisabled;
     public bool IsFogEnabled;
+    
+    [ColorUsage(true, true)]
+    public Color EnvironmentColor;
+    
     public Color FogColor;
     public float FogDensity;
     public Material SkyboxMaterial;
@@ -30,6 +34,11 @@ public class LevelLightingData : MonoBehaviour
             {
                 Debug.LogWarning("Directional Light not found");
             }
+        }
+
+        if (EnvironmentColor != Color.white)
+        {
+            RenderSettings.ambientLight = EnvironmentColor;
         }
 
         RenderSettings.fog = IsFogEnabled;

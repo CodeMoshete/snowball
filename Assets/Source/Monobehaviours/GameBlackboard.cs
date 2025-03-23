@@ -40,8 +40,10 @@ public class GameBlackboard : MonoBehaviour
     {
         if (!intBlackboard.ContainsKey(key))
         {
+            Debug.Log($"[GameBlackboard]: no value found for: {key}");
             return 0;
         }
+        Debug.Log($"[GameBlackboard]: Returning int value: {intBlackboard[key]}");
         return intBlackboard[key];
     }
 

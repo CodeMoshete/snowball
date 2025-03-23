@@ -17,6 +17,8 @@ public class PreGameScreen : MonoBehaviour
     public TMP_Text ClientActionLabel;
     public TMP_Text HostActionLabel;
     public Button HostStartButton;
+    public TMP_Text LevelTitleField;
+    public TMP_Text LevelDescriptionField;
 
     private List<GameObject> teamRosterObjects;
 
@@ -31,10 +33,16 @@ public class PreGameScreen : MonoBehaviour
 
     public bool OnGameManagerInitialized(object cookie)
     {
-        bool isHost = (bool)cookie;
-        HostActionLabel.gameObject.SetActive(isHost);
-        HostStartButton.gameObject.SetActive(isHost);
-        ClientActionLabel.gameObject.SetActive(!isHost);
+        GameInitializationData gameInitData = (GameInitializationData)cookie;
+        HostActionLabel.gameObject.SetActive(gameInitData.IsHost);
+        HostStartButton.gameObject.SetActive(gameInitData.IsHost);
+        ClientActionLabel.gameObject.SetActive(!gameInitData.IsHost);
+
+        if (gameInitData.LevelInfo != null)
+        {
+            LevelTitleField.text = $"Welcome to {gameInitData.LevelInfo.LevelDisplayName}";
+            LevelDescriptionField.text = gameInitData.LevelInfo.LevelDescription;
+        }
         return false;
     }
 

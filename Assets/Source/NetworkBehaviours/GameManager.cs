@@ -116,7 +116,8 @@ public class GameManager : NetworkBehaviour
         Service.EventManager.AddListener(EventId.StartGameplayPressed, OnStartGameplayPressed);
         // Service.EventManager.AddListener(EventId.OnPlaySoundEffect, OnPlaySoundEffect);
         Service.EventManager.AddListener(EventId.OnSpawnLocalGameObject, OnSpawnLocalGameObject);
-        Service.EventManager.SendEvent(EventId.GameManagerInitialized, IsHost);
+        GameInitializationData initData = GetGameInitData(levelPrefab);
+        Service.EventManager.SendEvent(EventId.GameManagerInitialized, initData);
         GetGameMetadataServerRpc(NetworkManager.LocalClientId, startData.PlayerName);
     }
 
@@ -304,6 +305,10 @@ public class GameManager : NetworkBehaviour
             Service.EventManager.AddListener(EventId.NetworkActionTriggered, OnNetworkAction);
             Service.NetworkActions.SyncActionsForLateJoiningUser(startData.StartActions);
 
+            List<GameObject> levelInfoContainer = UnityUtils.FindAllGameObjectContains<LevelInfo>(levelPrefab);
+            GameInitializationData initData = GetGameInitData(levelPrefab);
+            Service.EventManager.SendEvent(EventId.GameManagerInitialized, initData);
+
             GameObject spawnPointContainer = UnityUtils.FindGameObject(levelPrefab, "SpawnPoints");
             List<GameObject> teamSpawnPoints = UnityUtils.GetTopLevelChildren(spawnPointContainer);
             for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
@@ -327,6 +332,21 @@ public class GameManager : NetworkBehaviour
         {
             Service.EventManager.SendEvent(EventId.GameStateChanged, CurrentGameState);
         }
+    }
+
+    private GameInitializationData GetGameInitData(GameObject levelPrefab)
+    {
+        List<GameObject> levelInfoContainer = UnityUtils.FindAllGameObjectContains<LevelInfo>(levelPrefab);
+            LevelInfo levelInfo = null;
+            if (levelInfoContainer.Count > 0)
+            {
+                levelInfo = levelInfoContainer[0].GetComponent<LevelInfo>();
+            }
+
+            GameInitializationData initData = new GameInitializationData();
+            initData.IsHost = IsHost;
+            initData.LevelInfo = levelInfo;
+            return initData;
     }
 
     private void OnLevelLoadFail()
