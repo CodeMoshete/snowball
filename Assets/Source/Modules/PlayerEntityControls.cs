@@ -81,14 +81,14 @@ public class PlayerEntityControls
     {
         isGrounded = true;
         feetColliders.Add(collidedObject);
-        Debug.Log($"Collision start: {feetColliders.Count}");
+        // Debug.Log($"Collision start: {feetColliders.Count}");
     }
 
     private void OnFeetCollisionEnd(GameObject collidedObject)
     {
         feetColliders.Remove(collidedObject);
         isGrounded = feetColliders.Count > 0;
-        Debug.Log($"Collision start: {feetColliders.Count}");
+        // Debug.Log($"Collision start: {feetColliders.Count}");
     }
 
     private void UpdateLook(Vector2 value)
