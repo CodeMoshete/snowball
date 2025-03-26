@@ -25,6 +25,7 @@ public class LocalProjectlie : MonoBehaviour
 
     public SnowballType Type;
     public float DamageAmount;
+    public string ImpactEffectPrefabPath = IMPACT_EFFECT_RESOURCE;
     public ExplicitPlayerEntityProvider HitPlayerProvider;
     public ExplicitPlayerEntityProvider ThrowingPlayerProvider;
     public ExplicitTransformProvider HitTransformProvider;
@@ -126,7 +127,8 @@ public class LocalProjectlie : MonoBehaviour
                     healthTrigger.OnHit();
                 }
             }
-            TriggerCollisionEffect(IMPACT_EFFECT_RESOURCE, contactPt);
+            string impactEffect = ownerPlayer != null ? ImpactEffectPrefabPath : IMPACT_EFFECT_RESOURCE;
+            TriggerCollisionEffect(impactEffect, contactPt);
             rigidBody.linearVelocity = Vector3.zero;
             rigidBody.angularVelocity = Vector3.zero;
             Destroy(gameObject);

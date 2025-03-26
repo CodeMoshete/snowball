@@ -5150,6 +5150,7 @@ MonoBehaviour:
   LeaveSnowPileOnThrow: 0
   Type: 2
   DamageAmount: 0
+  ImpactEffectPrefabPath: Effects/SnowballExplosionEffect
   HitPlayerProvider: {fileID: 0}
   ThrowingPlayerProvider: {fileID: 4780658047567930048}
   HitTransformProvider: {fileID: 3161300606913251863}

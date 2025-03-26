@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 
-public class ShakeGameObjectAction : CustomAction
+public class ShakeGameObjectAction : CustomNetworkAction
 {
     private const float MULT_A = 50f;
     private const float MULT_B = 65f;
     private const float MULT_C = 125f;
 
     public Transform Target;
+    public TransformProvider TargetProvider;
     public float Duration;
     public float Intensity = 0.1f;
     public bool AffectX;
@@ -25,6 +26,16 @@ public class ShakeGameObjectAction : CustomAction
 
     public override void Initiate()
     {
+        base.Initiate();
+    }
+
+    public override void InitiateFromNetwork()
+    {
+        if (TargetProvider != null)
+        {
+            Target = TargetProvider.GetTransform();
+        }
+
         totalDuration = currentTime = Duration;
         initialPos = Target.transform.localPosition;
         yOffset = Random.Range(0f, 2 * Mathf.PI);
