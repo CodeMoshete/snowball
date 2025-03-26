@@ -18349,8 +18349,6 @@ Transform:
   - {fileID: 8905201027430534843}
   - {fileID: 3693170326391136106}
   - {fileID: 600620315890717894}
-  - {fileID: 1486974944309817576}
-  - {fileID: 2224430890332302931}
   m_Father: {fileID: 1456329003719552528}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4043065584694504524
@@ -18579,8 +18577,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SpawnAreas:
   - {fileID: 4975453037096458747}
-  - {fileID: 4463639901382019757}
-  - {fileID: 3120614881504911175}
   SnowballSpawnData:
   - Type: 2
     SnowballsPerArea: 1
@@ -32832,59 +32828,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 17.4, y: 40, z: 0.5}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &7419474729386735595
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1486974944309817576}
-  - component: {fileID: 4463639901382019757}
-  m_Layer: 0
-  m_Name: Volume3 (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1486974944309817576
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7419474729386735595}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.38352546, z: -0, w: 0.9235304}
-  m_LocalPosition: {x: -40.5, y: 11.839996, z: 34.6}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5161349941231338245}
-  m_LocalEulerAnglesHint: {x: 0, y: -45.104, z: 0}
---- !u!65 &4463639901382019757
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7419474729386735595}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 8.96, y: 7.53, z: 8.25}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7423525043764755693
 GameObject:
   m_ObjectHideFlags: 0
@@ -33469,59 +33412,6 @@ MonoBehaviour:
   LevelDisplayName: The Back Roads
   LevelDescription: "Jump into the opponent\u2019s bonfire 5 times to win!\n\nSnowballs
     spawn on the hillsides.\nDemolition snowballs spawn in the road.\n\nGood Luck!"
---- !u!1 &7874121711815241861
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2224430890332302931}
-  - component: {fileID: 3120614881504911175}
-  m_Layer: 0
-  m_Name: Volume3 (2)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2224430890332302931
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7874121711815241861}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.38352546, z: -0, w: 0.9235304}
-  m_LocalPosition: {x: 21.8, y: 11.839996, z: -44.6}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5161349941231338245}
-  m_LocalEulerAnglesHint: {x: 0, y: -45.104, z: 0}
---- !u!65 &3120614881504911175
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7874121711815241861}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 8.96, y: 7.53, z: 8.25}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7879265940259563900
 GameObject:
   m_ObjectHideFlags: 0

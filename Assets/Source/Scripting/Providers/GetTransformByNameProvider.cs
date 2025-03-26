@@ -6,28 +6,51 @@ public class GetTransformByNameProvider : TransformProvider
     // Leave blank in editor to search everywhere.
     public TransformProvider Parent;
     public string TransformName;
-    public override Transform GetTransform()
+
+    private Transform _cachedTransform;
+    private Transform cachedTransform
     {
-        if (Parent != null)
+        get
         {
-            Transform parentTransform = Parent.GetTransform();
-            if (parentTransform != null)
+            if (_cachedTransform == null)
             {
-                GameObject returnObj = UnityUtils.FindGameObject(parentTransform.gameObject, TransformName);
-                if (returnObj != null)
+                if (Parent != null)
                 {
-                    return returnObj.transform;
+                    Transform parentTransform = Parent.GetTransform();
+                    if (parentTransform != null)
+                    {
+                        GameObject returnObj = UnityUtils.FindGameObject(parentTransform.gameObject, TransformName);
+                        if (returnObj != null)
+                        {
+                            _cachedTransform = returnObj.transform;
+                        }
+                    }
+                }
+                else
+                {
+                    GameObject returnObj = GameObject.Find(TransformName);
+                    if (returnObj != null)
+                    {
+                        _cachedTransform = returnObj.transform;
+                    }
                 }
             }
+            return _cachedTransform;
         }
-        else
-        {
-            GameObject returnObj = GameObject.Find(TransformName);
-            if (returnObj != null)
-            {
-                return returnObj.transform;
-            }
-        }
-        return null;
+    }
+
+    public override Transform GetTransform()
+    {
+        return cachedTransform;
+    }
+
+    public override Vector3 GetTransformPosition()
+    {
+        return cachedTransform.position;
+    }
+
+    public override Vector3 GetTransformRotation()
+    {
+        return cachedTransform.eulerAngles;
     }
 }

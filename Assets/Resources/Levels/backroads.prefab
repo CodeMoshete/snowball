@@ -18583,7 +18583,7 @@ MonoBehaviour:
   - {fileID: 3120614881504911175}
   SnowballSpawnData:
   - Type: 2
-    SnowballsPerArea: 1
+    SnowballsPerArea: 10
   NextAction: {fileID: 5969938200247835005}
 --- !u!1 &4166536969170417949
 GameObject:

@@ -5,6 +5,12 @@ public class ExplicitTransformProvider : TransformProvider
     public Transform Transform;
     public Vector3 Position;
     public Vector3 Rotation;
+
+    public override Transform GetTransform()
+    {
+        return Transform;
+    }
+
     public override Vector3 GetTransformPosition()
     {
         if (Transform != null)
