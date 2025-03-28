@@ -7,7 +7,10 @@ public class GameHud : MonoBehaviour
     private const string HIT_NOTIFICATION_RESOURCE = "UI/PlayerHitNotification";
     private readonly Color GREEN_HIT_NOTIFICATION = new Color(0.41f, 1f, 0.57f);
     private readonly Color RED_HIT_NOTIFICATION = new Color(1f, 0.76f, 0.78f);
+    private const float AMMO_INFO_SHOW_TIME = 3f;
+    private const float AMMO_INFO_TRANSITION_TIME = 0.5f;
     public TMP_Text AmmoCountField;
+    public CanvasGroup AmmoDescriptionContainer;
     public TMP_Text AmmoNameField;
     public TMP_Text AmmoDescriptionField;
     public GameObject TooltipObject;
@@ -24,6 +27,8 @@ public class GameHud : MonoBehaviour
     private float currentBuildTime;
     private bool isBuilding;
     private SnowballInventoryItem currentAmmo;
+    private bool isShowingAmmoInfo;
+    private float ammoInfoShowTime;
 
     private void Start()
     {
@@ -46,7 +51,11 @@ public class GameHud : MonoBehaviour
 
         AmmoNameField.text = currentAmmo.ThrowableObject.DisplayName;
         AmmoDescriptionField.text = currentAmmo.ThrowableObject.Description;
+        
         // TODO: Play reveal / hide animation.
+        isShowingAmmoInfo = true;
+        ammoInfoShowTime = AMMO_INFO_SHOW_TIME + 2f * AMMO_INFO_TRANSITION_TIME;
+        AmmoDescriptionContainer.gameObject.SetActive(true);
 
         return false;
     }
@@ -170,6 +179,31 @@ public class GameHud : MonoBehaviour
             {
                 isBuilding = false;
                 BuildingTooltipObj.SetActive(false);
+            }
+        }
+
+        if (isShowingAmmoInfo)
+        {
+            ammoInfoShowTime -= Time.deltaTime;
+            float fadeInTimeframe = AMMO_INFO_SHOW_TIME + AMMO_INFO_TRANSITION_TIME;
+            if (ammoInfoShowTime > fadeInTimeframe)
+            {
+                AmmoDescriptionContainer.alpha = 1f - ((ammoInfoShowTime - fadeInTimeframe) / AMMO_INFO_TRANSITION_TIME);
+            }
+            else if (ammoInfoShowTime < AMMO_INFO_TRANSITION_TIME)
+            {
+                AmmoDescriptionContainer.alpha = ammoInfoShowTime / AMMO_INFO_TRANSITION_TIME;
+            }
+            else
+            {
+                AmmoDescriptionContainer.alpha = 1f;
+            }
+
+            if (ammoInfoShowTime <= 0f)
+            {
+                isShowingAmmoInfo = false;
+                AmmoDescriptionContainer.gameObject.SetActive(false);
+                ammoInfoShowTime = 0f;
             }
         }
     }
