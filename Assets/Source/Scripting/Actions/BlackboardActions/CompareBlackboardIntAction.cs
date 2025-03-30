@@ -1,4 +1,4 @@
-public class CompareBlackboardIntAction : CustomAction
+public class CompareBlackboardIntAction : CustomNetworkAction
 {
     public string Key;
     public int ComparisonValue;
@@ -7,6 +7,11 @@ public class CompareBlackboardIntAction : CustomAction
     public CustomAction OnEqual;
 
     public override void Initiate()
+    {
+        base.Initiate();
+    }
+
+    public override void InitiateFromNetwork()
     {
         int value = GameBlackboard.Instance.GetInt(Key);
 

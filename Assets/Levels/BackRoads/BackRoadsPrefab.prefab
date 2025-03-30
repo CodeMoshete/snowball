@@ -10560,6 +10560,52 @@ MonoBehaviour:
   EnterActions:
   - Parent: {fileID: 5487736995039710866}
   ExitActions: []
+--- !u!1 &818094585842369990
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3085606021609541522}
+  - component: {fileID: 4066546455536551398}
+  m_Layer: 0
+  m_Name: CheckIsHost
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3085606021609541522
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 818094585842369990}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5109141293493145970}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4066546455536551398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 818094585842369990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 357339b131df5684dac908bd39cfbd43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnIsHost: {fileID: 4104842492013577300}
+  OnIsNotHost: {fileID: 0}
 --- !u!1 &847989692040492700
 GameObject:
   m_ObjectHideFlags: 0
@@ -10926,6 +10972,52 @@ MonoBehaviour:
   PositionProvider: {fileID: 0}
   Position: {x: 0, y: 0, z: 0}
   OnDone: {fileID: 4195677408020062746}
+--- !u!1 &1198474321728451765
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6035432736542190621}
+  - component: {fileID: 6436747171783623792}
+  m_Layer: 0
+  m_Name: CheckIsHost (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6035432736542190621
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1198474321728451765}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -82.66, y: 0, z: 81.03}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5940633127496690228}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6436747171783623792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1198474321728451765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 357339b131df5684dac908bd39cfbd43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnIsHost: {fileID: 3444636517333319872}
+  OnIsNotHost: {fileID: 0}
 --- !u!1 &1211418466924274640
 GameObject:
   m_ObjectHideFlags: 0
@@ -15907,6 +15999,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0807dacc93d184e408aafaf5ac87638f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 0
+  IsSyncedOnJoin: 0
   Key: Campfire1Health
   ComparisonValue: 5
   OnGreaterThan: {fileID: 0}
@@ -26297,6 +26391,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0807dacc93d184e408aafaf5ac87638f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 0
+  IsSyncedOnJoin: 0
   Key: Campfire2Health
   ComparisonValue: 5
   OnGreaterThan: {fileID: 0}
@@ -27122,6 +27218,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4288007858175541159}
+  - {fileID: 3085606021609541522}
   - {fileID: 4672483860381899275}
   - {fileID: 3074262087524818097}
   m_Father: {fileID: 358323599085290755}
@@ -33081,6 +33178,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0807dacc93d184e408aafaf5ac87638f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 0
+  IsSyncedOnJoin: 0
   Key: Campfire1Health
   ComparisonValue: 5
   OnGreaterThan: {fileID: 0}
@@ -33232,6 +33331,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fab6abf8af8640aea2de1ffb4bf6a9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 0
+  IsSyncedOnJoin: 0
   Key: Campfire2Health
   IncrementBy: 1
   OnComplete: {fileID: 5011297702566385468}
@@ -33636,6 +33737,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5161773110990230913}
+  - {fileID: 6035432736542190621}
   - {fileID: 1498919346591817118}
   - {fileID: 132635578359946337}
   m_Father: {fileID: 12804684747561925}
@@ -40027,9 +40129,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fab6abf8af8640aea2de1ffb4bf6a9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 1
   Key: Campfire1Health
   IncrementBy: 1
-  OnComplete: {fileID: 4104842492013577300}
+  OnComplete: {fileID: 4066546455536551398}
 --- !u!1 &4829137718052529970
 GameObject:
   m_ObjectHideFlags: 0
@@ -62567,6 +62671,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0807dacc93d184e408aafaf5ac87638f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 0
+  IsSyncedOnJoin: 0
   Key: Campfire2Health
   ComparisonValue: 5
   OnGreaterThan: {fileID: 0}
@@ -62713,6 +62819,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fab6abf8af8640aea2de1ffb4bf6a9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 0
+  IsSyncedOnJoin: 0
   Key: Campfire1Health
   IncrementBy: 1
   OnComplete: {fileID: 6813801780402215063}
@@ -62760,9 +62868,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fab6abf8af8640aea2de1ffb4bf6a9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsNetworked: 1
+  IsSyncedOnJoin: 1
   Key: Campfire2Health
   IncrementBy: 1
-  OnComplete: {fileID: 3444636517333319872}
+  OnComplete: {fileID: 6436747171783623792}
 --- !u!1 &6960027562362022416
 GameObject:
   m_ObjectHideFlags: 0
@@ -68702,7 +68812,7 @@ GameObject:
   m_Component:
   - component: {fileID: 358323599085290755}
   m_Layer: 0
-  m_Name: DamageFire1
+  m_Name: DamageFireTeam1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
