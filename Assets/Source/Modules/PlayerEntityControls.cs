@@ -132,6 +132,8 @@ public class PlayerEntityControls
         if (player.IsControlDisabled)
             return;
 
+        // Debug.Log($"Player movement: {value}");
+
         Vector3 newPos = player.transform.position;
         float healthMovementModifier = Mathf.Lerp(MIN_SLOWED_SPEED, 1f, player.Health / Constants.MAX_HEALTH);
         float xComponent = value.x * healthMovementModifier;
@@ -147,6 +149,11 @@ public class PlayerEntityControls
             return;
 
         player.OnThrowPressed();
+
+        if (player.PlayerAnimator != null)
+        {
+            player.PlayerAnimator.Throw();
+        }
     }
 
     private void OnJump()
@@ -156,6 +163,11 @@ public class PlayerEntityControls
 
         Rigidbody rb = player.GetComponent<Rigidbody>();
         rb.AddForce(new Vector3(0f, JUMP_FORCE, 0f));
+
+        if (player.PlayerAnimator != null)
+        {
+            player.PlayerAnimator.Jump();
+        }
     }
 
     private void OnSpawnWall()

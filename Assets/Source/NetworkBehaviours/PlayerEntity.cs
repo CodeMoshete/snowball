@@ -29,6 +29,8 @@ public class PlayerEntity : NetworkBehaviour
     public float RotationSpeed = 40f;
     public Transform ProjectileOriginReference;
     public GameObject DefrostRangeFX;
+    public PlayerEntityAnimator PlayerAnimator;
+    public PlayerEntityTeamColor PlayerTeamColor;
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>(Constants.TEAM_UNASSIGNED);
     public NetworkVariable<FixedString64Bytes> PlayerName = new NetworkVariable<FixedString64Bytes>(Constants.PLAYER_NAME_DEFAULT);
     public NetworkVariable<PlayerClass> CurrentPlayerClass = new NetworkVariable<PlayerClass>(global::PlayerClass.Soldier);
@@ -54,6 +56,7 @@ public class PlayerEntity : NetworkBehaviour
     private int currentSnowballTypeIndex;
 
     private PlayerEntityControls controls;
+    
 
     private GameManager gameManager;
 

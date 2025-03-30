@@ -454,7 +454,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61d271afcd4384f489d9cd3119cf1175, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DownloadSource: 1
+  DownloadSource: 0
 --- !u!1 &709607091
 GameObject:
   m_ObjectHideFlags: 0
@@ -820,7 +820,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4dfc301d7be14b458b13d651434731e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NextAction: {fileID: 1741432117}
+  OnStart: {fileID: 1741432117}
+  OnEnabled: {fileID: 0}
 --- !u!1 &1347210350
 GameObject:
   m_ObjectHideFlags: 0
