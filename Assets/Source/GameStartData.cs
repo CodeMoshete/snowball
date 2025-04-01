@@ -15,6 +15,7 @@ public struct GameStartData : INetworkSerializable
     public Vector3 PlayerStartPos;
     public Vector3 PlayerStartEuler;
     public GameState CurrentGameState;
+    public Color PlayerColor;
     public int[] StartActions;
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -28,5 +29,6 @@ public struct GameStartData : INetworkSerializable
         serializer.SerializeValue(ref PlayerClass);
         serializer.SerializeValue(ref CurrentGameState);
         serializer.SerializeValue(ref StartActions);
+        serializer.SerializeValue(ref PlayerColor);
     }
 }

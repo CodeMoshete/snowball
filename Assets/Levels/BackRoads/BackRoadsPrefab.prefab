@@ -16193,7 +16193,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2098040106850282861}
   PositionReference: {fileID: 279413451931572190}
@@ -26289,7 +26289,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2394745705902988314}
   PositionReference: {fileID: 3587352330554671082}
@@ -27458,7 +27458,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2394745705902988314}
   PositionReference: {fileID: 8417445862406126160}
@@ -27964,7 +27964,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2098040106850282861}
   PositionReference: {fileID: 1360381625823830333}
@@ -28015,7 +28015,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2394745705902988314}
   PositionReference: {fileID: 2413719829627823247}
@@ -33426,7 +33426,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2098040106850282861}
   PositionReference: {fileID: 3780199369021906791}
@@ -33786,7 +33786,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2394745705902988314}
   PositionReference: {fileID: 69876919876767456}
@@ -39400,7 +39400,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2394745705902988314}
   PositionReference: {fileID: 2878681947992559058}
@@ -39451,7 +39451,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2394745705902988314}
   PositionReference: {fileID: 5983296024673749754}
@@ -39503,7 +39503,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37dd45c7668fc49c6943b14ca5d417b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   Message: Team 2's campfire has been damaged {0} of 5 times!
   DynamicStringProviders:
@@ -39557,7 +39557,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37dd45c7668fc49c6943b14ca5d417b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   Message: Team 1's campfire has been damaged {0} of 5 times!
   DynamicStringProviders:
@@ -40225,7 +40225,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2098040106850282861}
   PositionReference: {fileID: 202442248959672644}
@@ -40745,7 +40745,6 @@ Transform:
   - {fileID: 8606945534016156227}
   - {fileID: 1889335549769644640}
   - {fileID: 7043803103912592281}
-  - {fileID: 6381122656664891928}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5354300791388192936
@@ -51381,7 +51380,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2098040106850282861}
   PositionReference: {fileID: 1342467682387364030}
@@ -62119,7 +62118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2394745705902988314}
   PositionReference: {fileID: 5771095383115231748}
@@ -69502,7 +69501,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2098040106850282861}
   PositionReference: {fileID: 3114297349004292138}
@@ -69927,7 +69926,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2394745705902988314}
   PositionReference: {fileID: 3591894288164849606}
@@ -69978,7 +69977,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2098040106850282861}
   PositionReference: {fileID: 397083082660874764}
@@ -75159,7 +75158,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bfb8f7c4b5444b639c8969f2bc023e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNetworked: 0
+  IsNetworked: 1
   IsSyncedOnJoin: 0
   PlayerEntitySource: {fileID: 2098040106850282861}
   PositionReference: {fileID: 1632894162188206525}
@@ -75373,7 +75372,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &685036266916482691
 Transform:
   m_ObjectHideFlags: 0
@@ -77139,66 +77138,4 @@ CapsuleCollider:
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 6080139993415733803, guid: 2aa3c0d8e09684fc2a2406ba22fff339, type: 3}
   m_PrefabInstance: {fileID: 3433243755287512068}
-  m_PrefabAsset: {fileID: 0}
---- !u!1001 &8845353485962682434
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 1456329003719552528}
-    m_Modifications:
-    - target: {fileID: 2472281711139131994, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.0016332604
-      objectReference: {fileID: 0}
-    - target: {fileID: 2472281711139131994, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2472281711139131994, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -1.5888101
-      objectReference: {fileID: 0}
-    - target: {fileID: 2472281711139131994, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.34857455
-      objectReference: {fileID: 0}
-    - target: {fileID: 2472281711139131994, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2472281711139131994, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0.9372811
-      objectReference: {fileID: 0}
-    - target: {fileID: 2472281711139131994, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2472281711139131994, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2472281711139131994, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 139.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2472281711139131994, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6253182451098207251, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-      propertyPath: m_Name
-      value: TestCharacterPrefab
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
---- !u!4 &6381122656664891928 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2472281711139131994, guid: 62f94cd5bf6a34ba7b3896af0c7959b3, type: 3}
-  m_PrefabInstance: {fileID: 8845353485962682434}
   m_PrefabAsset: {fileID: 0}

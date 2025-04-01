@@ -34,6 +34,7 @@ public class PlayerEntity : NetworkBehaviour
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>(Constants.TEAM_UNASSIGNED);
     public NetworkVariable<FixedString64Bytes> PlayerName = new NetworkVariable<FixedString64Bytes>(Constants.PLAYER_NAME_DEFAULT);
     public NetworkVariable<PlayerClass> CurrentPlayerClass = new NetworkVariable<PlayerClass>(global::PlayerClass.Soldier);
+    public NetworkVariable<Color> PlayerColor = new NetworkVariable<Color>(Color.gray);
 
     public bool IsFrozen { get; private set; }
     public bool IsControlDisabled { 
@@ -68,6 +69,8 @@ public class PlayerEntity : NetworkBehaviour
         TeamName.OnValueChanged += OnTeamNameChanged;
         PlayerName.OnValueChanged += OnPlayerNameChanged;
         CurrentPlayerClass.OnValueChanged += OnPlayerClassChanged;
+        OnPlayerColorChanged(Color.gray, PlayerColor.Value);
+        PlayerColor.OnValueChanged += OnPlayerColorChanged;
         wallOptions = Resources.Load<Buildables>(BUILDABLES_RESOURCE);
         
         Constants.SnowballTypes = Resources.Load<Throwables>(THROWABLES_RESOURCE);
@@ -137,6 +140,7 @@ public class PlayerEntity : NetworkBehaviour
         AssignPlayerClassServerRpc(startData.PlayerClass);
         AssignTeamNameServerRpc(startData.PlayerTeamName);
         AssignPlayerNameRpc(startData.PlayerName);
+        SetPlayerColorRpc(startData.PlayerColor);
         PlacePlayerAtSpawn(startData);
         
         Transform teamQueen = gameManager.GetQueenForTeam(startData.PlayerTeamName);
@@ -223,10 +227,16 @@ public class PlayerEntity : NetworkBehaviour
         }
     }
 
-    [Rpc(SendTo.Everyone)]
+    [Rpc(SendTo.Server)]
     public void SetPlayerColorRpc(Color newColor)
     {
-        GetComponent<Renderer>().material.color = newColor;
+        PlayerColor.Value = newColor;
+    }
+
+    private void OnPlayerColorChanged(Color oldValue, Color newValue)
+    {
+        Debug.Log($"Player color changed to {newValue}");
+        GetComponent<Renderer>().material.color = newValue;
     }
 
     public SnowballInventoryItem GetInventoryForType(SnowballType type)

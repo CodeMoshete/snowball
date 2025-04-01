@@ -189,6 +189,7 @@ public class GameManager : NetworkBehaviour
         startData.PlayerName = playerName;
         startData.CurrentGameState = CurrentGameState == GameState.PreGameLobby ? GameState.PreGameLobby : GameState.Gameplay;
         startData.StartActions = Service.NetworkActions.CurrentActionsToSync;
+        startData.PlayerColor = teamColors[startData.PlayerTeamName];
 
         SpawnPlayer(clientId, playerName, spawnInfo);
         AssignPlayerClass(startData.PlayerTeamName, clientId);
@@ -212,7 +213,6 @@ public class GameManager : NetworkBehaviour
         netObj.SpawnWithOwnership(clientId, true);
         teamRosters[spawnInfo.TeamName].Add(clientId);
         entity.SetPlayerSnowCountClientRpc(SnowballType.Basic, Constants.DEFAULT_START_AMMO);
-        entity.SetPlayerColorRpc(teamColors[spawnInfo.TeamName]);
         Debug.Log($"Added player {clientId} to team {spawnInfo.TeamName}");
         return entity;
     }
@@ -264,6 +264,7 @@ public class GameManager : NetworkBehaviour
         startData.PlayerClass = serverStartData.PlayerClass;
         startData.TeamQueenPlayerId = serverStartData.TeamQueenPlayerId;
         startData.StartActions = serverStartData.StartActions;
+        startData.PlayerColor = serverStartData.PlayerColor;
 
         startData.CurrentGameState = serverStartData.CurrentGameState;
         CurrentGameState = startData.CurrentGameState;
