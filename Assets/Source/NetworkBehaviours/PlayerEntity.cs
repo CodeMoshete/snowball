@@ -543,6 +543,7 @@ public class PlayerEntity : NetworkBehaviour
     {
         if (!IsFrozen)
         {
+            // Debug.Log($"Apply damage {damage} to player {OwnerClientId}");
             gameManager.TransmitProjectileHitClientRpc(throwingPlayerId, OwnerClientId, damage);
         }
     }

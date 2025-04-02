@@ -53,9 +53,9 @@ public class DamageEntitiesInRange : CustomNetworkAction
             // If the entity is within the outer radius, apply damage scaled down linearly
             else if (distanceSquared < outerRadiusSquared)
             {
-                float distanceMult = distanceSquared - innerRadiusSquared / sqrDistanceBetweenRadiuses;
-                float damage = DamageAmount * (1 - distanceMult / (OuterRadius - InnerRadius));
-                player.DamagePlayerFromScript(DamageAmount, throwingPlayerId);
+                float distanceMult = 1f - (distanceSquared - innerRadiusSquared) / sqrDistanceBetweenRadiuses;
+                float damage = DamageAmount * distanceMult;
+                player.DamagePlayerFromScript(damage, throwingPlayerId);
             }
         }
     }
@@ -80,9 +80,10 @@ public class DamageEntitiesInRange : CustomNetworkAction
             // If the entity is within the outer radius, apply damage scaled down linearly
             else if (distanceSquared < outerRadiusSquared)
             {
-                float distanceMult = distanceSquared - innerRadiusSquared / sqrDistanceBetweenRadiuses;
-                float damage = DamageAmount * (1 - distanceMult / (OuterRadius - InnerRadius));
-                int adjustedDamage = Mathf.RoundToInt((float)entity.Health / 100f * damage);
+                float distanceMult = 1f - (distanceSquared - innerRadiusSquared) / sqrDistanceBetweenRadiuses;
+                float damage = DamageAmount * distanceMult;
+                int adjustedDamage = Mathf.RoundToInt(((float)entity.Health / 100f) * damage);
+                Debug.Log($"Applying {adjustedDamage} damage to {entity.name}");
                 entity.OnHit(adjustedDamage);
             }
         }

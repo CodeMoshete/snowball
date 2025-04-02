@@ -53,8 +53,8 @@ public class PhysicsExplosionAction : CustomNetworkAction
             else if (distanceSquared < outerRadiusSquared)
             {
                 // float distance = Mathf.Sqrt(distanceSquared);
-                float distanceMult = distanceSquared - innerRadiusSquared / sqrDistanceBetweenRadiuses;
-                float force = Force * (1 - distanceMult / (OuterRadius - InnerRadius));
+                float distanceMult = 1f - (distanceSquared - innerRadiusSquared) / sqrDistanceBetweenRadiuses;
+                float force = Force * distanceMult;
                 rb.AddForce(direction.normalized * force, ForceMode.Impulse);
             }
         }

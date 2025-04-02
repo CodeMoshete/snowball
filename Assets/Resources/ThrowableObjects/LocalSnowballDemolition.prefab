@@ -5157,6 +5157,7 @@ MonoBehaviour:
   OnHitPlayer: {fileID: 7574276903596408765}
   OnHitObjective: {fileID: 7574276903596408765}
   OnHitFloor: {fileID: 7574276903596408765}
+  OnHitHealthObject: {fileID: 7574276903596408765}
 --- !u!114 &1763849751745074174
 MonoBehaviour:
   m_ObjectHideFlags: 0

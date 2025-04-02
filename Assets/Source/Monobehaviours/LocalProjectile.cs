@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Video;
 using Utils;
 
 public class LocalProjectlie : MonoBehaviour
@@ -13,7 +12,7 @@ public class LocalProjectlie : MonoBehaviour
     private const string OBJECTIVE_TAG = "ProjectileObjective";
     private const string HEALTH_TAG = "HealthObject";
     private Rigidbody rigidBody;
-    private Collider collider;
+    private Collider colliderComp;
     private Transform owner;
     private PlayerEntity ownerPlayer;
     private string ownerTeamName;
@@ -35,6 +34,7 @@ public class LocalProjectlie : MonoBehaviour
     public CustomAction OnHitPlayer;
     public CustomAction OnHitObjective;
     public CustomAction OnHitFloor;
+    public CustomAction OnHitHealthObject;
 
     private void Start()
     {
@@ -61,15 +61,15 @@ public class LocalProjectlie : MonoBehaviour
         ownerTeamName = "None";
         this.isServer = isServer;
 
-        collider = GetComponent<Collider>();
-        collider.enabled = false;
+        colliderComp = GetComponent<Collider>();
+        colliderComp.enabled = false;
         if (!isServer && owner != null)
         {
             Service.UpdateManager.AddObserver(OnUpdate);
         }
         else if (isServer)
         {
-            collider.enabled = true;
+            colliderComp.enabled = true;
         }
     }
 
@@ -81,7 +81,7 @@ public class LocalProjectlie : MonoBehaviour
         float dotResult = Vector3.Dot(rigidBody.linearVelocity.normalized, vectorToProjectileSpawnPoint);
         if (dotResult < 0f)
         {
-            collider.enabled = true;
+            colliderComp.enabled = true;
             Service.UpdateManager.RemoveObserver(OnUpdate);
             Debug.Log("Projectile is now active");
         }
@@ -150,8 +150,14 @@ public class LocalProjectlie : MonoBehaviour
                 else if (collision.gameObject.tag == HEALTH_TAG)
                 {
                     Debug.Log($"Projectile hit a health object: {collision.gameObject.name}");
-                    ObjectHealthTrigger healthTrigger = UnityUtils.FindFirstComponentInParents<ObjectHealthTrigger>(collision.gameObject);
+                    ObjectHealthTrigger healthTrigger =
+                        UnityUtils.FindFirstComponentInParents<ObjectHealthTrigger>(collision.gameObject);
                     healthTrigger.OnHit();
+
+                    if (OnHitHealthObject != null)
+                    {
+                        OnHitHealthObject.Initiate();
+                    }
                 }
             }
             string impactEffect = ownerPlayer != null ? ImpactEffectPrefabPath : IMPACT_EFFECT_RESOURCE;

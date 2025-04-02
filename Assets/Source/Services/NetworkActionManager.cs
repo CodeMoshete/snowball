@@ -22,7 +22,7 @@ public class NetworkActionManager
         for (int i = 0, count = networkActionObjs.Count; i < count; ++i)
         {
             CustomNetworkAction action = networkActionObjs[i].GetComponent<CustomNetworkAction>();
-            Debug.Log($"Adding {action.name}");
+            // Debug.Log($"[NetworkActionManager]: Adding {action.name}");
             networkActions.Add(action);
         }
     }
@@ -42,7 +42,7 @@ public class NetworkActionManager
         {
             actionsIndicesToSync.Add(actionIndex);
         }
-        Debug.Log($"Triggering action {networkAction.name}");
+        // Debug.Log($"[NetworkActionManager]: Triggering action {networkAction.name}");
         networkAction.InitiateFromNetwork();
     }
 
