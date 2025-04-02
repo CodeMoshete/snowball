@@ -709,10 +709,10 @@ public class GameManager : NetworkBehaviour
         player.SetPlayerSnowCountClientRpc(SnowballType.Basic, playerInventory.Quantity - Constants.WallCost);
 
         GameObject instantiatedWall = Instantiate(Resources.Load<GameObject>(resourceName));
-        NetworkObject netObj = instantiatedWall.GetComponent<NetworkObject>();
-        netObj.Spawn(true);
         instantiatedWall.transform.position = position;
         instantiatedWall.transform.eulerAngles = euler;
+        NetworkObject netObj = instantiatedWall.GetComponent<NetworkObject>();
+        netObj.Spawn(true);
         Rigidbody rigidBody = instantiatedWall.GetComponent<Rigidbody>();
         if (rigidBody != null)
         {
