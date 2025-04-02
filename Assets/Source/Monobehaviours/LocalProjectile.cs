@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Video;
 using Utils;
 
 public class LocalProjectlie : MonoBehaviour
@@ -12,6 +13,7 @@ public class LocalProjectlie : MonoBehaviour
     private const string OBJECTIVE_TAG = "ProjectileObjective";
     private const string HEALTH_TAG = "HealthObject";
     private Rigidbody rigidBody;
+    private Collider collider;
     private Transform owner;
     private PlayerEntity ownerPlayer;
     private string ownerTeamName;
@@ -58,6 +60,31 @@ public class LocalProjectlie : MonoBehaviour
         }
         ownerTeamName = "None";
         this.isServer = isServer;
+
+        collider = GetComponent<Collider>();
+        collider.enabled = false;
+        if (!isServer && owner != null)
+        {
+            Service.UpdateManager.AddObserver(OnUpdate);
+        }
+        else if (isServer)
+        {
+            collider.enabled = true;
+        }
+    }
+
+    private void OnUpdate(float dt)
+    {
+        Vector3 vectorToProjectileSpawnPoint = 
+            (ownerPlayer.ProjectileOriginReference.position - transform.position).normalized;
+
+        float dotResult = Vector3.Dot(rigidBody.linearVelocity.normalized, vectorToProjectileSpawnPoint);
+        if (dotResult < 0f)
+        {
+            collider.enabled = true;
+            Service.UpdateManager.RemoveObserver(OnUpdate);
+            Debug.Log("Projectile is now active");
+        }
     }
 
     public void OnCollisionEnter(Collision collision)
