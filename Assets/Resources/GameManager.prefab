@@ -73,9 +73,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  SnowballThrowSpeed: 1800
-  MinThrowAngle: 2.5
-  MaxThrowAngle: 25
+  SnowballThrowSpeed: 1600
+  MinThrowAngle: -10
+  MaxThrowAngle: 65
 --- !u!114 &-5124431070991648272
 MonoBehaviour:
   m_ObjectHideFlags: 0
