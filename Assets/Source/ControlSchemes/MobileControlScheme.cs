@@ -143,7 +143,10 @@ public class MobileControlScheme : IControlScheme
             {
                 // Reset deltas when touch ends
                 if (isLeft)
+                {
                     leftTouchDelta = Vector2.zero;
+                    updateMovement(Vector2.zero);
+                }
                 else
                     rightTouchDelta = Vector2.zero;
             }

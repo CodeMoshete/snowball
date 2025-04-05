@@ -12,7 +12,8 @@ struct SpawnInfo
 
 public class GameManager : NetworkBehaviour
 {
-    public const string PLAYER_RESOURCE = "PlayerPrefab";
+    // public const string PLAYER_RESOURCE = "PlayerPrefab";
+    public const string PLAYER_RESOURCE = "PlayerPrefabModel";
     private const string SNOW_PILE_RESOURCE = "SnowPile";
 
     public float SnowballThrowSpeed = Constants.SNOWBALL_THROW_SPEED;

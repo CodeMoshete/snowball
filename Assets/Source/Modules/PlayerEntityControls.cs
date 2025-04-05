@@ -132,7 +132,8 @@ public class PlayerEntityControls
         if (player.IsControlDisabled)
             return;
 
-        // Debug.Log($"Player movement: {value}");
+        Debug.Log($"Player movement: {value}");
+        SetMovementAnimationState(value);
 
         Vector3 newPos = player.transform.position;
         float healthMovementModifier = Mathf.Lerp(MIN_SLOWED_SPEED, 1f, player.Health / Constants.MAX_HEALTH);
@@ -141,6 +142,17 @@ public class PlayerEntityControls
         newPos += xComponent * player.transform.right;
         newPos += yComponent * player.transform.forward;
         player.transform.position = newPos;
+    }
+
+    private void SetMovementAnimationState(Vector2 movementVector)
+    {
+        if (player.PlayerAnimator != null)
+        {
+            player.PlayerAnimator.SetMoveForward(movementVector.y > 0f);
+            player.PlayerAnimator.SetMoveBackward(movementVector.y < 0f);
+            player.PlayerAnimator.SetMoveLeft(movementVector.x < 0f);
+            player.PlayerAnimator.SetMoveRight(movementVector.x > 0f);
+        }
     }
 
     private void OnThrow()

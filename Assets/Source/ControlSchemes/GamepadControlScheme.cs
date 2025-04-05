@@ -18,6 +18,7 @@ public class GamepadControlScheme : IControlScheme
     private Action onEscape;
     private float lookMultiplier = (LOOK_MULT_MIN + LOOK_MULT_MAX) / 2f;
     private Gamepad currentGamepad;
+    private bool isMoving;
 
     public void Initialize(
         Action<Vector2> onUpdateLook, 
@@ -81,7 +82,13 @@ public class GamepadControlScheme : IControlScheme
         Vector2 leftStickVal = currentGamepad.leftStick.value;
         if (leftStickVal.x != 0f || leftStickVal.y != 0f)
         {
+            isMoving = true;
             moveDelta = leftStickVal * speedMult;
+            updateMovement(moveDelta);
+        }
+        else if (isMoving)
+        {
+            isMoving = false;
             updateMovement(moveDelta);
         }
         Debug.Log($"Left stick: {leftStickVal}");

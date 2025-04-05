@@ -199,7 +199,7 @@ public class LevelLoader : MonoBehaviour
             return;
         }
 
-        ReconnectShaders(prefab);
+        // ReconnectShaders(prefab);
 
         Debug.Log("Level loaded successfully!");
         onDownloadSuccess(prefab);
