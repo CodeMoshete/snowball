@@ -150,8 +150,11 @@ public class PlayerEntityControls
         {
             player.PlayerAnimator.SetMoveForward(movementVector.y > 0f);
             player.PlayerAnimator.SetMoveBackward(movementVector.y < 0f);
-            player.PlayerAnimator.SetMoveLeft(movementVector.x < 0f);
-            player.PlayerAnimator.SetMoveRight(movementVector.x > 0f);
+
+            float strafeThreshold = Mathf.Abs(movementVector.y) / 2f;
+
+            player.PlayerAnimator.SetMoveLeft(movementVector.x < -strafeThreshold);
+            player.PlayerAnimator.SetMoveRight(movementVector.x > strafeThreshold);
         }
     }
 

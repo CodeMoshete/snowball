@@ -502,7 +502,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 64e4d32fa6b06455daf00096e818dc06, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 53609281838995098}
+      addedObject: {fileID: 4326290801103214572}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 64e4d32fa6b06455daf00096e818dc06, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2624126761803640026}
@@ -517,7 +517,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 64e4d32fa6b06455daf00096e818dc06, type: 3}
   m_PrefabInstance: {fileID: 3803341686590090130}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &53609281838995098
+--- !u!114 &4326290801103214572
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -526,7 +526,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4037836387342227139}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Script: {fileID: 11500000, guid: 33c355a32f55b4f618970c9e1433562c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
@@ -537,6 +537,13 @@ MonoBehaviour:
     DestinationState: -1907200461
     TransitionDuration: 0
     TriggerNameHash: -1907200461
+    TransitionIndex: 0
+  - IsCrossFadeExit: 0
+    Layer: 2
+    OriginatingState: -34935967
+    DestinationState: 1137391654
+    TransitionDuration: 0.25
+    TriggerNameHash: 125937960
     TransitionIndex: 0
   m_Animator: {fileID: 2624126761803640026}
 --- !u!95 &2624126761803640026
