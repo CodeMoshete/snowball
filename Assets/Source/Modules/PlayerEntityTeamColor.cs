@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class PlayerEntityTeamColor : MonoBehaviour
@@ -16,6 +17,12 @@ public class PlayerEntityTeamColor : MonoBehaviour
                 {
                     material.color = teamColor;
                 }
+            }
+
+            TMP_Text textField = TeamColorObject.GetComponentInChildren<TMP_Text>();
+            if (textField != null)
+            {
+                textField.color = teamColor;
             }
         }
     }

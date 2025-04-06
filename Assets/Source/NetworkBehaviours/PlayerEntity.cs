@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -29,6 +30,8 @@ public class PlayerEntity : NetworkBehaviour
     public float RotationSpeed = 40f;
     public Transform ProjectileOriginReference;
     public GameObject DefrostRangeFX;
+    public GameObject PlayerNameTagContainer;
+    public TMP_Text PlayerNameTag;
     public PlayerEntityAnimator PlayerAnimator;
     public PlayerEntityTeamColor PlayerTeamColor;
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>(Constants.TEAM_UNASSIGNED);
@@ -66,6 +69,12 @@ public class PlayerEntity : NetworkBehaviour
         base.OnNetworkSpawn();
 
         name = PlayerName.Value.ToString();
+        if (PlayerNameTagContainer != null)
+        {
+            PlayerNameTag.text = PlayerName.Value.ToString();
+            PlayerNameTagContainer.SetActive(!IsOwner);
+        }
+
         TeamName.OnValueChanged += OnTeamNameChanged;
         PlayerName.OnValueChanged += OnPlayerNameChanged;
         CurrentPlayerClass.OnValueChanged += OnPlayerClassChanged;
@@ -236,7 +245,9 @@ public class PlayerEntity : NetworkBehaviour
     private void OnPlayerColorChanged(Color oldValue, Color newValue)
     {
         Debug.Log($"Player color changed to {newValue}");
-        GetComponent<Renderer>().material.color = newValue;
+        // GetComponent<Renderer>().material.color = newValue;
+        if (PlayerTeamColor != null)
+            PlayerTeamColor.SetTeamColor(newValue);
     }
 
     public SnowballInventoryItem GetInventoryForType(SnowballType type)

@@ -132,7 +132,7 @@ public class PlayerEntityControls
         if (player.IsControlDisabled)
             return;
 
-        Debug.Log($"Player movement: {value}");
+        // Debug.Log($"Player movement: {value}");
         SetMovementAnimationState(value);
 
         Vector3 newPos = player.transform.position;
