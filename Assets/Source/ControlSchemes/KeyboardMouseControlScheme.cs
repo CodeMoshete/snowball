@@ -17,7 +17,6 @@ public class KeyboardMouseControlScheme : IControlScheme
     private Action onPrevWall;
     private Action onEscape;
     private float lookMultiplier = 250f;
-    private bool isMoving;
 
     public void Initialize(
         Action<Vector2> onUpdateLook, 
@@ -71,13 +70,11 @@ public class KeyboardMouseControlScheme : IControlScheme
         moveDelta.y -= Input.GetKey(KeyCode.S) ? speedMult : 0f;
         if (moveDelta.x != 0f || moveDelta.y != 0f)
         {
-            isMoving = true;
             moveDelta = moveDelta.normalized * speedMult;
             updateMovement(moveDelta);
         }
         else
         {
-            isMoving = false;
             updateMovement(moveDelta);
         }
 
