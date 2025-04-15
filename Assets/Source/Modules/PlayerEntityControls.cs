@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor.Callbacks;
 using UnityEngine;
 using Utils;
 
@@ -32,6 +33,7 @@ public class PlayerEntityControls
     }
 
     private PlayerEntity player;
+    private Rigidbody playerRigidbody;
     private Transform cameraOrigin;
     private Transform cameraCenterpoint;
     private Transform cameraTransform;
@@ -46,6 +48,7 @@ public class PlayerEntityControls
     public PlayerEntityControls(PlayerEntity player)
     {
         this.player = player;
+        playerRigidbody = player.GetComponent<Rigidbody>();
         cameraCenterpoint = UnityUtils.FindGameObject(player.gameObject, CAMERA_CENTERPOINT).transform;
         cameraOrigin = UnityUtils.FindGameObject(player.gameObject, CAMERA_ORIGIN).transform;
         cameraTransform = GameObject.Find(CAMERA_NAME).transform;
@@ -135,13 +138,15 @@ public class PlayerEntityControls
         // Debug.Log($"Player movement: {value}");
         SetMovementAnimationState(value);
 
-        Vector3 newPos = player.transform.position;
+        // Vector3 newPos = player.transform.position;
         float healthMovementModifier = Mathf.Lerp(MIN_SLOWED_SPEED, 1f, player.Health / Constants.MAX_HEALTH);
         float xComponent = value.x * healthMovementModifier;
         float yComponent = value.y * healthMovementModifier;
-        newPos += xComponent * player.transform.right;
-        newPos += yComponent * player.transform.forward;
-        player.transform.position = newPos;
+        // newPos += xComponent * player.transform.right;
+        // newPos += yComponent * player.transform.forward;
+        // player.transform.position = newPos;
+        Vector3 movement = (xComponent * player.transform.right) + (yComponent * player.transform.forward);
+        playerRigidbody.MovePosition(playerRigidbody.position + movement);
     }
 
     private void SetMovementAnimationState(Vector2 movementVector)

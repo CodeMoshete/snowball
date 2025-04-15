@@ -188,7 +188,10 @@ public class GameManager : NetworkBehaviour
         startData.PlayerStartEuler = spawnInfo.SpawnPoint.eulerAngles;
         startData.PlayerId = clientId;
         startData.PlayerName = playerName;
-        startData.CurrentGameState = CurrentGameState == GameState.PreGameLobby ? GameState.PreGameLobby : GameState.Gameplay;
+        
+        startData.CurrentGameState = CurrentGameState ==
+            GameState.PreGameLobby ? GameState.PreGameLobby : GameState.Gameplay;
+
         startData.StartActions = Service.NetworkActions.CurrentActionsToSync;
         startData.PlayerColor = teamColors[startData.PlayerTeamName];
 
