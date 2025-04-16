@@ -201,8 +201,8 @@ MonoBehaviour:
   RotationSpeed: 40
   ProjectileOriginReference: {fileID: 383231530722205033}
   DefrostRangeFX: {fileID: 2279561091434676160}
-  PlayerNameTagContainer: {fileID: 0}
-  PlayerNameTag: {fileID: 0}
+  PlayerNameTagContainer: {fileID: 2214038214617022285}
+  PlayerNameTag: {fileID: 7460523117402692412}
   PlayerAnimator: {fileID: 4155188668984683824}
   PlayerTeamColor: {fileID: 1153027706854138343}
   TeamName:

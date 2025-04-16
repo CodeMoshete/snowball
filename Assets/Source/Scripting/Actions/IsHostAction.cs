@@ -17,11 +17,11 @@ public class IsHostAction : CustomAction
         GameManager gameManager = gameManagerObj.GetComponent<GameManager>();
         if (gameManager.IsHost)
         {
-            OnIsHost.Initiate();
+            OnIsHost?.Initiate();
         }
         else
         {
-            OnIsNotHost.Initiate();
+            OnIsNotHost?.Initiate();
         }
     }
 }

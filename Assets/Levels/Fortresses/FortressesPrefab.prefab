@@ -14216,6 +14216,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 409007005088253861}
+  - component: {fileID: 4760742631956423430}
   m_Layer: 0
   m_Name: Team2
   m_TagString: Untagged
@@ -14246,6 +14247,19 @@ Transform:
   - {fileID: 6499135810359637647}
   m_Father: {fileID: 3851177149177725938}
   m_LocalEulerAnglesHint: {x: 0, y: 179.516, z: 0}
+--- !u!114 &4760742631956423430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2651268321898941142}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 481c9f3c69ed8487eacbe466f4fc867e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TeamColor: {r: 0.25490198, g: 0.28235295, b: 0.8039216, a: 1}
 --- !u!1 &2661782066585129780
 GameObject:
   m_ObjectHideFlags: 0
@@ -30136,6 +30150,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6408205282512065724}
+  - component: {fileID: 721764169260090238}
   m_Layer: 0
   m_Name: Team1
   m_TagString: Untagged
@@ -30166,6 +30181,19 @@ Transform:
   - {fileID: 3741058783068885236}
   m_Father: {fileID: 3851177149177725938}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &721764169260090238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6304140090628207073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 481c9f3c69ed8487eacbe466f4fc867e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TeamColor: {r: 1, g: 0.022058824, b: 0, a: 1}
 --- !u!1 &6364527461733065825
 GameObject:
   m_ObjectHideFlags: 0

@@ -98,6 +98,14 @@ public class GameManager : NetworkBehaviour
         for (int i = 0, count = teamSpawnPoints.Count; i < count; ++i)
         {
             string teamName = teamSpawnPoints[i].name;
+            
+            TeamColorProvider teamColorProvider = teamSpawnPoints[i].GetComponent<TeamColorProvider>();
+            if (teamColorProvider != null)
+            {
+                Color teamColor = teamColorProvider.TeamColor;
+                teamColors.Add(teamName, teamColor);
+            }
+
             List<Transform> spawnPointsTransforms = UnityUtils.GetTopLevelChildTransforms(teamSpawnPoints[i]);
             spawnPoints.Add(teamName, spawnPointsTransforms);
             teamRosters.Add(teamName, new List<ulong>());
@@ -107,8 +115,11 @@ public class GameManager : NetworkBehaviour
         foreach (KeyValuePair<string, List<Transform>> teamSpawns in spawnPoints)
         {
             string teamName = teamSpawns.Key;
-            Color teamColor = Constants.TEAM_COLORS[teamNum];
-            teamColors.Add(teamName, teamColor);
+            if (!teamColors.ContainsKey(teamName))
+            {
+                Color teamColor = Constants.TEAM_COLORS[teamNum];
+                teamColors.Add(teamName, teamColor);
+            }
             ++teamNum;
         }
 
