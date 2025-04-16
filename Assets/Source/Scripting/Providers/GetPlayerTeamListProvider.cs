@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IterateOverTeamAction : PlayerEntityListProvider
+public class GetPlayerTeamListProvider : PlayerEntityListProvider
 {
     public string TeamName;
 

@@ -502,10 +502,11 @@ public class PlayerEntity : NetworkBehaviour
     }
 
     [Rpc(SendTo.Everyone)]
-    public void SetPlayerPositionFromScriptRpc(Vector3 newPosition)
+    public void SetPlayerTransformFromScriptRpc(Vector3 newPosition, Vector3 euler)
     {
         GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
         transform.position = newPosition;
+        transform.eulerAngles = euler;
         Debug.Log("[PlayerEntity] Set player position to " + newPosition.ToString());
     }
 

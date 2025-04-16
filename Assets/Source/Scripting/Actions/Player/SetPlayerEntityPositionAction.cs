@@ -1,4 +1,3 @@
-using Unity.Netcode;
 using UnityEngine;
 
 public class SetPlayerEntityPositionAction : CustomNetworkAction
@@ -7,6 +6,7 @@ public class SetPlayerEntityPositionAction : CustomNetworkAction
     public Transform PositionReference;
     public TransformProvider PositionProvider;
     public Vector3 Position;
+    public bool AlignRotationToTarget;
     public CustomAction OnDone;
 
     public override void Initiate()
@@ -33,7 +33,13 @@ public class SetPlayerEntityPositionAction : CustomNetworkAction
             Position.y += 1.0f;
         }
 
-        player.SetPlayerPositionFromScriptRpc(Position);
+        Vector3 euler = player.transform.eulerAngles;
+        if (AlignRotationToTarget && PositionReference != null)
+        {
+            euler = PositionReference.eulerAngles;
+        }
+
+        player.SetPlayerTransformFromScriptRpc(Position, euler);
         Debug.Log($"Set player {player.name} position to {Position}");
 
         if (OnDone != null)
