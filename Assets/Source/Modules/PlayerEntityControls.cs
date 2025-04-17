@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEditor.Callbacks;
 using UnityEngine;
 using Utils;
 
@@ -15,6 +14,7 @@ public class PlayerEntityControls
     private const float JUMP_FORCE = 250f;
     private float fullPitchRange = 2f * MAX_PITCH;
 
+    // CameraPitchPct is 1 when looking up as far as possible, and 0 when looking down.
     public float CameraPitchPct
     {
         get

@@ -4,5 +4,6 @@ public enum SnowballType
 {
     Basic,
     Teleport,
-    Demolition
+    Demolition,
+    Icicle
 }

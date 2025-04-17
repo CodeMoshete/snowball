@@ -32,3 +32,9 @@ MonoBehaviour:
     IconName: ThrowableObjects/Icons/DemolitionSnowball
     DisplayName: Demolition Snowball
     Description: Cause mass destruction of structures and damage opponents in range!
+  - Type: 3
+    PrefabName: ThrowableObjects/LocalIcicle
+    PickupPrefabName: ThrowableObjects/IciclePile
+    IconName: ThrowableObjects/Icons/IcicleIcon
+    DisplayName: Icicle
+    Description: A long range, fast projectile that deals heavy damage.

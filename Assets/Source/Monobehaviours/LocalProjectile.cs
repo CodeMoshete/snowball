@@ -23,6 +23,9 @@ public class LocalProjectlie : MonoBehaviour
     
     public bool FreezePlayer;
     public bool LeaveSnowPileOnThrow;
+    public bool customPitchAngles;
+    public float MaxPitch = -1f;
+    public float MinPitch = -1f;
 
     public SnowballType Type;
     public float DamageAmount;

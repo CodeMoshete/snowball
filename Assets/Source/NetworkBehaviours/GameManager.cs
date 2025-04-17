@@ -490,7 +490,7 @@ public class GameManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Everyone)]
-    public void FireProjectileClientRpc(Vector3 position, Vector3 euler, Vector3 fwd, float verticalVel, ulong ownerId, SnowballType type = SnowballType.Basic)
+    public void FireProjectileClientRpc(Vector3 position, Vector3 euler, Vector3 fwd, float pitchPct, ulong ownerId, SnowballType type = SnowballType.Basic)
     {
         Transform owner = playerTransforms[ownerId];
         PlayerEntity player = owner.GetComponent<PlayerEntity>();
@@ -508,10 +508,18 @@ public class GameManager : NetworkBehaviour
         LocalProjectlie projComp = projectileObj.GetComponent<LocalProjectlie>();
         projComp.SetOwner(owner, IsServer);
 
-        float throwAngle = Mathf.Lerp(MinThrowAngle, MaxThrowAngle, verticalVel) * Mathf.Deg2Rad;
+        // Limits throw pitch to look values above 0.4.
+        float loftPct = projComp.customPitchAngles ? pitchPct : Mathf.Max(pitchPct - 0.4f, 0f) / 0.6f;
+
+        float minAgle = projComp.customPitchAngles ? projComp.MinPitch : MinThrowAngle;
+        float maxAgle = projComp.customPitchAngles ? projComp.MaxPitch : MaxThrowAngle;
+
+        float throwAngle = Mathf.Lerp(minAgle, maxAgle, loftPct) * Mathf.Deg2Rad;
         float verticalSpeed = SnowballThrowSpeed * Mathf.Sin(throwAngle);
         float horizontalSpeed = SnowballThrowSpeed * Mathf.Cos(throwAngle);
-        rb.AddForce(new Vector3(fwd.x * horizontalSpeed, verticalSpeed, fwd.z * horizontalSpeed));
+        Vector3 forceDirection = new Vector3(fwd.x * horizontalSpeed, verticalSpeed, fwd.z * horizontalSpeed);
+        rb.AddForce(forceDirection);
+        projectileObj.transform.LookAt(projectileObj.transform.position + forceDirection);
     }
 
     [Rpc(SendTo.Everyone)]
