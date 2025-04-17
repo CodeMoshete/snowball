@@ -494,6 +494,7 @@ public class GameManager : NetworkBehaviour
     {
         Transform owner = playerTransforms[ownerId];
         PlayerEntity player = owner.GetComponent<PlayerEntity>();
+        player.ThrowAudioSource?.Play();
 
         Debug.Log("Locally firing projectile!");
         ThrowableObject thrownSnowball = Constants.SnowballTypes.ThrowableObjects.Find(item => item.Type == type);

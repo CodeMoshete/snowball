@@ -34,6 +34,7 @@ public class PlayerEntity : NetworkBehaviour
     public TMP_Text PlayerNameTag;
     public PlayerEntityAnimator PlayerAnimator;
     public PlayerEntityTeamColor PlayerTeamColor;
+    public AudioSource ThrowAudioSource;
     public NetworkVariable<FixedString64Bytes> TeamName = new NetworkVariable<FixedString64Bytes>(Constants.TEAM_UNASSIGNED);
     public NetworkVariable<FixedString64Bytes> PlayerName = new NetworkVariable<FixedString64Bytes>(Constants.PLAYER_NAME_DEFAULT);
     public NetworkVariable<PlayerClass> CurrentPlayerClass = new NetworkVariable<PlayerClass>(global::PlayerClass.Soldier);
