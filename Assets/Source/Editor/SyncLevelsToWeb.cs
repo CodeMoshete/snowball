@@ -20,7 +20,7 @@ public class JsonDownloader : EditorWindow
         "Android",
         "StandaloneLinux64",
         "StandaloneOSX",
-        "StandaloneWindows"
+        "StandaloneWindows64"
     };
     private string remoteJsonData = "No data downloaded yet.";
 

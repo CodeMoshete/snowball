@@ -11,7 +11,7 @@ public class BuildLevelAssetBundles : MonoBehaviour
     [MenuItem("Tools/Build Selected Levels - All")]
     public static void BuildBundlesForAllPlatforms()
     {
-        BuildBundlesForPlatform(BuildTarget.StandaloneWindows);
+        BuildBundlesForPlatform(BuildTarget.StandaloneWindows64);
         BuildBundlesForPlatform(BuildTarget.Android);
         BuildBundlesForPlatform(BuildTarget.StandaloneLinux64);
         BuildBundlesForPlatform(BuildTarget.StandaloneOSX);
@@ -27,7 +27,7 @@ public class BuildLevelAssetBundles : MonoBehaviour
     [MenuItem("Tools/Build Selected Levels - Windows")]
     public static void BuildBundlesForWindows()
     {
-        BuildBundlesForPlatform(BuildTarget.StandaloneWindows);
+        BuildBundlesForPlatform(BuildTarget.StandaloneWindows64);
     }
 
     [MenuItem("Tools/Build Selected Levels - Android")]

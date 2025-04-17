@@ -3,23 +3,23 @@
 	[
 		{
 			"Name": "backroads",
-			"Version": 20
+			"Version": 21
 		},
 		{
 			"Name": "fortresses",
-			"Version": 5
-		},
-		{
-			"Name": "testarena",
 			"Version": 7
 		},
 		{
+			"Name": "testarena",
+			"Version": 8
+		},
+		{
 			"Name": "testarena2",
-			"Version": 4
+			"Version": 5
 		},
 		{
 			"Name": "testarena3",
-			"Version": 3
+			"Version": 4
 		}
 	]
 }

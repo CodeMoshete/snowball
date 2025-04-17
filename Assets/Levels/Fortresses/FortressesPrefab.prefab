@@ -13024,8 +13024,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8750261335358043649}
   - {fileID: 960855820396147844}
+  - {fileID: 8750261335358043649}
   - {fileID: 1702123972563090715}
   - {fileID: 1013187901504945481}
   - {fileID: 3851177149177725938}
@@ -47143,11 +47143,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LevelDisplayName: Fortresses
-  LevelDescription: 'Capture the enemy flag 5 times to win!
+  LevelDescription: '- Freeze enemies to send them to your jail!
 
+    - Free your
+    jailed teammates with the Jailbreak button behind the enemy base!
 
-    - Respawn time:
-    7s'
+    - Jail
+    the entire enemy team to score!
+
+    - First team to score 5 times wins!'
 --- !u!1 &7471533991169038718
 GameObject:
   m_ObjectHideFlags: 0

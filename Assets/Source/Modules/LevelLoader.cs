@@ -25,7 +25,7 @@ public class LevelLoader : MonoBehaviour
 #if UNITY_STANDALONE_LINUX
     private const string PLATFORM_DIR = "StandaloneLinux64";
 #elif UNITY_STANDALONE_WIN
-    private const string PLATFORM_DIR = "StandaloneWindows";
+    private const string PLATFORM_DIR = "StandaloneWindows64";
 #elif UNITY_STANDALONE_OSX
     private const string PLATFORM_DIR = "StandaloneOSX";
 #elif UNITY_ANDROID
