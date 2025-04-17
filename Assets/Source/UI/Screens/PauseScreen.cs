@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,8 @@ public class PauseScreen : MonoBehaviour
     // public Button QuitButton;
     public Slider LookSpeedSlider;
     public Toggle InvertLookToggle;
+    public TMP_Text LevelTitleLabel;
+    public TMP_Text LevelInfoField;
 
     private void Start()
     {
@@ -16,8 +19,25 @@ public class PauseScreen : MonoBehaviour
         InvertLookToggle.onValueChanged.AddListener(OnInvertLookToggled);
         Service.EventManager.AddListener(EventId.OnGameResume, OnGameResumed);
         Service.EventManager.AddListener(EventId.OnGamePause, OnGamePaused);
+        Service.EventManager.AddListener(EventId.GameManagerInitialized, OnGameManagerInitialized);
         LookSpeedSlider.value = 0.5f;
         gameObject.SetActive(false);
+    }
+
+    public bool OnGameManagerInitialized(object cookie)
+    {
+        GameInitializationData gameInitData = (GameInitializationData)cookie;
+        if (gameInitData.LevelInfo != null)
+        {
+            LevelTitleLabel.text = gameInitData.LevelInfo.LevelDisplayName;
+            LevelInfoField.text = gameInitData.LevelInfo.LevelDescription;
+        }
+        else
+        {
+            LevelTitleLabel.gameObject.SetActive(false);
+            LevelInfoField.gameObject.SetActive(false);
+        }
+        return false;
     }
 
     private bool OnGameResumed(object cookie)
@@ -57,5 +77,6 @@ public class PauseScreen : MonoBehaviour
     {
         Service.EventManager.RemoveListener(EventId.OnGameResume, OnGameResumed);
         Service.EventManager.RemoveListener(EventId.OnGamePause, OnGamePaused);
+        Service.EventManager.RemoveListener(EventId.GameManagerInitialized, OnGameManagerInitialized);
     }
 }

@@ -21,6 +21,7 @@ public class BuildLevelAssetBundles : MonoBehaviour
     public static void BuildBundlesForCurrentPlatform()
     {
         BuildTarget currentTarget = EditorUserBuildSettings.activeBuildTarget;
+        Debug.Log($"Current Build Target: {currentTarget}");
         BuildBundlesForPlatform(currentTarget);
     }
 

@@ -117,7 +117,9 @@ public class PlayerEntityControls
             cameraCenterpoint.position, 
             direction.normalized, 
             out RaycastHit hit, 
-            armatureMagnitude, CAMERA_COLLISION_LAYERS))
+            armatureMagnitude, 
+            CAMERA_COLLISION_LAYERS,
+            QueryTriggerInteraction.Ignore))
         {
             float pct = hit.distance / armatureMagnitude;
             pct = Mathf.Max(pct - 0.1f, 0f);

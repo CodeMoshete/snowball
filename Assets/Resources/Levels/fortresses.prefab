@@ -457,7 +457,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 7.04, y: 1.83, z: 6.9}
+  m_Size: {x: 6.64, y: 1.83, z: 6.34}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &7243613908031884547
 MonoBehaviour:
@@ -13024,8 +13024,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8750261335358043649}
   - {fileID: 960855820396147844}
+  - {fileID: 8750261335358043649}
   - {fileID: 1702123972563090715}
   - {fileID: 1013187901504945481}
   - {fileID: 3851177149177725938}
@@ -16909,7 +16909,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 7.04, y: 1.83, z: 6.9}
+  m_Size: {x: 6.64, y: 1.83, z: 6.34}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &5877576969348027498
 MonoBehaviour:
@@ -17118,7 +17118,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 7.04, y: 1.83, z: 6.9}
+  m_Size: {x: 6.64, y: 1.83, z: 6.34}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &8708370226339402555
 MonoBehaviour:
@@ -47143,11 +47143,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LevelDisplayName: Fortresses
-  LevelDescription: 'Capture the enemy flag 5 times to win!
+  LevelDescription: '- Freeze enemies to send them to your jail!
 
+    - Free your
+    jailed teammates with the Jailbreak button behind the enemy base!
 
-    - Respawn time:
-    7s'
+    - Jail
+    the entire enemy team to score!
+
+    - First team to score 5 times wins!'
 --- !u!1 &7471533991169038718
 GameObject:
   m_ObjectHideFlags: 0
@@ -49501,7 +49505,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 7.04, y: 1.83, z: 6.9}
+  m_Size: {x: 6.64, y: 1.83, z: 6.34}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6136528561363927106
 MonoBehaviour:
@@ -55964,6 +55968,10 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: 5533791280246004339, guid: b39feff26fe0c44c49c0b4fc36e73cb6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 2f5e140d467a343eb9dac880aab6f4ec, type: 2}
     - target: {fileID: 7564519993635161695, guid: b39feff26fe0c44c49c0b4fc36e73cb6, type: 3}
       propertyPath: m_Layer
       value: 7
